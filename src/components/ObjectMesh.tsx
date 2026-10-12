@@ -1,7 +1,6 @@
 import { memo, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { Edges } from '@react-three/drei';
-import { useFrame, type ThreeEvent } from '@react-three/fiber';
+import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import type { Motion, Panel, SceneObject, Vec3 } from '../types';
 import { mm } from '../units';
 import { objectSize, panelsOf } from '../lib/geometry';
@@ -14,6 +13,36 @@ const RAIL_COLOR = '#9aa0a6';
 const HANDLE_COLOR = '#55595e';
 const OPEN_SPEED = 7;
 const EXPLODE_SPEED = 5;
+const MAX_DT = 1 / 30; // with on-demand rendering the first frame after idle has a huge delta
+
+const EDGE = new THREE.LineBasicMaterial({ color: '#8a8a8a' });
+const EDGE_SELECTED = new THREE.LineBasicMaterial({ color: '#2f7cf6' });
+const SELECTED_TINT = '#2f7cf6';
+
+/** Outline geometry per panel shape, shared by every panel of the same size (cheap 1-px lines). */
+const edgeCache = new Map<string, THREE.EdgesGeometry>();
+function panelEdges(p: Panel): THREE.EdgesGeometry {
+  const key = `${p.size.x}|${p.size.y}|${p.size.z}|${p.cutout ? JSON.stringify(p.cutout) : ''}`;
+  let g = edgeCache.get(key);
+  if (!g) {
+    const base = p.cutout ? frontGeometry(p) : new THREE.BoxGeometry(mm(p.size.x), mm(p.size.y), mm(p.size.z));
+    g = new THREE.EdgesGeometry(base, 20);
+    base.dispose();
+    if (edgeCache.size > 2000) edgeCache.clear(); // bounded; entries are rebuilt on demand
+    edgeCache.set(key, g);
+  }
+  return g;
+}
+
+/** A front with a real cutout: its outline extruded to its thickness, centered like a box. */
+function frontGeometry(p: Panel): THREE.ExtrudeGeometry {
+  const { outline, holes } = frontOutline(p.size.x, p.size.y, p.cutout);
+  const shape = new THREE.Shape(outline.map((q) => new THREE.Vector2(mm(q.x), mm(q.y))));
+  shape.holes = holes.map((h) => new THREE.Path(h.map((q) => new THREE.Vector2(mm(q.x), mm(q.y)))));
+  const g = new THREE.ExtrudeGeometry(shape, { depth: mm(p.size.z), bevelEnabled: false });
+  g.translate(0, 0, -mm(p.size.z) / 2);
+  return g;
+}
 
 interface Props {
   obj: SceneObject;
@@ -45,15 +74,7 @@ function partsOf(panels: Panel[]): Part[] {
 }
 
 function PanelGeometry({ p }: { p: Panel }) {
-  const extruded = useMemo(() => {
-    if (!p.cutout) return null;
-    const { outline, holes } = frontOutline(p.size.x, p.size.y, p.cutout);
-    const shape = new THREE.Shape(outline.map((q) => new THREE.Vector2(mm(q.x), mm(q.y))));
-    shape.holes = holes.map((h) => new THREE.Path(h.map((q) => new THREE.Vector2(mm(q.x), mm(q.y)))));
-    const g = new THREE.ExtrudeGeometry(shape, { depth: mm(p.size.z), bevelEnabled: false });
-    g.translate(0, 0, -mm(p.size.z) / 2);
-    return g;
-  }, [p.cutout, p.size.x, p.size.y, p.size.z]);
+  const extruded = useMemo(() => (p.cutout ? frontGeometry(p) : null), [p.cutout, p.size.x, p.size.y, p.size.z]);
   useEffect(() => () => extruded?.dispose(), [extruded]);
 
   if (extruded) return <primitive object={extruded} attach="geometry" />;
@@ -77,10 +98,10 @@ function PanelMesh({ p, obj, selected, overlapping }: { p: Panel; obj: SceneObje
         color={color}
         roughness={metal ? 0.3 : 0.7}
         metalness={metal ? 0.8 : 0}
-        emissive={overlapping ? '#e53935' : '#000000'}
-        emissiveIntensity={overlapping ? 0.55 : 0}
+        emissive={overlapping ? '#e53935' : selected ? SELECTED_TINT : '#000000'}
+        emissiveIntensity={overlapping ? 0.55 : selected ? 0.12 : 0}
       />
-      {!metal && <Edges color={selected ? '#2f7cf6' : '#8a8a8a'} lineWidth={selected ? 2 : 1} />}
+      {!metal && <lineSegments geometry={panelEdges(p)} material={selected ? EDGE_SELECTED : EDGE} />}
     </mesh>
   );
 }
@@ -91,13 +112,20 @@ function AnimatedPart({ part, size, open, explode, children }: { part: Part; siz
   const inner = useRef<THREE.Group>(null!);
   const st = useRef({ t: 0, e: 0 });
   const anchor = part.panels[0].pos; // the front for doors/drawers
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => invalidate(), [open, explode, invalidate]); // start animating towards the new target
 
-  useFrame((_, dt) => {
+  useFrame((state, delta) => {
     const s = st.current;
+    const dt = Math.min(delta, MAX_DT);
     s.t = THREE.MathUtils.damp(s.t, open ? 1 : 0, OPEN_SPEED, dt);
     s.e = THREE.MathUtils.damp(s.e, explode, EXPLODE_SPEED, dt);
     if (Math.abs(s.t - (open ? 1 : 0)) < 1e-4) s.t = open ? 1 : 0;
     if (Math.abs(s.e - explode) < 1e-4) s.e = explode;
+    if (s.t !== (open ? 1 : 0) || s.e !== explode) {
+      state.invalidate(); // keep frames coming until settled
+      state.gl.shadowMap.needsUpdate = true;
+    }
     const tr = partTransform(part.motion, s.t, partExplodeOffset(anchor, size, s.e));
     outer.current.position.set(mm(tr.outer.x), mm(tr.outer.y), mm(tr.outer.z));
     outer.current.rotation.y = tr.rotationY;
@@ -120,13 +148,20 @@ export const ObjectMesh = memo(function ObjectMesh({ obj, selected, overlapping,
   const toggleOpen = useStore((s) => s.toggleOpen);
   const movable = parts.some((p) => p.motion);
 
-  useFrame((_, dt) => {
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => invalidate(), [spread, invalidate]);
+
+  useFrame((state, delta) => {
     const c = cur.current;
+    const dt = Math.min(delta, MAX_DT);
     c.x = THREE.MathUtils.damp(c.x, spread.x, EXPLODE_SPEED, dt);
     c.z = THREE.MathUtils.damp(c.z, spread.z, EXPLODE_SPEED, dt);
     if (Math.abs(c.x - spread.x) < 0.01 && Math.abs(c.z - spread.z) < 0.01) {
       c.x = spread.x; // settle exactly, so leaving explode restores the original position
       c.z = spread.z;
+    } else {
+      state.invalidate();
+      state.gl.shadowMap.needsUpdate = true;
     }
     root.current.position.set(mm(obj.position.x + c.x), mm(obj.position.y), mm(obj.position.z + c.z));
   });

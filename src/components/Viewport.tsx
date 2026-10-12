@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, OrthographicCamera, PerspectiveCamera } from '@react-three/drei';
@@ -21,6 +21,25 @@ function Bridge({ handle }: { handle: React.MutableRefObject<ThreeHandle | null>
   const { camera, gl } = useThree();
   handle.current = { camera, gl };
   if (import.meta.env.DEV) Object.assign(window, { __three: handle.current, __store: useStore, __templates: TEMPLATES });
+  return null;
+}
+
+/**
+ * The light never moves, so shadows only change when the design does. Recomputing the shadow map
+ * only then (instead of every frame) halves the work while orbiting.
+ */
+function ShadowUpdater({ objects, room }: { objects: unknown; room: Room }) {
+  const gl = useThree((s) => s.gl);
+  const invalidate = useThree((s) => s.invalidate);
+  const dragging = useStore((s) => s.dragSnapshot !== null); // shadows catch up when the drag ends
+  useEffect(() => {
+    gl.shadowMap.autoUpdate = false;
+  }, [gl]);
+  useEffect(() => {
+    if (dragging) return;
+    gl.shadowMap.needsUpdate = true;
+    invalidate();
+  }, [objects, room, dragging, gl, invalidate]);
   return null;
 }
 
@@ -112,7 +131,9 @@ export function Viewport() {
 
   return (
     <div className="viewport" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
-      <Canvas shadows dpr={[1, 2]} onPointerMissed={onPointerMissed}>
+      {/* Render on demand: nothing is drawn while the scene is idle. */}
+      <Canvas shadows frameloop="demand" dpr={[1, 2]} onPointerMissed={onPointerMissed}>
+        <ShadowUpdater objects={objects} room={room} />
         <Bridge handle={handle} />
         <color attach="background" args={['#f6f5f2']} />
         <hemisphereLight args={['#ffffff', '#c9c2b5', 0.9]} />

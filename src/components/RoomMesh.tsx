@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Edges } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Room } from '../types';
@@ -74,9 +74,14 @@ export function RoomMesh({ room, showWalls, faded }: { room: Room; showWalls: bo
   const map = room.floorKind === 'color' ? null : floorTexture(room.floorKind, room.floorColor);
   const walls = useMemo(() => wallsOf(room), [room]);
 
-  useFrame(({ camera }, dt) => {
-    fade.current = THREE.MathUtils.damp(fade.current, faded ? FADED_OPACITY : 1, 6, dt);
-    if (Math.abs(fade.current - (faded ? FADED_OPACITY : 1)) < 1e-3) fade.current = faded ? FADED_OPACITY : 1;
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => invalidate(), [faded, invalidate]);
+
+  useFrame(({ camera, invalidate: again }, delta) => {
+    const target = faded ? FADED_OPACITY : 1;
+    fade.current = THREE.MathUtils.damp(fade.current, target, 6, Math.min(delta, 1 / 30));
+    if (Math.abs(fade.current - target) < 1e-3) fade.current = target;
+    else again();
     const translucent = fade.current < 0.999;
     if (solid.transparent !== translucent) {
       solid.transparent = translucent;
