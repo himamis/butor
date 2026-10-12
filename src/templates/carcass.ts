@@ -7,7 +7,9 @@ const BACK = 8;
 export const carcass: TemplateDef = {
   id: 'carcass',
   name: 'Carcass',
-  category: 'Units',
+  category: 'Cabinets',
+  description: 'Open box with sides, top, bottom, back and adjustable shelves.',
+  tags: ['box', 'cabinet', 'shelves', 'open'],
   params: [W(800, 100, 2400), H(2200, 200, 3000), D(580, 100, 1000), p('thickness', 'Thickness', 18, 8, 40), p('shelves', 'Shelves', 3, 0, 10)],
   build: ({ width: w, height: h, depth: d, thickness: t, shelves }) => {
     const x0 = -w / 2;

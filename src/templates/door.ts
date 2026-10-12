@@ -6,6 +6,8 @@ export const door: TemplateDef = {
   id: 'door',
   name: 'Door',
   category: 'Fronts',
+  description: 'Hinged door with hinge side, opening angle and handle.',
+  tags: ['door', 'hinged', 'front'],
   params: [
     W(400, 100, 1200), H(2190, 100, 3000), p('depth', 'Thickness', 18, 8, 40),
     hingeParam(), openAngleParam(), handleParam(), handlePosParam(), handleInsetParam(),

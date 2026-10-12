@@ -64,7 +64,7 @@ export function frontWithHandle(o: {
   }
   if (handle === HANDLE.knob) {
     return [front, {
-      name: `Knob Ø${KNOB.d}`, role: 'handle', shape: 'knob', motion: o.motion,
+      name: `Knob Ø${KNOB.d}`, hardware: `Knob Ø${KNOB.d}`, role: 'handle', shape: 'knob', motion: o.motion,
       pos: { x: o.hx, y: o.hy, z: face + KNOB.proj / 2 },
       size: { x: KNOB.d, y: KNOB.d, z: KNOB.proj },
     }];
@@ -72,7 +72,7 @@ export function frontWithHandle(o: {
   if (handle === HANDLE.bar) {
     const len = Math.min(BAR.len, (o.horizontal ? o.w : o.h) - 40);
     return [front, {
-      name: `Bar handle ${len} mm`, role: 'handle', motion: o.motion,
+      name: `Bar handle ${len} mm`, hardware: `Bar handle ${len} mm`, role: 'handle', motion: o.motion,
       pos: { x: o.hx, y: o.hy, z: face + BAR.proj / 2 },
       size: o.horizontal ? { x: len, y: BAR.t, z: BAR.proj } : { x: BAR.t, y: len, z: BAR.proj },
     }];
@@ -110,3 +110,59 @@ export function shiftPanels(panels: Panel[], dx: number, dy: number, dz: number)
     motion: pn.motion?.kind === 'hinge' ? { ...pn.motion, pivot: { x: pn.motion.pivot.x + dx, z: pn.motion.pivot.z + dz } } : pn.motion,
   }));
 }
+
+/**
+ * A drawer: front (with handle) whose back face is at frontZ0, and a box behind it.
+ * Everything shares one slide motion; it opens 85 % of the box depth.
+ */
+export function drawerPanels(o: {
+  id: string;
+  name?: string;
+  x0: number; y0: number; w: number; h: number;
+  frontZ0: number; frontT: number;
+  box: { x0: number; y0: number; w: number; h: number; d: number; t: number };
+  handle: number;
+}): Panel[] {
+  const b = o.box;
+  const motion: Motion = { id: o.id, kind: 'slide', offset: { x: 0, y: 0, z: b.d * 0.85 } };
+  const m = (pn: Panel): Panel => ({ ...pn, motion });
+  const bz0 = o.frontZ0 - b.d;
+  const hy = Math.round(o.handle) === HANDLE.cutout ? o.y0 + o.h : o.y0 + o.h / 2; // a grip notch sits in the top edge
+  return [
+    ...frontWithHandle({ name: o.name ?? 'Drawer front', x0: o.x0, y0: o.y0, z0: o.frontZ0, w: o.w, h: o.h, t: o.frontT, handle: o.handle, hx: o.x0 + o.w / 2, hy, horizontal: true, motion }),
+    m(box('Drawer side', 'drawer', b.x0, b.y0, bz0, b.t, b.h, b.d)),
+    m(box('Drawer side', 'drawer', b.x0 + b.w - b.t, b.y0, bz0, b.t, b.h, b.d)),
+    m(box('Drawer back', 'drawer', b.x0 + b.t, b.y0, bz0, b.w - 2 * b.t, b.h, b.t)),
+    m(box('Drawer bottom', 'drawer', b.x0 + b.t, b.y0, bz0 + b.t, b.w - 2 * b.t, b.t, b.d - b.t)),
+  ];
+}
+
+/** One or two overlay doors (2 mm gaps, outer hinges) whose back face is at z0. */
+export function doorSet(o: {
+  w: number; h: number; z0: number; t: number; doors: number;
+  openAngle: number; handle: number; handlePos: number; handleInset: number;
+  y0?: number; gap?: number;
+}): Panel[] {
+  const gap = o.gap ?? 2;
+  const y0 = o.y0 ?? gap;
+  const common = { y0, z0: o.z0, h: o.h - 2 * gap, t: o.t, openAngle: o.openAngle, handle: o.handle, handlePos: o.handlePos, handleInset: o.handleInset };
+  if (Math.round(o.doors) === 1) return hingedDoor({ ...common, id: 'door-0', x0: -o.w / 2 + gap, w: o.w - 2 * gap, hinge: 0 });
+  const dw = (o.w - 3 * gap) / 2;
+  return [
+    ...hingedDoor({ ...common, id: 'door-0', x0: -o.w / 2 + gap, w: dw, hinge: 0 }),
+    ...hingedDoor({ ...common, id: 'door-1', x0: -o.w / 2 + 2 * gap + dw, w: dw, hinge: 1 }),
+  ];
+}
+
+/** A sliding door whose back face is at z0; dir −1 slides left, +1 right, by `travel` mm. Handle sits at its leading edge. */
+export function slidingDoor(o: { id: string; x0: number; y0: number; z0: number; w: number; h: number; t: number; dir: number; travel: number; handle: number; moves?: boolean }): Panel[] {
+  const motion: Motion | undefined = o.moves === false ? undefined : { id: o.id, kind: 'slide', offset: { x: o.dir * o.travel, y: 0, z: 0 } };
+  const edge = Math.min(60, o.w / 4);
+  const hx = o.dir < 0 ? o.x0 + edge : o.x0 + o.w - edge; // pull on the side it moves towards
+  return frontWithHandle({ name: 'Sliding door', x0: o.x0, y0: o.y0, z0: o.z0, w: o.w, h: o.h, t: o.t, handle: o.handle, hx, hy: o.y0 + o.h / 2, horizontal: false, motion });
+}
+
+export const doorsParam = (def = 2): ParamDef => ({
+  ...p('doors', 'Doors', def, 1, 2),
+  options: [{ value: 1, label: 'One' }, { value: 2, label: 'Two' }],
+});

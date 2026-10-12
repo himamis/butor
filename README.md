@@ -16,7 +16,7 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 
 ## Using it
 
-- **Add parts:** drag a template from the library on the left into the 3D view.
+- **Add parts:** drag a template from the library on the left into the 3D view. The library has 24 templates in six categories (Wardrobes, Cabinets, Fronts, Interior, Panels, Base & trim). Filter with the category chips, collapse sections, or search (press `/`): every word must match a template's name, description or keywords, e.g. "shoe", "sliding door", "closet".
 - **Select:** click an object. Shift-click to add to the selection. Click empty space to deselect.
 - **Move / rotate:** use the gizmo (Move / Rotate in the toolbar), or type exact values in the right panel. Moves snap to the grid and flush against other objects and walls.
 - **Resize:** edit the size fields. Resizing changes the part's real dimensions, so panel thickness stays the same.
@@ -46,7 +46,10 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 
 ## Adding a template
 
-1. Create a file in `src/templates/`, e.g. `myPart.ts`, exporting a `TemplateDef`:
+1. Create a file in `src/templates/` (or add to the category file: `wardrobes.ts`, `cabinets.ts`, `interior.ts`, `trim.ts`), exporting a `TemplateDef`:
+   - `category` (one of `CATEGORIES` in `categories.ts`), a one-line `description`, and optional search `tags`.
+   - For a pre-configured version of an existing template, use `variant(base, { id, name, description, defaults })`.
+   - Builders in `hardware.ts`: `doorSet()`, `hingedDoor()`, `slidingDoor()`, `drawerPanels()`, `frontWithHandle()`. Bought parts use role `hardware` (metal, not in the cut list) and set `hardware: '<name>'` on one panel per item for the hardware list.
    - `params`: must include `width`, `height`, `depth` (mm), plus any extras (`thickness`, `shelves`…).
    - Params with `options` show as a dropdown (e.g. hinge side). Reuse `handleParam()`, `hingedDoor()` and `frontWithHandle()` from `hardware.ts` for fronts.
    - Panels that move together share a `motion` (`hinge` or `slide`); give panels a `cutout` for grip holes or notches.

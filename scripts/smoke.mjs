@@ -61,21 +61,21 @@ await page.waitForTimeout(600);
 await shot('1-closed');
 
 // Click selects; double-click opens
-await page.click('text=Front'); await page.waitForTimeout(600);
+await page.click('.toolbar >> text=Front'); await page.waitForTimeout(600);
 let pt = await screen({ x: 1000, y: 1100, z: 600 });
 await page.mouse.click(pt.x, pt.y); await page.waitForTimeout(150);
 check('click selects', (await store()).selection.length === 1);
 await page.mouse.dblclick(pt.x, pt.y); await page.waitForTimeout(150);
 st = await store();
 check('double-click opens the doors', st.openIds.length === 1);
-await page.click('text=3D'); await page.waitForTimeout(400);
+await page.click('.toolbar >> text=3D'); await page.waitForTimeout(400);
 await S(() => window.__store.getState().select(null, false));
-await page.click('text=Close all'); await page.waitForTimeout(100);
+await page.click('.toolbar >> text=Close all'); await page.waitForTimeout(100);
 check('toolbar closes what is open', (await store()).openIds.length === 0);
-await page.click('text=Open all'); await page.waitForTimeout(1200);
+await page.click('.toolbar >> text=Open all'); await page.waitForTimeout(1200);
 check('open all opens doors and drawers', (await store()).openIds.length === 4);
 await shot('2-open');
-await page.click('text=Close all'); await page.waitForTimeout(300);
+await page.click('.toolbar >> text=Close all'); await page.waitForTimeout(300);
 check('close all', (await store()).openIds.length === 0);
 
 // Exploded view
@@ -90,12 +90,12 @@ await S(() => window.__store.getState().select(window.__store.getState().design.
 await page.waitForTimeout(150);
 await page.locator('.props .row', { hasText: 'Handle' }).locator('select').selectOption({ label: 'Cutout (grip)' });
 check('handle select updates params', (await store()).design.objects[2].params.handle === 3);
-await page.click('text=Cut list'); await page.waitForTimeout(200);
+await page.click('.toolbar >> text=Cut list'); await page.waitForTimeout(200);
 const modal = await page.textContent('.modal');
 check('cut list shows hardware', modal.includes('Knob Ø30') && modal.includes('Bar handle'));
 check('cut list marks cutouts', modal.includes('grip notch'));
 await shot('4-cutlist');
-await page.click('text=Close');
+await page.click('.modal button:has-text("Close")');
 
 // Number fields clamp; bad files are rejected; autosave survives reload
 await S(() => window.__store.getState().select(window.__store.getState().design.objects[0].id, false));
@@ -105,11 +105,43 @@ await width.fill('99999'); await width.press('Enter'); await page.waitForTimeout
 check('width clamps to max', (await store()).design.objects[0].params.width === 2400 && (await width.inputValue()) === '2400', `store=${(await store()).design.objects[0].params.width} field=${await width.inputValue()}`);
 const bad = path.join(out, 'bad.json'); fs.writeFileSync(bad, '{"hello":1}');
 const n = (await store()).design.objects.length;
-const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.click('text=Open…')]);
+const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.click('.toolbar >> text=Open…')]);
 await chooser.setFiles(bad); await page.waitForTimeout(300);
 check('invalid file keeps the design', (await store()).design.objects.length === n);
 await page.waitForTimeout(700); await page.reload(); await page.waitForTimeout(1000);
 check('autosave restores after reload', (await store()).design.objects.length === n);
+
+// ---------- Library: search, categories, every template renders ----------
+await page.fill('.library input[type=search]', 'shoe'); await page.waitForTimeout(150);
+const shoeCards = await page.$$eval('.library .card .card-name', (els) => els.map((e) => e.textContent));
+check('search finds shoe templates', shoeCards.length >= 2 && shoeCards.every((n) => /shoe/i.test(n)), shoeCards.join(', '));
+await page.fill('.library input[type=search]', ''); await page.click('.chips >> text=Fronts'); await page.waitForTimeout(150);
+const frontCards = await page.$$eval('.library section h3 span:first-child', (els) => els.map((e) => e.textContent.trim()));
+check('category chip filters the library', frontCards.length === 1 && frontCards[0].includes('Fronts'), frontCards.join(', '));
+await page.click('.chips >> text=All');
+const snapshot = await S(() => window.__store.getState().design);
+await S(() => {
+  const s = window.__store.getState();
+  s.commit((d) => ({ ...d, room: { ...d.room, points: [{ x: 0, z: 0 }, { x: 14000, z: 0 }, { x: 14000, z: 6000 }, { x: 0, z: 6000 }], columns: [] }, objects: [] }));
+});
+const all = await S(() => {
+  const s = window.__store.getState();
+  const tpl = window.__templates;
+  tpl.forEach((t, i) => s.addObject(t.id, { x: 800 + (i % 8) * 1650, y: 0, z: 800 + Math.floor(i / 8) * 1900 }));
+  return tpl.length;
+});
+await page.waitForTimeout(800);
+check('every template can be placed', (await store()).design.objects.length === all, `${all} templates`);
+await S(() => window.__store.getState().select(null, false));
+await page.click('.toolbar >> text=Top'); await page.waitForTimeout(600);
+await shot('9-all-templates-top');
+await page.click('.toolbar >> text=3D'); await page.click('.toolbar >> text=Open all'); await page.waitForTimeout(1200);
+await shot('10-all-templates-open');
+await page.click('button:has-text("Explode")'); await page.waitForTimeout(1200);
+await shot('11-all-templates-exploded');
+await page.click('button:has-text("Explode")'); await page.click('.toolbar >> text=Close all');
+await S((d) => window.__store.getState().commit(() => d), snapshot);
+await page.waitForTimeout(300);
 
 // ---------- Room columns ----------
 await S(() => window.__store.getState().select(null, false)); await page.waitForTimeout(150);
@@ -123,7 +155,7 @@ check('a column can be added and positioned', cols.length === 1 && cols[0].x ===
 await S(() => window.__store.getState().addObject('carcass', { x: 3500, y: 0, z: 290 }));
 await page.waitForTimeout(150);
 check('furniture overlapping a column is flagged', (await page.textContent('.status')).includes('overlapping'));
-await page.click('text=3D'); await page.waitForTimeout(500);
+await page.click('.toolbar >> text=3D'); await page.waitForTimeout(500);
 await shot('7-column');
 await page.click('button:has-text("Explode")'); await page.waitForTimeout(1500);
 await shot('8-exploded-faded-room');
@@ -132,10 +164,10 @@ await S(() => window.__store.getState().undo());
 await page.waitForTimeout(800); // let the editor's debounced autosave settle before the viewer checks
 
 // ---------- Share link: read-only viewer ----------
-await page.click('text=Share'); await page.waitForTimeout(200);
+await page.click('.toolbar >> text=Share'); await page.waitForTimeout(200);
 const link = await page.inputValue('.modal input');
 check('share dialog shows a view link', link.includes('#view='));
-await page.click('.modal >> text=Close');
+await page.click('.modal button:has-text("Close")');
 const autosaveBefore = await S(() => localStorage.getItem('wardrobe-designer:autosave'));
 const viewer = await context.newPage(); // same storage as the editor
 viewer.on('pageerror', (e) => errors.push('viewer: ' + e.message));
@@ -148,7 +180,7 @@ check('viewer shows the shared design', viewerCount === n, `${viewerCount} objec
 await viewer.keyboard.press('Meta+a'); await viewer.keyboard.press('Delete'); await viewer.keyboard.press('Meta+z');
 await VS(() => window.__store.getState().addObject('carcass', { x: 0, y: 0, z: 0 }));
 check('viewer refuses edits', (await VS(() => window.__store.getState().design.objects.length)) === viewerCount);
-await viewer.click('text=Open all'); await viewer.waitForTimeout(300);
+await viewer.click('.toolbar >> text=Open all'); await viewer.waitForTimeout(300);
 check('viewer can open doors', (await VS(() => window.__store.getState().openIds.length)) > 0);
 await viewer.screenshot({ path: path.join(out, '5-viewer.png') });
 await viewer.waitForTimeout(700);

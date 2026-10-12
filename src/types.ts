@@ -1,6 +1,6 @@
 export type Vec3 = { x: number; y: number; z: number };
 
-export type PanelRole = 'carcass' | 'back' | 'door' | 'drawer' | 'rail' | 'handle';
+export type PanelRole = 'carcass' | 'back' | 'door' | 'drawer' | 'rail' | 'handle' | 'hardware'; // handle/hardware: bought metal parts, not cut from board
 
 /** How a group of panels moves when opened. Panels sharing `id` move together. */
 export type Motion =
@@ -25,6 +25,7 @@ export interface Panel {
   shape?: 'box' | 'cylinder' | 'knob'; // cylinder = rail along X, knob = cylinder along Z
   motion?: Motion;
   cutout?: Cutout;
+  hardware?: string; // name to count in the hardware list (one per item, even if the item has several panels)
 }
 
 export interface ParamDef {
@@ -37,10 +38,14 @@ export interface ParamDef {
   options?: { value: number; label: string }[]; // rendered as a select
 }
 
+export type Category = 'Wardrobes' | 'Cabinets' | 'Fronts' | 'Interior' | 'Panels' | 'Base & trim';
+
 export interface TemplateDef {
   id: string;
   name: string;
-  category: string;
+  category: Category;
+  description: string; // one line, shown in the library and searchable
+  tags?: string[]; // extra search words (synonyms)
   params: ParamDef[]; // must include width, height, depth
   build(p: Record<string, number>): Panel[];
 }

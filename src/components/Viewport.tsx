@@ -5,7 +5,7 @@ import { OrbitControls, OrthographicCamera, PerspectiveCamera } from '@react-thr
 import type { Room } from '../types';
 import { mm, toMm } from '../units';
 import { useStore, type View } from '../state/store';
-import { hasTemplate } from '../templates';
+import { TEMPLATES, hasTemplate } from '../templates';
 import { boundsOf, findOverlaps, objectBox } from '../lib/geometry';
 import { objectExplodeOffset } from '../lib/explode';
 import { RoomMesh } from './RoomMesh';
@@ -18,7 +18,7 @@ type ThreeHandle = { camera: THREE.Camera; gl: THREE.WebGLRenderer };
 function Bridge({ handle }: { handle: React.MutableRefObject<ThreeHandle | null> }) {
   const { camera, gl } = useThree();
   handle.current = { camera, gl };
-  if (import.meta.env.DEV) Object.assign(window, { __three: handle.current, __store: useStore });
+  if (import.meta.env.DEV) Object.assign(window, { __three: handle.current, __store: useStore, __templates: TEMPLATES });
   return null;
 }
 

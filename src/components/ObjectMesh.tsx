@@ -66,8 +66,8 @@ function PanelGeometry({ p }: { p: Panel }) {
 }
 
 function PanelMesh({ p, obj, selected, overlapping }: { p: Panel; obj: SceneObject; selected: boolean; overlapping: boolean }) {
-  const metal = p.role === 'rail' || p.role === 'handle';
-  const color = p.role === 'rail' ? RAIL_COLOR : p.role === 'handle' ? HANDLE_COLOR : p.role === 'door' && obj.doorColor ? obj.doorColor : obj.color;
+  const metal = p.role === 'rail' || p.role === 'handle' || p.role === 'hardware';
+  const color = p.role === 'rail' || p.role === 'hardware' ? RAIL_COLOR : p.role === 'handle' ? HANDLE_COLOR : p.role === 'door' && obj.doorColor ? obj.doorColor : obj.color;
   const rotation: [number, number, number] =
     p.shape === 'cylinder' ? [0, 0, Math.PI / 2] : p.shape === 'knob' ? [Math.PI / 2, 0, 0] : [0, 0, 0];
   return (
