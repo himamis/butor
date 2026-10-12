@@ -3,7 +3,7 @@
   "version": "2.0.0-alpha.0",
   "private": true,
   "type": "module",
-  "description": "Butor \u2014 browser-based 3D wardrobe designer (v2).",
+  "description": "Butor — browser-based 3D wardrobe designer (v2).",
   "scripts": {
     "dev": "concurrently -k -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
     "dev:web": "vite",
