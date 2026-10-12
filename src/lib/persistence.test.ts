@@ -1,0 +1,32 @@
+import { describe, expect, it } from 'vitest';
+import { parseDesign } from './persistence';
+import { DEFAULT_ROOM } from '../state/defaults';
+
+const valid = () => ({
+  version: 1,
+  room: DEFAULT_ROOM,
+  objects: [{ id: 'a', templateId: 'carcass', name: 'C', params: { width: 900 }, position: { x: 1, y: 0, z: 2 }, rotationY: 90, color: '#123456' }],
+});
+
+describe('parseDesign', () => {
+  it('accepts a valid design and fills missing params with defaults', () => {
+    const d = parseDesign(valid())!;
+    expect(d.objects[0].params).toMatchObject({ width: 900, height: 2200, shelves: 3 });
+  });
+
+  it.each([
+    ['not an object', 42],
+    ['wrong version', { ...valid(), version: 2 }],
+    ['too few room points', { ...valid(), room: { ...DEFAULT_ROOM, points: [{ x: 0, z: 0 }, { x: 1, z: 1 }] } }],
+    ['unknown template', { ...valid(), objects: [{ ...valid().objects[0], templateId: 'spaceship' }] }],
+    ['bad position', { ...valid(), objects: [{ ...valid().objects[0], position: { x: 'a', y: 0, z: 0 } }] }],
+  ])('rejects %s', (_, json) => {
+    expect(parseDesign(json)).toBeNull();
+  });
+
+  it('defaults bad room fields', () => {
+    const d = parseDesign({ ...valid(), room: { points: DEFAULT_ROOM.points, floorKind: 'lava' } })!;
+    expect(d.room.floorKind).toBe(DEFAULT_ROOM.floorKind);
+    expect(d.room.height).toBe(DEFAULT_ROOM.height);
+  });
+});
