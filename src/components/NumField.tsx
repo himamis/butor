@@ -9,13 +9,13 @@ export function NumField({ value, onCommit, step = 1, min, max }: {
   max?: number;
 }) {
   const [text, setText] = useState(String(round(value)));
-  useEffect(() => setText(String(round(value))), [value]);
+  const [rev, setRev] = useState(0); // bumps on every commit so the field resyncs even if the store clamps to the same value
+  useEffect(() => setText(String(round(value))), [value, rev]);
 
   const commit = () => {
     const v = parseFloat(text);
     if (Number.isFinite(v) && v !== round(value)) onCommit(v);
-    // If the store clamps back to the same value, the effect won't fire — reset here.
-    setText(String(round(value)));
+    setRev((r) => r + 1);
   };
 
   return (
