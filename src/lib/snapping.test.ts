@@ -13,6 +13,10 @@ describe('snapMove', () => {
     expect(snapMove(box(1000, 1800), { x: 123, y: 0, z: 47 }, [], DEFAULT_ROOM, 10)).toEqual({ x: 120, y: 0, z: 50 });
   });
 
+  it('snaps the position (not just the move) to the grid, so off-grid objects get back on it', () => {
+    expect(snapMove(box(1003, 1803), { x: 100, y: 0, z: 0 }, [], DEFAULT_ROOM, 10).x).toBe(97);
+  });
+
   it('snaps flush against a neighbour within the threshold', () => {
     const d = snapMove(box(1000, 1800), { x: 185, y: 0, z: 0 }, [box(2000, 2800)], DEFAULT_ROOM, 10);
     expect(d.x).toBe(200); // right face 1800+200 = 2000 = neighbour's left face

@@ -19,8 +19,9 @@ export function parseDesign(json: unknown): Design | null {
 
   const objects: SceneObject[] = [];
   for (const o of json.objects) {
-    if (!isObj(o) || typeof o.templateId !== 'string' || !hasTemplate(o.templateId)) return null;
-    if (!isObj(o.position) || !isNum(o.position.x) || !isNum(o.position.y) || !isNum(o.position.z)) return null;
+    // Skip objects we cannot build (e.g. a template from a newer or older version) instead of losing the design.
+    if (!isObj(o) || typeof o.templateId !== 'string' || !hasTemplate(o.templateId)) continue;
+    if (!isObj(o.position) || !isNum(o.position.x) || !isNum(o.position.y) || !isNum(o.position.z)) continue;
     const t = getTemplate(o.templateId);
     const params = defaultParams(t);
     if (isObj(o.params)) for (const def of t.params) if (isNum(o.params[def.key])) params[def.key] = clampParam(def, o.params[def.key] as number);

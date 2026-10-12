@@ -11,6 +11,7 @@ import { ShareDialog } from './components/ShareDialog';
 import { ChatPanel } from './components/ChatPanel';
 import { BrokenShareLink, ViewerApp } from './components/ViewerApp';
 import { decodeShare, shareHashOf } from './lib/share';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 /** Resolved once at startup: a #view= link opens the read-only viewer. */
 const shared = shareHashOf(location.hash) !== null ? decodeShare(location.hash) : undefined;
@@ -62,8 +63,7 @@ function useShortcuts() {
 
 export default function App() {
   if (shared === null) return <BrokenShareLink />;
-  if (shared) return <ViewerApp />;
-  return <Editor />;
+  return <ErrorBoundary area="app">{shared ? <ViewerApp /> : <Editor />}</ErrorBoundary>;
 }
 
 function Editor() {
@@ -77,12 +77,12 @@ function Editor() {
     <div className="app">
       <Toolbar onCutList={() => setCutList(true)} onShare={() => setShare(true)} onChat={() => setChat(!chat)} chatOpen={chat} />
       <Library />
-      <Viewport />
+      <div className="viewport-slot"><ErrorBoundary area="3D view"><Viewport /></ErrorBoundary></div>
       {/* The chat stays mounted while hidden so the conversation survives toggling. */}
       <ChatPanel hidden={!chat} />
-      {!chat && <Properties />}
-      <StatusBar />
-      {cutList && <CutListDialog onClose={() => setCutList(false)} />}
+      {!chat && <div className="props-slot"><ErrorBoundary area="properties panel"><Properties /></ErrorBoundary></div>}
+      <div className="status-slot"><ErrorBoundary area="status bar"><StatusBar /></ErrorBoundary></div>
+      {cutList && <ErrorBoundary area="cut list"><CutListDialog onClose={() => setCutList(false)} /></ErrorBoundary>}
       {share && <ShareDialog onClose={() => setShare(false)} />}
     </div>
   );

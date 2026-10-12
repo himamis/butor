@@ -18,8 +18,6 @@ describe('parseDesign', () => {
     ['not an object', 42],
     ['wrong version', { ...valid(), version: 2 }],
     ['too few room points', { ...valid(), room: { ...DEFAULT_ROOM, points: [{ x: 0, z: 0 }, { x: 1, z: 1 }] } }],
-    ['unknown template', { ...valid(), objects: [{ ...valid().objects[0], templateId: 'spaceship' }] }],
-    ['bad position', { ...valid(), objects: [{ ...valid().objects[0], position: { x: 'a', y: 0, z: 0 } }] }],
   ])('rejects %s', (_, json) => {
     expect(parseDesign(json)).toBeNull();
   });
@@ -40,5 +38,16 @@ describe('older and hand-edited files', () => {
   it('an old door without hardware params loads with defaults', () => {
     const json = { ...valid(), objects: [{ ...valid().objects[0], templateId: 'door', params: { width: 400, height: 2190, depth: 18 } }] };
     expect(parseDesign(json)!.objects[0].params).toMatchObject({ hinge: 0, openAngle: 95, handle: 1 });
+  });
+});
+
+describe('one bad object never costs the whole design', () => {
+  it('skips objects with unknown templates or broken positions and keeps the rest', () => {
+    const good = valid().objects[0];
+    const d = parseDesign({
+      ...valid(),
+      objects: [good, { ...good, id: 'x', templateId: 'spaceship' }, { ...good, id: 'y', position: { x: 'a', y: 0, z: 0 } }, 'junk'],
+    })!;
+    expect(d.objects.map((o) => o.id)).toEqual(['a']);
   });
 });

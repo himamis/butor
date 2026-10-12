@@ -220,6 +220,16 @@ await page.click('button:has-text("Explode")'); await page.waitForTimeout(300);
 await S(() => window.__store.getState().undo());
 await page.waitForTimeout(800); // let the editor's debounced autosave settle before the viewer checks
 
+// ---------- A crash in the 3D view does not take down the app ----------
+const good = (await store()).design;
+await S(() => { const s = window.__store; s.setState({ design: { ...s.getState().design, objects: [...s.getState().design.objects, { id: 'bad', templateId: 'no-such-template', name: 'x', params: {}, position: { x: 0, y: 0, z: 0 }, rotationY: 0, color: '#fff' }] } }); });
+await page.waitForTimeout(300);
+check('a broken object shows an error panel, toolbar and library stay usable', (await page.$('.crash')) !== null && (await page.$('.library')) !== null && (await page.$('.toolbar')) !== null);
+await S((d) => window.__store.setState({ design: d }), good);
+for (const b of await page.$$('.crash button:has-text("Try again")')) await b.click();
+await page.waitForTimeout(500);
+check('"Try again" brings the 3D view back', (await page.$('.crash')) === null && (await page.$('.viewport canvas')) !== null);
+
 // ---------- Share link: read-only viewer ----------
 await page.click('.toolbar >> text=Share'); await page.waitForTimeout(200);
 const link = await page.inputValue('.modal input');
@@ -284,7 +294,7 @@ await S(() => document.activeElement?.blur()); await S(() => window.__store.getS
 check('undo reverts the AI change', (await store()).design.objects.length === before);
 mock.close();
 
-check('no page errors', errors.length === 0, errors.join('; '));
+check('no page errors', errors.filter((e) => !e.includes('no-such-template')).length === 0, errors.join('; '));
 await browser.close();
 console.log(failures ? `\n${failures} check(s) failed` : '\nall checks passed');
 process.exit(failures ? 1 : 0);

@@ -100,7 +100,11 @@ export function rotateAround(p: Vec3, cx: number, cz: number, deg: number): Vec3
 
 export const normDeg = (deg: number) => ((Math.round(deg * 100) / 100) % 360 + 360) % 360;
 
-const PASTE_OFFSET = 50; // mm along x per duplicate / paste
+/** Copies land flush beside the originals (shifted by the selection's width along x), so they never overlap. */
+const copyStep = (objs: SceneObject[]) => {
+  const b = boundsOf(objs);
+  return b ? b.max.x - b.min.x : 0;
+};
 
 /** Adds copies (new ids, new group ids, unlocked) shifted by dx, selects them; one undo step. */
 function insertCopies(objs: SceneObject[], dx: number) {
@@ -119,7 +123,8 @@ function insertCopies(objs: SceneObject[], dx: number) {
 }
 
 export const useStore = create<State>()((set, get) => ({
-  design: loadAutosave() ?? defaultDesign(),
+  // A shared view link shows its own design; never read (or later write) the visitor's autosave there.
+  design: (typeof location !== 'undefined' && location.hash.startsWith('#view=') ? null : loadAutosave()) ?? defaultDesign(),
   selection: [],
   openIds: [],
   past: [],
@@ -166,7 +171,7 @@ export const useStore = create<State>()((set, get) => ({
     if (!next) return;
     const ids = new Set(next.objects.map((o) => o.id));
     set({
-      design: next, past: [...past, design], future: future.slice(1),
+      design: next, past: [...past, design].slice(-HISTORY), future: future.slice(1),
       selection: selection.filter((id) => ids.has(id)), openIds: get().openIds.filter((id) => ids.has(id)),
     });
   },
@@ -242,7 +247,8 @@ export const useStore = create<State>()((set, get) => ({
 
   duplicateSelected() {
     const sel = new Set(get().selection);
-    insertCopies(get().design.objects.filter((o) => sel.has(o.id)), PASTE_OFFSET);
+    const objs = get().design.objects.filter((o) => sel.has(o.id));
+    insertCopies(objs, copyStep(objs));
   },
 
   copySelected() {
@@ -257,11 +263,11 @@ export const useStore = create<State>()((set, get) => ({
     const { clipboard, pasteCount, readOnly } = get();
     if (readOnly || !clipboard.length) return;
     set({ pasteCount: pasteCount + 1 });
-    insertCopies(clipboard, PASTE_OFFSET * (pasteCount + 1));
+    insertCopies(clipboard, copyStep(clipboard) * (pasteCount + 1));
   },
 
   groupSelected() {
-    const sel = get().selection;
+    const sel = [...new Set(get().selection)];
     if (sel.length < 2) return;
     const g = uid();
     get().updateObjects(sel, (o) => ({ ...o, groupId: g }));

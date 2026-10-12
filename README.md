@@ -31,14 +31,14 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 - **Measure:** press `M` (or the Measure button), click a surface — a unit's side, top or front, a wall, a column or the floor — then click a second point. The distance is measured square to the first surface, so you get the real gap between units, a unit and a wall, or the floor and a cabinet. Measurements stay until you click Clear; `Esc` cancels or leaves the tool. Works in shared view-only links too.
 - **Overlaps:** intersecting parts turn red and are counted in the status bar.
 - **Save / Open:** designs are `.json` files. Your work is also autosaved in the browser.
-- **Cut list:** lists every panel with its size and quantity, plus the hardware (knobs, bar handles); fronts with a grip cutout are marked. Export as CSV.
+- **Cut list:** lists every panel with its size and quantity, plus the hardware: handles, hinges (by door height), drawer runners (by depth), baskets and racks; fronts with a grip cutout are marked. Export as CSV.
 
 ### Shortcuts
 
 | Key | Action |
 |---|---|
 | Ctrl/⌘ Z, Ctrl/⌘ Shift Z | Undo, redo |
-| Ctrl/⌘ C, Ctrl/⌘ V | Copy, paste (each paste lands 50 mm further along; works across opened designs) |
+| Ctrl/⌘ C, Ctrl/⌘ V | Copy, paste (copies line up flush to the right; works across opened designs) |
 | Ctrl/⌘ D | Duplicate |
 | Ctrl/⌘ G, Ctrl/⌘ Shift G | Group, ungroup |
 | Delete / Backspace | Delete selection |

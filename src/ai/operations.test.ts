@@ -111,3 +111,9 @@ describe('limits on model values', () => {
     expect(applyOperations(base(), [{ op: 'update', id: 'c1', name: 'x'.repeat(201) }], ids).results[0].ok).toBe(false);
   });
 });
+
+describe('group validation', () => {
+  it('rejects a group of one object listed twice', () => {
+    expect(applyOperations(base(), [{ op: 'group', ids: ['c1', 'c1'] }], ids).results[0].ok).toBe(false);
+  });
+});

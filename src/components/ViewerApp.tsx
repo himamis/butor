@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Viewport } from './Viewport';
+import { ErrorBoundary } from './ErrorBoundary';
 import { StatusBar } from './StatusBar';
 import { CutListDialog } from './CutListDialog';
 import { ViewControls } from './ViewControls';
@@ -15,8 +16,8 @@ export function ViewerApp() {
         <div className="sep" />
         <button onClick={() => setCutList(true)}>Cut list</button>
       </header>
-      <Viewport />
-      <StatusBar />
+      <div className="viewport-slot"><ErrorBoundary area="3D view"><Viewport /></ErrorBoundary></div>
+      <div className="status-slot"><ErrorBoundary area="status bar"><StatusBar /></ErrorBoundary></div>
       {cutList && <CutListDialog onClose={() => setCutList(false)} />}
     </div>
   );

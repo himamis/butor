@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useStore } from './store';
 import { defaultDesign } from './defaults';
+import { findOverlaps } from '../lib/geometry';
 
 const s = () => useStore.getState();
 
@@ -144,17 +145,29 @@ describe('copy and paste', () => {
     const objs = s().design.objects;
     expect(objs).toHaveLength(2);
     expect(objs[1].id).not.toBe(a.id);
-    expect(objs[1]).toMatchObject({ templateId: 'carcass', params: a.params, position: { x: 450, y: 0, z: 400 } });
+    // lands flush to the right of the original (800 mm wide), not overlapping it
+    expect(objs[1]).toMatchObject({ templateId: 'carcass', params: a.params, position: { x: 1200, y: 0, z: 400 } });
     expect(s().selection).toEqual([objs[1].id]);
     expect(s().past.length).toBe(past + 1);
   });
 
-  it('repeated pastes fan out instead of stacking', () => {
+  it('repeated pastes line up side by side, without overlaps', () => {
     s().addObject('carcass', { x: 400, y: 0, z: 400 });
     s().copySelected();
     s().paste();
     s().paste();
-    expect(s().design.objects.map((o) => o.position.x)).toEqual([400, 450, 500]);
+    expect(s().design.objects.map((o) => o.position.x)).toEqual([400, 1200, 2000]);
+    expect(findOverlaps(s().design.objects).size).toBe(0);
+  });
+
+  it('duplicate also places the copy flush beside the selection (group width for groups)', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    s().addObject('carcass', { x: 1200, y: 0, z: 400 });
+    const [a, b] = s().design.objects;
+    s().select(a.id, false);
+    s().select(b.id, true);
+    s().duplicateSelected();
+    expect(s().design.objects.slice(2).map((o) => o.position.x)).toEqual([2000, 2800]);
   });
 
   it('copies the clipboard at copy time, not later edits', () => {
@@ -231,5 +244,25 @@ describe('measure tool', () => {
     expect(s().measures).toHaveLength(1);
     s().clearMeasures();
     expect(s().measures).toEqual([]);
+  });
+});
+
+describe('history limits', () => {
+  it('redo never grows the history past its cap', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    const id = s().design.objects[0].id;
+    for (let i = 0; i < 105; i++) s().setParam(id, 'width', 200 + i);
+    expect(s().past.length).toBe(100);
+    s().undo();
+    s().redo();
+    expect(s().past.length).toBeLessThanOrEqual(100);
+  });
+
+  it('grouping needs two different objects', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    const id = s().design.objects[0].id;
+    useStore.setState({ selection: [id, id] });
+    s().groupSelected();
+    expect(s().design.objects[0].groupId).toBeUndefined();
   });
 });

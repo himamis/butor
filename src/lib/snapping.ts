@@ -27,7 +27,12 @@ const roundTo = (v: number, step: number) => Math.round(v / step) * step;
  * Never lets the box go below the floor.
  */
 export function snapMove(moving: Box, delta: Vec3, others: Box[], room: Room, grid: number, threshold = 20): Vec3 {
-  const d = { x: roundTo(delta.x, grid), y: roundTo(delta.y, grid), z: roundTo(delta.z, grid) };
+  // Snap where the box lands (its min corner), not the move distance, so off-grid objects get back on the grid.
+  const d = {
+    x: roundTo(moving.min.x + delta.x, grid) - moving.min.x,
+    y: roundTo(moving.min.y + delta.y, grid) - moving.min.y,
+    z: roundTo(moving.min.z + delta.z, grid) - moving.min.z,
+  };
   const cand = (): Box => ({
     min: { x: moving.min.x + d.x, y: moving.min.y + d.y, z: moving.min.z + d.z },
     max: { x: moving.max.x + d.x, y: moving.max.y + d.y, z: moving.max.z + d.z },

@@ -138,8 +138,8 @@ function applyOne(d: Design, raw: unknown, newId: () => string): { design: Desig
 
     case 'group':
     case 'ungroup': {
-      const list = stringList(op.ids, 'ids').map((id) => findObject(d, id));
-      if (op.op === 'group' && list.length < 2) fail('group needs at least two ids');
+      const list = [...new Set(stringList(op.ids, 'ids'))].map((id) => findObject(d, id));
+      if (op.op === 'group' && list.length < 2) fail('group needs at least two different ids');
       const ids = new Set(list.map((o) => o.id));
       const groupId = op.op === 'group' ? newId() : undefined;
       return {
