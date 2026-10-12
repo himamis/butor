@@ -1,5 +1,5 @@
 import type { Connect, Plugin } from 'vite';
-import { handleChat, publicConfig } from './chatHandler';
+import { checkRequest, handleChat, publicConfig } from './chatHandler';
 
 const MAX_BODY = 4 * 1024 * 1024;
 
@@ -28,6 +28,8 @@ const middleware: Connect.NextHandleFunction = async (req, res, next) => {
   if (req.url === '/config' && req.method === 'GET') return send(200, publicConfig(process.env));
   if (req.url !== '/' && req.url !== '') return next();
   if (req.method !== 'POST') return send(405, { error: 'Use POST.' });
+  const rejected = checkRequest(req.headers);
+  if (rejected) return send(rejected.status, rejected.json);
   try {
     const body = JSON.parse(await readBody(req));
     const r = await handleChat(body, process.env);

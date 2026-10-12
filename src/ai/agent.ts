@@ -8,6 +8,7 @@ export const TOOL_DESCRIPTION =
 
 export interface ToolCall {
   id: string;
+  name: string;
   input: unknown;
 }
 
@@ -65,6 +66,9 @@ export async function runAgent(o: {
     }
 
     const results = res.toolCalls.map((call) => {
+      // Every call gets a result, otherwise the provider rejects the next request.
+      if (call.name !== TOOL_NAME) return { id: call.id, content: `ERROR: unknown tool "${call.name}". The only tool is ${TOOL_NAME}.`, isError: true };
+      if (res.stop === 'max_tokens') return { id: call.id, content: 'ERROR: your reply was cut off, so this call was not applied. Send fewer operations per call.', isError: true };
       const ops = typeof call.input === 'object' && call.input !== null ? (call.input as { operations?: unknown }).operations : undefined;
       const r = applyOperations(design, ops);
       design = r.design;

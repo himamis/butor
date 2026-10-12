@@ -40,12 +40,12 @@ function saveSettings(s: Settings) {
   }
 }
 
-function SettingsForm({ s, set, server }: { s: Settings; set: (s: Settings) => void; server: ServerConfig | null }) {
+function SettingsForm({ s, set, server, disabled }: { s: Settings; set: (s: Settings) => void; server: ServerConfig | null; disabled: boolean }) {
   const field = (k: keyof Settings) => ({ value: s[k], onChange: (e: { target: { value: string } }) => set({ ...s, [k]: e.target.value }) });
   const anthropic = s.provider === 'anthropic';
   const serverKey = anthropic ? server?.anthropicKey : server?.llmKey;
   return (
-    <div className="chat-settings">
+    <fieldset className="chat-settings" disabled={disabled}>
       <div className="row">
         <label>Provider</label>
         <select {...field('provider')}>
@@ -74,9 +74,9 @@ function SettingsForm({ s, set, server }: { s: Settings; set: (s: Settings) => v
         </div>
       )}
       <small style={{ color: 'var(--muted)' }}>
-        Requests go through this app’s server, which holds any environment keys. A key typed here is stored in this browser only.
+        Requests go through this app’s server, which holds any environment keys. A key typed here is stored in this browser only. Server keys are only used with the default URLs.
       </small>
-    </div>
+    </fieldset>
   );
 }
 
@@ -88,6 +88,7 @@ export function ChatPanel({ hidden }: { hidden: boolean }) {
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const history = useRef<unknown[]>([]); // provider-native, append-only
+  const discarded = useRef(false); // the model's last changes were not applied; tell it on the next turn
   const log = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -126,16 +127,25 @@ export function ChatPanel({ hidden }: { hidden: boolean }) {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings, history: history.current, message: text, design: sent }),
+        body: JSON.stringify({
+          settings,
+          history: history.current,
+          message: discarded.current
+            ? `(Note: your previous changes were NOT applied because I edited the design at the same time. The design below is current.)\n\n${text}`
+            : text,
+          design: sent,
+        }),
       });
       if (res.status === 404) throw new Error('The AI chat needs the app’s server — run it with npm run dev or npm run preview.');
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? `Server error ${res.status}`);
 
       history.current = data.history;
+      discarded.current = false;
       const next = parseDesign(data.design);
       const changed = next && JSON.stringify(next) !== JSON.stringify(sent);
       if (changed && useStore.getState().design !== sent) {
+        discarded.current = true;
         setMsgs((m) => [...m, { role: 'assistant', text: data.reply }, { role: 'error', text: 'You edited the design while the AI was working, so its changes were not applied. Ask again to redo them on the current design.' }]);
         return;
       }
@@ -157,7 +167,7 @@ export function ChatPanel({ hidden }: { hidden: boolean }) {
           <button className={showSettings ? 'active' : ''} onClick={() => setShowSettings(!showSettings)}>Settings</button>
         </span>
       </div>
-      {showSettings && <SettingsForm s={settings} set={setSettings} server={server} />}
+      {showSettings && <SettingsForm s={settings} set={setSettings} server={server} disabled={busy} />}
       <div className="chat-log" ref={log}>
         {!msgs.length && (
           <p style={{ color: 'var(--muted)' }}>

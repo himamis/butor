@@ -98,3 +98,16 @@ describe('applyOperations', () => {
     expect(results[0].message).toMatch(/colour/);
   });
 });
+
+describe('limits on model values', () => {
+  it('clamps absurd positions to ±100 m', () => {
+    const { design } = applyOperations(base(), [{ op: 'update', id: 'c1', position: { x: 1e300, z: -1e9 } }], ids);
+    expect(design.objects[0].position).toMatchObject({ x: 100000, z: -100000 });
+  });
+
+  it('rejects rooms with too many points and over-long names', () => {
+    const many = Array.from({ length: 201 }, (_, i) => ({ x: i, z: i % 2 }));
+    expect(applyOperations(base(), [{ op: 'set_room', points: many }], ids).results[0].ok).toBe(false);
+    expect(applyOperations(base(), [{ op: 'update', id: 'c1', name: 'x'.repeat(201) }], ids).results[0].ok).toBe(false);
+  });
+});

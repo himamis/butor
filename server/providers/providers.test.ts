@@ -33,7 +33,7 @@ describe('anthropic provider', () => {
 
     expect(r.stop).toBe('tool_use');
     expect(r.text).toBe('Adding it.');
-    expect(r.toolCalls).toEqual([{ id: 'tu1', input: { operations: [] } }]);
+    expect(r.toolCalls).toEqual([{ id: 'tu1', name: 'apply_operations', input: { operations: [] } }]);
     // assistant content is echoed back unchanged (thinking blocks included)
     expect(r.assistant).toEqual({ role: 'assistant', content: response.content });
   });
@@ -91,7 +91,7 @@ describe('openai-compatible provider', () => {
     const p = openAICompatProvider({ baseUrl: 'http://x/v1', model: 'm', fetch });
     const r = await p.step([], 's');
     expect(r.stop).toBe('tool_use');
-    expect(r.toolCalls[0]).toEqual({ id: 'c1', input: { operations: [] } });
+    expect(r.toolCalls[0]).toEqual({ id: 'c1', name: 'apply_operations', input: { operations: [] } });
     expect(r.toolCalls[1].input).toEqual({ operations: [1] });
     expect(r.toolCalls[1].id).toBeTruthy();
     expect(r.toolCalls[2].input).toBeNull();
@@ -109,5 +109,37 @@ describe('openai-compatible provider', () => {
     const fetch = vi.fn().mockResolvedValue({ ok: false, status: 404, text: async () => 'model "m" not found' });
     const p = openAICompatProvider({ baseUrl: 'http://x/v1', model: 'm', fetch });
     await expect(p.step([], 's')).rejects.toThrow(/404.*not found/);
+  });
+});
+
+describe('anthropic effort', () => {
+  it('sends effort only to models that accept it', async () => {
+    for (const [model, sent] of [['claude-opus-5-5', true], ['claude-sonnet-4-6', true], ['claude-haiku-4-5', false], ['claude-3-7-sonnet', false]] as const) {
+      const create = vi.fn().mockResolvedValue({ content: [], stop_reason: 'end_turn' });
+      await anthropicProvider({ client: { beta: { messages: { create } } }, model, effort: 'medium' }).step([], 's');
+      expect('output_config' in create.mock.calls[0][0]).toBe(sent);
+    }
+  });
+
+  it('returns every tool call with its name, including unknown tools', async () => {
+    const create = vi.fn().mockResolvedValue({ content: [{ type: 'tool_use', id: 'a', name: 'other', input: {} }], stop_reason: 'tool_use' });
+    const r = await anthropicProvider({ client: { beta: { messages: { create } } }, model: 'claude-opus-5-5' }).step([], 's');
+    expect(r.toolCalls).toEqual([{ id: 'a', name: 'other', input: {} }]);
+    expect(r.stop).toBe('tool_use');
+  });
+});
+
+describe('openai-compatible errors', () => {
+  it('passes through every tool call name', async () => {
+    const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ choices: [{ message: { role: 'assistant', content: '', tool_calls: [{ id: 'z', function: { name: 'other', arguments: '{}' } }] } }] }) });
+    const r = await openAICompatProvider({ baseUrl: 'http://x/v1', model: 'm', fetch }).step([], 's');
+    expect(r.toolCalls).toEqual([{ id: 'z', name: 'other', input: {} }]);
+  });
+});
+
+describe('anthropic custom base URL', () => {
+  it('refuses to start without an explicit key, so the SDK cannot pick up environment credentials', () => {
+    expect(() => anthropicProvider({ baseURL: 'https://evil.example', model: 'claude-opus-5-5' })).toThrow(/needs an API key/);
+    expect(() => anthropicProvider({ baseURL: 'https://proxy.example', apiKey: 'k' })).not.toThrow();
   });
 });

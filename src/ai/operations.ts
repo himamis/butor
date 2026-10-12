@@ -15,6 +15,10 @@ export interface OpResult {
 }
 
 const FLOORS: FloorKind[] = ['color', 'wood', 'tiles', 'concrete'];
+const MAX_COORD = 100000; // mm, ±100 m
+const MAX_POINTS = 200;
+const MAX_NAME = 200;
+const coord = (v: number) => Math.min(MAX_COORD, Math.max(-MAX_COORD, v));
 const HEX = /^#[0-9a-f]{6}$/i;
 
 type Rec = Record<string, unknown>;
@@ -64,9 +68,9 @@ function position(input: unknown, base: Vec3): Vec3 {
   const p = input as Rec;
   for (const k of ['x', 'y', 'z']) if (p[k] !== undefined && !isNum(p[k])) fail(`position.${k} must be a number (mm)`);
   return {
-    x: (p.x as number | undefined) ?? base.x,
-    y: Math.max(0, (p.y as number | undefined) ?? base.y),
-    z: (p.z as number | undefined) ?? base.z,
+    x: coord((p.x as number | undefined) ?? base.x),
+    y: Math.max(0, coord((p.y as number | undefined) ?? base.y)),
+    z: coord((p.z as number | undefined) ?? base.z),
   };
 }
 
@@ -97,7 +101,7 @@ function applyOne(d: Design, raw: unknown, newId: () => string): { design: Desig
       const obj: SceneObject = {
         id: newId(),
         templateId: t.id,
-        name: typeof op.name === 'string' && op.name ? op.name : t.name,
+        name: typeof op.name === 'string' && op.name ? op.name.slice(0, MAX_NAME) : t.name,
         params: mergeParams(t.id, defaultParams(t), op.params, notes),
         position: position(op.position, roomCenter(d)),
         rotationY: normDeg((op.rotationY as number | undefined) ?? 0),
@@ -111,7 +115,7 @@ function applyOne(d: Design, raw: unknown, newId: () => string): { design: Desig
       const o = findObject(d, op.id);
       if (o.locked) fail(`object "${o.name}" is locked by the user`);
       if (op.rotationY !== undefined && !isNum(op.rotationY)) fail('rotationY must be a number (degrees)');
-      if (op.name !== undefined && typeof op.name !== 'string') fail('name must be a string');
+      if (op.name !== undefined && (typeof op.name !== 'string' || op.name.length > MAX_NAME)) fail(`name must be a string of at most ${MAX_NAME} characters`);
       const next: SceneObject = {
         ...o,
         name: (op.name as string | undefined) ?? o.name,
@@ -148,10 +152,10 @@ function applyOne(d: Design, raw: unknown, newId: () => string): { design: Desig
       const room = { ...d.room };
       if (op.points !== undefined) {
         const pts = op.points;
-        if (!Array.isArray(pts) || pts.length < 3 || !pts.every((p) => isObj(p) && isNum(p.x) && isNum(p.z))) {
-          fail('points must be at least 3 corners [{x, z}, …] in mm');
+        if (!Array.isArray(pts) || pts.length < 3 || pts.length > MAX_POINTS || !pts.every((p) => isObj(p) && isNum(p.x) && isNum(p.z))) {
+          fail(`points must be 3–${MAX_POINTS} corners [{x, z}, …] in mm`);
         }
-        room.points = (pts as { x: number; z: number }[]).map((p) => ({ x: p.x, z: p.z }));
+        room.points = (pts as { x: number; z: number }[]).map((p) => ({ x: coord(p.x), z: coord(p.z) }));
       }
       if (op.height !== undefined) {
         if (!isNum(op.height)) fail('height must be a number (mm)');

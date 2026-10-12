@@ -8,6 +8,8 @@ export const DEFAULT_ANTHROPIC_MODEL = 'claude-opus-5-5';
 /** Models that accept the server-side `fallbacks: "default"` form on the Claude API. */
 const DEFAULT_FALLBACK_MODELS = ['claude-fable-5-1', 'claude-opus-5-5', 'claude-opus-5', 'claude-sonnet-5-5'];
 export const supportsDefaultFallback = (model: string) => DEFAULT_FALLBACK_MODELS.includes(model);
+/** Models that accept output_config.effort (others return a 400). */
+export const supportsEffort = (model: string) => /^claude-(opus-(5|4-[5-8])|sonnet-(5|4-6)|fable-5|mythos-5|haiku-5)/.test(model);
 
 type CreateParams = Anthropic.Beta.MessageCreateParamsNonStreaming & { fallbacks?: 'default' };
 /** The slice of the SDK client this adapter uses (injectable for tests). */
@@ -28,7 +30,9 @@ export function anthropicProvider(o: {
   model?: string;
   effort?: 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 }): ChatProvider {
-  // With no apiKey the SDK resolves ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN / an `ant auth login` profile.
+  // With no apiKey the SDK resolves ANTHROPIC_API_KEY / ANTHROPIC_AUTH_TOKEN / an `ant auth login` profile itself.
+  // Never let that happen for a browser-chosen base URL: those credentials would be sent there.
+  if (!o.client && o.baseURL && !o.apiKey) throw new Error('A custom Anthropic base URL needs an API key in AI settings.');
   const client: AnthropicLike = o.client ?? (new Anthropic({ apiKey: o.apiKey || undefined, baseURL: o.baseURL || undefined }) as unknown as AnthropicLike);
   const model = o.model || DEFAULT_ANTHROPIC_MODEL;
   const fallback = supportsDefaultFallback(model);
@@ -50,13 +54,13 @@ export function anthropicProvider(o: {
         system,
         tools: [tool],
         messages: history as Anthropic.Beta.BetaMessageParam[],
-        ...(o.effort ? { output_config: { effort: o.effort } } : {}),
+        ...(o.effort && supportsEffort(model) ? { output_config: { effort: o.effort } } : {}),
         // On a safety decline the API re-runs the request on Anthropic's recommended fallback model.
         ...(fallback ? { betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default' as const } : {}),
       };
       const res = await client.beta.messages.create(params);
       const text = res.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('\n');
-      const toolCalls = res.content.flatMap((b) => (b.type === 'tool_use' && b.name === TOOL_NAME ? [{ id: b.id, input: b.input }] : []));
+      const toolCalls = res.content.flatMap((b) => (b.type === 'tool_use' ? [{ id: b.id, name: b.name, input: b.input }] : []));
       const stop = res.stop_reason === 'refusal' ? 'refusal' : res.stop_reason === 'max_tokens' ? 'max_tokens' : toolCalls.length ? 'tool_use' : 'end';
       // Echo the content unchanged on the next request (thinking blocks must not be edited).
       return { assistant: { role: 'assistant', content: res.content }, text, toolCalls, stop };

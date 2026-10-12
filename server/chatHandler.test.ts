@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { handleChat, publicConfig } from './chatHandler';
+import { checkRequest, handleChat, publicConfig, type ProviderConfig } from './chatHandler';
 import { defaultDesign } from '../src/state/defaults';
 import type { ChatProvider } from '../src/ai/agent';
 
@@ -67,5 +67,53 @@ describe('publicConfig', () => {
     const c = publicConfig({ ANTHROPIC_API_KEY: 'secret', LLM_BASE_URL: 'http://localhost:11434/v1', LLM_MODEL: 'qwen3' });
     expect(c).toEqual({ anthropicKey: true, llmKey: false, llmBaseUrl: 'http://localhost:11434/v1', llmModel: 'qwen3' });
     expect(JSON.stringify(c)).not.toContain('secret');
+  });
+});
+
+describe('keys never follow a browser-supplied URL', () => {
+  const capture = () => {
+    const seen: ProviderConfig[] = [];
+    return { seen, factory: (cfg: ProviderConfig) => (seen.push(cfg), okProvider) };
+  };
+
+  it('anthropic: the env key is not used with a custom base URL', async () => {
+    const c = capture();
+    await handleChat(body({ settings: { provider: 'anthropic', baseUrl: 'https://evil.example' } }), { ANTHROPIC_API_KEY: 'secret' }, c.factory);
+    expect(c.seen[0].apiKey).toBeUndefined();
+  });
+
+  it('anthropic: the env key is used with the default URL', async () => {
+    const c = capture();
+    await handleChat(body(), { ANTHROPIC_API_KEY: 'secret' }, c.factory);
+    expect(c.seen[0].apiKey).toBe('secret');
+  });
+
+  it('openai-compatible: LLM_API_KEY only goes to LLM_BASE_URL', async () => {
+    const c = capture();
+    const env = { LLM_API_KEY: 'secret', LLM_BASE_URL: 'http://localhost:11234/v1', LLM_MODEL: 'm' };
+    await handleChat(body({ settings: { provider: 'openai-compatible', baseUrl: 'http://169.254.169.254/v1' } }), env, c.factory);
+    await handleChat(body({ settings: { provider: 'openai-compatible' } }), env, c.factory);
+    await handleChat(body({ settings: { provider: 'openai-compatible', baseUrl: 'http://localhost:11234/v1/' } }), env, c.factory);
+    expect(c.seen.map((s) => s.apiKey)).toEqual([undefined, 'secret', 'secret']);
+  });
+});
+
+describe('history limits', () => {
+  it('rejects a conversation that is too long instead of silently dropping turns', async () => {
+    const r = await handleChat(body({ history: Array.from({ length: 401 }, () => ({ role: 'user', content: 'x' })) }), {}, () => okProvider);
+    expect(r.status).toBe(400);
+    expect((r.json as { error: string }).error).toMatch(/New chat/);
+  });
+});
+
+describe('checkRequest (cross-site protection)', () => {
+  it.each([
+    ['same-origin JSON', { 'content-type': 'application/json', origin: 'http://192.168.0.224:5173', host: '192.168.0.224:5173' }, null],
+    ['no Origin (curl, server-side tools)', { 'content-type': 'application/json; charset=utf-8', host: 'localhost:5173' }, null],
+    ['text/plain from a web page', { 'content-type': 'text/plain', origin: 'https://evil.example', host: 'localhost:5173' }, 415],
+    ['JSON from another origin', { 'content-type': 'application/json', origin: 'https://evil.example', host: 'localhost:5173' }, 403],
+    ['missing content type', { host: 'localhost:5173' }, 415],
+  ])('%s', (_, headers, status) => {
+    expect(checkRequest(headers)?.status ?? null).toBe(status);
   });
 });

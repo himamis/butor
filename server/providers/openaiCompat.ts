@@ -54,11 +54,11 @@ export function openAICompatProvider(o: { baseUrl: string; model: string; apiKey
 
       // Give every call an id (some servers omit it) and echo the same ids in the stored assistant message.
       const calls = (choice.message.tool_calls ?? []).map((c) => ({ ...c, id: c.id || `call_${randomUUID()}` }));
-      const toolCalls: ToolCall[] = calls.filter((c) => c.function?.name === TOOL_NAME).map((c) => ({ id: c.id, input: parseArgs(c.function.arguments) }));
+      const toolCalls: ToolCall[] = calls.map((c) => ({ id: c.id, name: c.function?.name ?? '', input: parseArgs(c.function?.arguments) }));
       const assistant: OAIMessage = {
         role: 'assistant',
         content: choice.message.content ?? '',
-        ...(calls.length ? { tool_calls: calls.map((c) => ({ id: c.id, type: 'function', function: { name: c.function.name, arguments: typeof c.function.arguments === 'string' ? c.function.arguments : JSON.stringify(c.function.arguments ?? {}) } })) } : {}),
+        ...(calls.length ? { tool_calls: calls.map((c) => ({ id: c.id, type: 'function', function: { name: c.function?.name ?? '', arguments: typeof c.function?.arguments === 'string' ? c.function.arguments : JSON.stringify(c.function?.arguments ?? {}) } })) } : {}),
       };
       const stop = toolCalls.length ? 'tool_use' : choice.finish_reason === 'length' ? 'max_tokens' : 'end';
       return { assistant, text: choice.message.content ?? '', toolCalls, stop };

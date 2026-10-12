@@ -18,7 +18,7 @@ function fakeProvider(steps: StepResult[]): ChatProvider & { calls: unknown[][] 
   };
 }
 
-const add = (id: string) => ({ id, input: { operations: [{ op: 'add', templateId: 'carcass', position: { x: 1000, y: 0, z: 290 } }] } });
+const add = (id: string) => ({ id, name: 'apply_operations', input: { operations: [{ op: 'add', templateId: 'carcass', position: { x: 1000, y: 0, z: 290 } }] } });
 
 describe('runAgent', () => {
   it('applies tool calls, feeds results back and returns the final reply', async () => {
@@ -52,7 +52,7 @@ describe('runAgent', () => {
 
   it('reports invalid tool input as an error result and leaves the design alone', async () => {
     const p = fakeProvider([
-      { assistant: {}, text: '', toolCalls: [{ id: 't1', input: { operations: [{ op: 'add', templateId: 'spaceship' }] } }], stop: 'tool_use' },
+      { assistant: {}, text: '', toolCalls: [{ id: 't1', name: 'apply_operations', input: { operations: [{ op: 'add', templateId: 'spaceship' }] } }], stop: 'tool_use' },
       { assistant: {}, text: 'Sorry.', toolCalls: [], stop: 'end' },
     ]);
     const r = await runAgent({ provider: p, system: 's', history: [], message: 'x', design: defaultDesign() });
@@ -62,7 +62,7 @@ describe('runAgent', () => {
 
   it('handles input that is not even an object', async () => {
     const p = fakeProvider([
-      { assistant: {}, text: '', toolCalls: [{ id: 't1', input: 'not json' }], stop: 'tool_use' },
+      { assistant: {}, text: '', toolCalls: [{ id: 't1', name: 'apply_operations', input: 'not json' }], stop: 'tool_use' },
       { assistant: {}, text: 'ok', toolCalls: [], stop: 'end' },
     ]);
     const r = await runAgent({ provider: p, system: 's', history: [], message: 'x', design: defaultDesign() });
@@ -81,5 +81,26 @@ describe('runAgent', () => {
     const p = fakeProvider([{ assistant: {}, text: '', toolCalls: [], stop: 'refusal' }]);
     const r = await runAgent({ provider: p, system: 's', history: [], message: 'x', design: defaultDesign() });
     expect(r.reply).toMatch(/declined/);
+  });
+});
+
+describe('robustness against model mistakes', () => {
+  it('answers a tool call with an unknown name so the conversation stays valid', async () => {
+    const p = fakeProvider([
+      { assistant: {}, text: '', toolCalls: [{ id: 'x1', name: 'make_wardrobe', input: {} }], stop: 'tool_use' },
+      { assistant: {}, text: 'ok', toolCalls: [], stop: 'end' },
+    ]);
+    await runAgent({ provider: p, system: 's', history: [], message: 'x', design: defaultDesign() });
+    expect(p.calls[1][2]).toMatchObject({ id: 'x1', isError: true, content: expect.stringMatching(/unknown tool/) });
+  });
+
+  it('does not apply a tool call from a reply cut off at max_tokens', async () => {
+    const p = fakeProvider([
+      { assistant: {}, text: '', toolCalls: [add('t1')], stop: 'max_tokens' },
+      { assistant: {}, text: 'ok', toolCalls: [], stop: 'end' },
+    ]);
+    const r = await runAgent({ provider: p, system: 's', history: [], message: 'x', design: defaultDesign() });
+    expect(r.design.objects).toHaveLength(0);
+    expect(p.calls[1][2]).toMatchObject({ isError: true, content: expect.stringMatching(/cut off/) });
   });
 });
