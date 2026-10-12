@@ -28,6 +28,7 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 - **Exploded view:** toggle Explode in the toolbar and adjust the amount with the slider. Walls and columns fade out so they don't hide the parts. Moving is disabled while exploded.
 - **Share:** the Share button copies a read-only link with the whole design inside it. Whoever opens it can look around, switch views, open doors and drawers, explode and see the cut list — but cannot change anything, and their own autosaved work is left alone. Links made on `localhost` only work on your computer; open the app via its network address to share with other devices.
 - **AI assistant:** the AI button opens a chat that edits the design. Each request is one undo step, and the reply lists what changed. See [AI setup](#ai-setup).
+- **Measure:** press `M` (or the Measure button), click a surface — a unit's side, top or front, a wall, a column or the floor — then click a second point. The distance is measured square to the first surface, so you get the real gap between units, a unit and a wall, or the floor and a cabinet. Measurements stay until you click Clear; `Esc` cancels or leaves the tool. Works in shared view-only links too.
 - **Overlaps:** intersecting parts turn red and are counted in the status bar.
 - **Save / Open:** designs are `.json` files. Your work is also autosaved in the browser.
 - **Cut list:** lists every panel with its size and quantity, plus the hardware (knobs, bar handles); fronts with a grip cutout are marked. Export as CSV.
@@ -43,7 +44,8 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 | Delete / Backspace | Delete selection |
 | R, Shift R | Rotate selection 90° clockwise / counter-clockwise |
 | G, T | Move mode, rotate mode |
-| Esc | Deselect |
+| M | Measure tool |
+| Esc | Deselect / cancel a measurement |
 
 ## Adding a template
 

@@ -99,17 +99,17 @@ export function RoomMesh({ room, showWalls, faded }: { room: Room; showWalls: bo
 
   return (
     <group>
-      <mesh geometry={floorGeom} rotation-x={-Math.PI / 2} receiveShadow>
+      <mesh geometry={floorGeom} rotation-x={-Math.PI / 2} receiveShadow userData={{ measurable: true }}>
         <meshStandardMaterial key={map?.uuid ?? 'plain'} color={map ? '#ffffff' : room.floorColor} map={map} roughness={0.85} />
       </mesh>
       {showWalls &&
         walls.map((w) => (
-          <mesh key={w.key} ref={(m) => (wallRefs.current[w.key] = m)} receiveShadow position={[mm(w.x), mm(room.height) / 2, mm(w.z)]} rotation-y={w.rot} material={solid}>
+          <mesh key={w.key} ref={(m) => (wallRefs.current[w.key] = m)} receiveShadow position={[mm(w.x), mm(room.height) / 2, mm(w.z)]} rotation-y={w.rot} material={solid} userData={{ measurable: true }}>
             <boxGeometry args={[mm(w.len), mm(room.height), mm(room.wallThickness)]} />
           </mesh>
         ))}
       {room.columns.map((c) => (
-        <mesh key={c.id} position={[mm(c.x), mm(room.height) / 2, mm(c.z)]} material={solid} castShadow receiveShadow>
+        <mesh key={c.id} position={[mm(c.x), mm(room.height) / 2, mm(c.z)]} material={solid} castShadow receiveShadow userData={{ measurable: true }}>
           <boxGeometry args={[mm(c.w), mm(room.height), mm(c.d)]} />
           {!faded && <Edges color="#9a978f" />}
         </mesh>

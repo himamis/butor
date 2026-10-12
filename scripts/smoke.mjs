@@ -173,6 +173,33 @@ await S(() => { const s = window.__store.getState(); s.undo(); s.undo(); s.undo(
 check('undo restores the original', !(await store()).design.objects.some((o) => o.id === resized.id));
 await page.click('.toolbar >> text=3D'); await page.waitForTimeout(300);
 
+// ---------- Measure tool ----------
+const designBeforeMeasure = (await store()).design;
+await S(() => { const s = window.__store.getState(); s.commit((d) => ({ ...d, objects: [] })); s.addObject('carcass', { x: 2000, y: 0, z: 290 }); s.select(null, false); });
+const pastBeforeMeasure = (await store()).past.length;
+await page.click('.toolbar >> text=Front'); await page.waitForTimeout(600);
+await page.keyboard.press('m');
+check('M turns on the measure tool', (await store()).tool === 'measure');
+let pt1 = await screen({ x: 600, y: 1800, z: 0 });      // back wall, beside the unit
+let pt2 = await screen({ x: 2000, y: 1100, z: 580 });   // the unit's front (side panel edge / shelf)
+await page.mouse.click(pt1.x, pt1.y); await page.mouse.move(pt2.x, pt2.y, { steps: 5 }); await page.mouse.click(pt2.x, pt2.y);
+await page.waitForTimeout(200);
+let ms = (await store()).measures;
+check('wall to unit front measures the depth', ms.length === 1 && ms[0].distance === 580, JSON.stringify(ms.map((m) => m.distance)));
+await page.click('.toolbar >> text=Top'); await page.waitForTimeout(600);
+pt1 = await screen({ x: 2000, y: 2200, z: 290 });   // top of the unit
+pt2 = await screen({ x: 3200, y: 0, z: 1500 });     // floor
+await page.mouse.click(pt1.x, pt1.y); await page.mouse.click(pt2.x, pt2.y); await page.waitForTimeout(200);
+ms = (await store()).measures;
+check('top of unit to floor measures its height', ms.length === 2 && ms[1].distance === 2200, JSON.stringify(ms.map((m) => m.distance)));
+await page.click('.toolbar >> text=3D'); await page.waitForTimeout(500);
+await shot('13-measure');
+st = await store();
+check('measuring selects nothing and changes nothing', st.selection.length === 0 && st.past.length === pastBeforeMeasure);
+await page.click('.toolbar >> text=Clear'); await page.keyboard.press('Escape');
+check('clear and Esc leave the tool', (await store()).measures.length === 0 && (await store()).tool === 'select');
+await S((d) => window.__store.getState().commit(() => d), designBeforeMeasure);
+
 // ---------- Room columns ----------
 await S(() => window.__store.getState().select(null, false)); await page.waitForTimeout(150);
 await page.click('text=+ Add column'); await page.waitForTimeout(100);

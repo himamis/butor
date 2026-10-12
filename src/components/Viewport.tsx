@@ -12,6 +12,7 @@ import { RoomMesh } from './RoomMesh';
 import { ObjectMesh } from './ObjectMesh';
 import { SelectionGizmo, gizmoActivity } from './SelectionGizmo';
 import { ResizeHandles } from './ResizeHandles';
+import { MeasureTool } from './MeasureTool';
 import { BoxDimensions } from './Dimensions';
 
 type ThreeHandle = { camera: THREE.Camera; gl: THREE.WebGLRenderer };
@@ -65,6 +66,7 @@ export function Viewport() {
   const view = useStore((s) => s.view);
   const showOverall = useStore((s) => s.showOverall);
   const doorsHidden = useStore((s) => s.doorsHidden);
+  const tool = useStore((s) => s.tool);
   const openIds = useStore((s) => s.openIds);
   const explode = useStore((s) => (s.exploded ? s.explodeAmount : 0));
   const handle = useRef<ThreeHandle | null>(null);
@@ -104,7 +106,7 @@ export function Viewport() {
   };
 
   const onPointerMissed = () => {
-    if (performance.now() - gizmoActivity.at < 300) return;
+    if (performance.now() - gizmoActivity.at < 300 || useStore.getState().tool === 'measure') return;
     useStore.getState().select(null, false);
   };
 
@@ -139,8 +141,9 @@ export function Viewport() {
             spread={spreads.get(o.id)!}
           />
         ))}
-        <SelectionGizmo />
-        <ResizeHandles />
+        {tool !== 'measure' && <SelectionGizmo />}
+        {tool !== 'measure' && <ResizeHandles />}
+        <MeasureTool />
         {/* Dimensions describe the assembled design, so they are hidden while exploded. */}
         {selBox && explode === 0 && <BoxDimensions box={selBox} offset={60} color="#2f7cf6" />}
         {showOverall && explode === 0 && objects.length > 1 && allBox && <BoxDimensions box={allBox} offset={160} color="#e07a1f" />}

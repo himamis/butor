@@ -38,8 +38,10 @@ button, select, input {
 }
 button {
   background: var(--panel); border: 1px solid var(--border); border-radius: 5px;
-  padding: 4px 9px; cursor: pointer;
+  padding: 4px 8px; cursor: pointer;
 }
+.toolbar button, .toolbar select { padding: 4px 7px; }
+.toolbar .sep { margin: 0 3px; }
 button:hover:not(:disabled) { border-color: #bbb; }
 button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 button:disabled { opacity: 0.4; cursor: default; }
@@ -136,3 +138,4 @@ h3:first-child { margin-top: 0; }
 .card-name { font-weight: 500; display: block; }
 .card .card-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 2px 0; }
 .lib-foot { color: var(--muted); font-size: 11px; text-align: center; margin-top: 14px; }
+.measure-label { color: #8e24aa; border-color: #8e24aa; font-size: 12px; }

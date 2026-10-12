@@ -5,7 +5,7 @@ import { defaultDesign } from './defaults';
 const s = () => useStore.getState();
 
 beforeEach(() => {
-  useStore.setState({ readOnly: false, exploded: false });
+  useStore.setState({ readOnly: false, exploded: false, measures: [], measureStart: null, tool: 'select' });
   s().loadDesign(defaultDesign());
 });
 
@@ -202,5 +202,34 @@ describe('copy and paste', () => {
     s().enterViewer(s().design);
     s().paste();
     expect(s().design.objects).toHaveLength(2);
+  });
+});
+
+describe('measure tool', () => {
+  it('two clicks make a measurement; the design and undo history are untouched; works in the viewer', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    s().enterViewer(s().design);
+    const design = s().design;
+    s().setUi({ tool: 'measure' });
+    s().measureClick({ x: 800, y: 1000, z: 400 }, { x: 1, y: 0, z: 0 });
+    expect(s().measureStart).not.toBeNull();
+    s().measureClick({ x: 4000, y: 500, z: 100 }, { x: -1, y: 0, z: 0 });
+    expect(s().measureStart).toBeNull();
+    expect(s().measures).toHaveLength(1);
+    expect(s().measures[0].distance).toBe(3200);
+    expect(s().design).toBe(design);
+    expect(s().past).toEqual([]);
+  });
+
+  it('cancel drops a half-finished measurement, clear removes all', () => {
+    s().setUi({ tool: 'measure' });
+    s().measureClick({ x: 0, y: 0, z: 0 }, { x: 0, y: 1, z: 0 });
+    s().measureClick({ x: 0, y: 2200, z: 0 }, { x: 0, y: -1, z: 0 });
+    s().measureClick({ x: 0, y: 0, z: 0 }, { x: 0, y: 1, z: 0 });
+    s().cancelMeasure();
+    expect(s().measureStart).toBeNull();
+    expect(s().measures).toHaveLength(1);
+    s().clearMeasures();
+    expect(s().measures).toEqual([]);
   });
 });

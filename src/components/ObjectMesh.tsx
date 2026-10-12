@@ -71,7 +71,7 @@ function PanelMesh({ p, obj, selected, overlapping }: { p: Panel; obj: SceneObje
   const rotation: [number, number, number] =
     p.shape === 'cylinder' ? [0, 0, Math.PI / 2] : p.shape === 'knob' ? [Math.PI / 2, 0, 0] : [0, 0, 0];
   return (
-    <mesh position={[mm(p.pos.x), mm(p.pos.y), mm(p.pos.z)]} rotation={rotation} castShadow receiveShadow>
+    <mesh position={[mm(p.pos.x), mm(p.pos.y), mm(p.pos.z)]} rotation={rotation} castShadow receiveShadow userData={{ measurable: true }}>
       <PanelGeometry p={p} />
       <meshStandardMaterial
         color={color}
@@ -132,12 +132,13 @@ export const ObjectMesh = memo(function ObjectMesh({ obj, selected, overlapping,
   });
 
   const onClick = (e: ThreeEvent<MouseEvent>) => {
-    if (e.delta > 4) return; // orbit drag, not a click
+    if (e.delta > 4 || useStore.getState().tool === 'measure') return; // orbit drag, or measuring
     e.stopPropagation();
     select(obj.id, e.shiftKey);
   };
   const onDoubleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
+    if (useStore.getState().tool === 'measure') return;
     if (movable) toggleOpen(obj.id);
   };
 

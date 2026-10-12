@@ -5,6 +5,7 @@ import { boundsOf, hasMovingParts } from '../lib/geometry';
 import { DEFAULT_COLOR, defaultDesign } from './defaults';
 import { loadAutosave } from '../lib/persistence';
 import { uid } from '../lib/uid';
+import { measureBetween, snapNormal } from '../lib/measure';
 
 export type Mode = 'translate' | 'rotate';
 export type View = '3d' | 'front' | 'top' | 'side';
@@ -18,6 +19,14 @@ interface Ui {
   doorsHidden: boolean;
   exploded: boolean;
   explodeAmount: number; // 0..1
+  tool: 'select' | 'measure';
+}
+
+export interface Measure {
+  a: Vec3; // first click (mm)
+  end: Vec3; // where the measuring line ends, square to the first surface
+  b: Vec3; // second click
+  distance: number; // mm
 }
 
 interface State extends Ui {
@@ -55,6 +64,11 @@ interface State extends Ui {
   enterViewer(d: Design): void;
   setUi(partial: Partial<Ui>): void;
   toggleOpen(id: string): void;
+  measures: Measure[]; // view state, never saved
+  measureStart: { p: Vec3; n: Vec3 } | null;
+  measureClick(p: Vec3, n: Vec3): void;
+  cancelMeasure(): void;
+  clearMeasures(): void;
   setOpenAll(open: boolean): void;
 }
 
@@ -121,6 +135,9 @@ export const useStore = create<State>()((set, get) => ({
   doorsHidden: false,
   exploded: false,
   explodeAmount: 0.6,
+  tool: 'select',
+  measures: [],
+  measureStart: null,
 
   commit(fn) {
     if (get().readOnly) return;
@@ -288,6 +305,21 @@ export const useStore = create<State>()((set, get) => ({
 
   setUi(partial) {
     set(partial);
+  },
+
+  measureClick(p, n) {
+    const start = get().measureStart;
+    if (!start) return set({ measureStart: { p, n: snapNormal(n) } });
+    const { distance, end } = measureBetween(start.p, start.n, p);
+    set({ measures: [...get().measures, { a: start.p, end, b: p, distance }], measureStart: null });
+  },
+
+  cancelMeasure() {
+    set({ measureStart: null });
+  },
+
+  clearMeasures() {
+    set({ measures: [], measureStart: null });
   },
 
   toggleOpen(id) {

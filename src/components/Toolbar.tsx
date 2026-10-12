@@ -29,16 +29,15 @@ export function Toolbar({ onCutList, onShare, onChat, chatOpen }: { onCutList: (
       <button onClick={open}>Open…</button>
       <button onClick={() => saveToFile(s.design)}>Save</button>
       <div className="sep" />
-      <button onClick={s.undo} disabled={!s.past.length} title="Undo (Ctrl+Z)">↶ Undo</button>
-      <button onClick={s.redo} disabled={!s.future.length} title="Redo (Ctrl+Shift+Z)">↷ Redo</button>
+      <button onClick={s.undo} disabled={!s.past.length} title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+      <button onClick={s.redo} disabled={!s.future.length} title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↷</button>
       <div className="sep" />
       <button className={s.mode === 'translate' ? 'active' : ''} onClick={() => s.setUi({ mode: 'translate' })} title="Move (G)">Move</button>
       <button className={s.mode === 'rotate' ? 'active' : ''} onClick={() => s.setUi({ mode: 'rotate' })} title="Rotate (T)">Rotate</button>
-      <label style={{ marginLeft: 6, color: 'var(--muted)' }}>Grid</label>
-      <select value={s.grid} onChange={(e) => s.setUi({ grid: Number(e.target.value) as Grid })} style={{ width: 70 }}>
-        <option value={1}>1 mm</option>
-        <option value={10}>10 mm</option>
-        <option value={50}>50 mm</option>
+      <select title="Snap grid" value={s.grid} onChange={(e) => s.setUi({ grid: Number(e.target.value) as Grid })} style={{ width: 'auto' }}>
+        <option value={1}>Grid 1 mm</option>
+        <option value={10}>Grid 10 mm</option>
+        <option value={50}>Grid 50 mm</option>
       </select>
       <div className="sep" />
       <button onClick={s.groupSelected} disabled={!canGroup} title="Group (Ctrl+G)">Group</button>
