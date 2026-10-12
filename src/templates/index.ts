@@ -6,9 +6,10 @@ import { rail } from './rail';
 import { door } from './door';
 import { drawer } from './drawer';
 import { carcass } from './carcass';
+import { carcassDoors } from './carcassDoors';
 
 /** Template library. To add a template: create a file in this folder and list it here. */
-export const TEMPLATES: TemplateDef[] = [carcass, sidePanel, horizontalPanel, backPanel, door, drawer, rail];
+export const TEMPLATES: TemplateDef[] = [carcass, carcassDoors, sidePanel, horizontalPanel, backPanel, door, drawer, rail];
 
 const byId = new Map(TEMPLATES.map((t) => [t.id, t]));
 
