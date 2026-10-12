@@ -4,7 +4,10 @@ import { defaultDesign } from './defaults';
 
 const s = () => useStore.getState();
 
-beforeEach(() => s().loadDesign(defaultDesign()));
+beforeEach(() => {
+  useStore.setState({ readOnly: false, exploded: false });
+  s().loadDesign(defaultDesign());
+});
 
 describe('store', () => {
   it('group rotate is one undo step that restores every member', () => {
@@ -98,5 +101,34 @@ describe('open state follows the design', () => {
     s().undo();
     expect(s().design.objects[0].id).toBe(id);
     expect(s().openIds).toEqual([]);
+  });
+});
+
+describe('read-only viewer', () => {
+  it('enterViewer shows the shared design and refuses every edit', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    const shared = { ...defaultDesign(), objects: [] };
+    s().enterViewer(shared);
+    expect(s().readOnly).toBe(true);
+    expect(s().design).toBe(shared);
+    expect(s().past).toEqual([]);
+
+    s().addObject('carcass', { x: 0, y: 0, z: 0 });
+    s().commit((d) => ({ ...d, objects: [] }));
+    s().updateObjectsLive(['x'], (o) => o);
+    s().setRoom((r) => ({ ...r, height: 9999 }));
+    s().loadDesign({ ...defaultDesign(), objects: [] });
+    expect(s().design).toBe(shared);
+    expect(s().past).toEqual([]);
+  });
+
+  it('viewing actions still work', () => {
+    s().addObject('door', { x: 400, y: 0, z: 400 });
+    const d = s().design;
+    s().enterViewer(d);
+    s().setOpenAll(true);
+    expect(s().openIds).toHaveLength(1);
+    s().setUi({ exploded: true });
+    expect(s().exploded).toBe(true);
   });
 });

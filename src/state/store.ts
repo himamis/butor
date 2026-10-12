@@ -4,6 +4,7 @@ import { clampParam, defaultParams, getTemplate } from '../templates';
 import { boundsOf, hasMovingParts } from '../lib/geometry';
 import { DEFAULT_COLOR, defaultDesign } from './defaults';
 import { loadAutosave } from '../lib/persistence';
+import { uid } from '../lib/uid';
 
 export type Mode = 'translate' | 'rotate';
 export type View = '3d' | 'front' | 'top' | 'side';
@@ -26,6 +27,7 @@ interface State extends Ui {
   past: Design[];
   future: Design[];
   dragSnapshot: Design | null;
+  readOnly: boolean; // shared-link viewer: the design can be looked at, never changed
 
   commit(fn: (d: Design) => Design): void;
   undo(): void;
@@ -46,13 +48,13 @@ interface State extends Ui {
   applyColorToAll(hex: string): void;
   setRoom(fn: (r: Room) => Room): void;
   loadDesign(d: Design): void;
+  enterViewer(d: Design): void;
   setUi(partial: Partial<Ui>): void;
   toggleOpen(id: string): void;
   setOpenAll(open: boolean): void;
 }
 
 const HISTORY = 100;
-const uid = () => crypto.randomUUID();
 
 const mapObjects = (d: Design, ids: string[], fn: (o: SceneObject) => SceneObject): Design => {
   const set = new Set(ids);
@@ -87,6 +89,7 @@ export const useStore = create<State>()((set, get) => ({
   past: [],
   future: [],
   dragSnapshot: null,
+  readOnly: false,
   mode: 'translate',
   view: '3d',
   grid: 10,
@@ -96,6 +99,7 @@ export const useStore = create<State>()((set, get) => ({
   explodeAmount: 0.6,
 
   commit(fn) {
+    if (get().readOnly) return;
     const { design, past, dragSnapshot } = get();
     const next = fn(design);
     if (next === design) return;
@@ -140,10 +144,12 @@ export const useStore = create<State>()((set, get) => ({
   },
 
   updateObjectsLive(ids, fn) {
+    if (get().readOnly) return;
     set({ design: mapObjects(get().design, ids, fn) });
   },
 
   addObject(templateId, position) {
+    if (get().readOnly) return;
     const t = getTemplate(templateId);
     const obj: SceneObject = {
       id: uid(),
@@ -173,6 +179,7 @@ export const useStore = create<State>()((set, get) => ({
   },
 
   select(id, additive) {
+    if (get().readOnly) return;
     if (id === null) return set({ selection: [] });
     const objs = get().design.objects;
     const obj = objs.find((o) => o.id === id);
@@ -245,7 +252,12 @@ export const useStore = create<State>()((set, get) => ({
   },
 
   loadDesign(d) {
+    if (get().readOnly) return;
     set({ design: d, past: [], future: [], selection: [], openIds: [], dragSnapshot: null });
+  },
+
+  enterViewer(d) {
+    set({ design: d, readOnly: true, past: [], future: [], selection: [], openIds: [], dragSnapshot: null });
   },
 
   setUi(partial) {

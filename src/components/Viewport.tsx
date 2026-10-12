@@ -82,6 +82,7 @@ export function Viewport() {
     e.preventDefault();
     const id = e.dataTransfer.getData('template');
     const t = handle.current;
+    if (useStore.getState().readOnly) return;
     if (!hasTemplate(id) || !t) return;
     const f = roomFrame(room);
     const rect = t.gl.domElement.getBoundingClientRect();

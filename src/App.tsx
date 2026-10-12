@@ -7,12 +7,20 @@ import { Viewport } from './components/Viewport';
 import { Properties } from './components/Properties';
 import { StatusBar } from './components/StatusBar';
 import { CutListDialog } from './components/CutListDialog';
+import { ShareDialog } from './components/ShareDialog';
+import { ChatPanel } from './components/ChatPanel';
+import { BrokenShareLink, ViewerApp } from './components/ViewerApp';
+import { decodeShare, shareHashOf } from './lib/share';
+
+/** Resolved once at startup: a #view= link opens the read-only viewer. */
+const shared = shareHashOf(location.hash) !== null ? decodeShare(location.hash) : undefined;
+if (shared) useStore.getState().enterViewer(shared);
 
 function useAutosave() {
   useEffect(() => {
     let timer: number | undefined;
     const unsub = useStore.subscribe((s, prev) => {
-      if (s.design === prev.design) return;
+      if (s.design === prev.design || s.readOnly) return;
       clearTimeout(timer);
       timer = window.setTimeout(() => writeAutosave(useStore.getState().design), 500);
     });
@@ -48,18 +56,29 @@ function useShortcuts() {
 }
 
 export default function App() {
+  if (shared === null) return <BrokenShareLink />;
+  if (shared) return <ViewerApp />;
+  return <Editor />;
+}
+
+function Editor() {
   const [cutList, setCutList] = useState(false);
+  const [share, setShare] = useState(false);
+  const [chat, setChat] = useState(false);
   useAutosave();
   useShortcuts();
 
   return (
     <div className="app">
-      <Toolbar onCutList={() => setCutList(true)} />
+      <Toolbar onCutList={() => setCutList(true)} onShare={() => setShare(true)} onChat={() => setChat(!chat)} chatOpen={chat} />
       <Library />
       <Viewport />
-      <Properties />
+      {/* The chat stays mounted while hidden so the conversation survives toggling. */}
+      <ChatPanel hidden={!chat} />
+      {!chat && <Properties />}
       <StatusBar />
       {cutList && <CutListDialog onClose={() => setCutList(false)} />}
+      {share && <ShareDialog onClose={() => setShare(false)} />}
     </div>
   );
 }

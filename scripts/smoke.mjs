@@ -3,6 +3,7 @@
 import { chromium } from 'playwright-core';
 import fs from 'fs';
 import path from 'path';
+import http from 'http';
 
 const out = path.resolve(process.argv[2] ?? 'smoke-out');
 fs.mkdirSync(out, { recursive: true });
@@ -10,7 +11,8 @@ const URL = process.env.URL ?? 'http://localhost:5173/';
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const browser = await chromium.launch({ executablePath: CHROME, headless: true, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
-const page = await browser.newPage({ viewport: { width: 1400, height: 850 } });
+const context = await browser.newContext({ viewport: { width: 1400, height: 850 } });
+const page = await context.newPage();
 const errors = [];
 let failures = 0;
 page.on('pageerror', (e) => errors.push(e.message));
@@ -108,6 +110,70 @@ await chooser.setFiles(bad); await page.waitForTimeout(300);
 check('invalid file keeps the design', (await store()).design.objects.length === n);
 await page.waitForTimeout(700); await page.reload(); await page.waitForTimeout(1000);
 check('autosave restores after reload', (await store()).design.objects.length === n);
+
+// ---------- Share link: read-only viewer ----------
+await page.click('text=Share'); await page.waitForTimeout(200);
+const link = await page.inputValue('.modal input');
+check('share dialog shows a view link', link.includes('#view='));
+await page.click('.modal >> text=Close');
+const autosaveBefore = await S(() => localStorage.getItem('wardrobe-designer:autosave'));
+const viewer = await context.newPage(); // same storage as the editor
+viewer.on('pageerror', (e) => errors.push('viewer: ' + e.message));
+await viewer.goto(link); await viewer.waitForTimeout(1200);
+const VS = (fn) => viewer.evaluate(fn);
+check('viewer is read-only', await VS(() => window.__store.getState().readOnly));
+check('viewer hides library and properties', (await viewer.$('.library')) === null && (await viewer.$('.props')) === null);
+const viewerCount = await VS(() => window.__store.getState().design.objects.length);
+check('viewer shows the shared design', viewerCount === n, `${viewerCount} objects`);
+await viewer.keyboard.press('Meta+a'); await viewer.keyboard.press('Delete'); await viewer.keyboard.press('Meta+z');
+await VS(() => window.__store.getState().addObject('carcass', { x: 0, y: 0, z: 0 }));
+check('viewer refuses edits', (await VS(() => window.__store.getState().design.objects.length)) === viewerCount);
+await viewer.click('text=Open all'); await viewer.waitForTimeout(300);
+check('viewer can open doors', (await VS(() => window.__store.getState().openIds.length)) > 0);
+await viewer.screenshot({ path: path.join(out, '5-viewer.png') });
+await viewer.waitForTimeout(700);
+const autosaveAfter = await VS(() => localStorage.getItem('wardrobe-designer:autosave'));
+check('viewer never touches autosave', autosaveAfter === autosaveBefore, `before ${autosaveBefore?.length} after ${autosaveAfter?.length} editor now ${(await S(() => localStorage.getItem('wardrobe-designer:autosave')))?.length}`);
+await viewer.goto(URL.replace(/\/$/, '') + '/#view=broken!!'); await viewer.reload(); await viewer.waitForTimeout(500);
+check('damaged link shows a message', (await viewer.textContent('body')).includes('damaged'));
+await viewer.close();
+
+// ---------- AI chat against a mock OpenAI-compatible server ----------
+const mock = http.createServer((req, res) => {
+  let body = '';
+  req.on('data', (c) => (body += c));
+  req.on('end', () => {
+    const msgs = JSON.parse(body).messages;
+    const last = msgs[msgs.length - 1];
+    const message = last.role === 'tool'
+      ? { role: 'assistant', content: 'Added a carcass with doors on the left.' }
+      : { role: 'assistant', content: null, tool_calls: [{ id: 'c1', type: 'function', function: { name: 'apply_operations', arguments: JSON.stringify({ operations: [{ op: 'add', templateId: 'carcass-doors', position: { x: 2600, y: 0, z: 300 }, color: '#6b4a2f' }] }) } }] };
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ choices: [{ message, finish_reason: last.role === 'tool' ? 'stop' : 'tool_calls' }] }));
+  });
+});
+await new Promise((r) => mock.listen(0, r));
+const mockUrl = `http://127.0.0.1:${mock.address().port}/v1`;
+await page.click('button:has-text("AI")');
+await page.click('.chat >> text=Settings');
+await page.locator('.chat-settings .row', { hasText: 'Provider' }).locator('select').selectOption('openai-compatible');
+await page.locator('.chat-settings .row', { hasText: 'Model' }).locator('input').fill('mock');
+await page.locator('.chat-settings .row', { hasText: 'Base URL' }).locator('input').fill(mockUrl);
+const before = (await store()).design.objects.length;
+const pastBefore = (await store()).past.length;
+await page.fill('.chat textarea', 'Add a walnut carcass with doors on the right');
+await page.keyboard.press('Enter');
+await page.waitForSelector('.msg.assistant .changes', { timeout: 10000 }).catch(() => {});
+const chatText = await page.textContent('.chat-log');
+check('AI reply is shown with its changes', chatText.includes('Added a carcass with doors') && chatText.includes('added Carcass with doors'), chatText.slice(-200));
+st = await store();
+check('AI change applied to the design', st.design.objects.length === before + 1 && st.design.objects.at(-1).color === '#6b4a2f');
+check('AI change is one undo step', st.past.length === pastBefore + 1);
+await page.screenshot({ path: path.join(out, '6-chat.png') });
+await page.keyboard.press('Meta+z');
+await S(() => document.activeElement?.blur()); await S(() => window.__store.getState().undo());
+check('undo reverts the AI change', (await store()).design.objects.length === before);
+mock.close();
 
 check('no page errors', errors.length === 0, errors.join('; '));
 await browser.close();

@@ -1,14 +1,8 @@
-import { useStore, type Grid, type View } from '../state/store';
+import { useStore, type Grid } from '../state/store';
+import { ViewControls } from './ViewControls';
 import { openFile, saveToFile } from '../lib/persistence';
 
-const VIEWS: { id: View; label: string }[] = [
-  { id: '3d', label: '3D' },
-  { id: 'front', label: 'Front' },
-  { id: 'top', label: 'Top' },
-  { id: 'side', label: 'Side' },
-];
-
-export function Toolbar({ onCutList }: { onCutList: () => void }) {
+export function Toolbar({ onCutList, onShare, onChat, chatOpen }: { onCutList: () => void; onShare: () => void; onChat: () => void; chatOpen: boolean }) {
   const s = useStore();
   const canGroup = s.selection.length > 1;
   const canUngroup = s.design.objects.some((o) => s.selection.includes(o.id) && o.groupId);
@@ -50,23 +44,11 @@ export function Toolbar({ onCutList }: { onCutList: () => void }) {
       <button onClick={s.groupSelected} disabled={!canGroup} title="Group (Ctrl+G)">Group</button>
       <button onClick={s.ungroupSelected} disabled={!canUngroup} title="Ungroup (Ctrl+Shift+G)">Ungroup</button>
       <div className="sep" />
-      {VIEWS.map((v) => (
-        <button key={v.id} className={s.view === v.id ? 'active' : ''} onClick={() => s.setUi({ view: v.id })}>{v.label}</button>
-      ))}
-      <div className="sep" />
-      <button onClick={() => s.setOpenAll(s.openIds.length === 0)} title="Double-click a unit to open just that one">
-        {s.openIds.length ? 'Close all' : 'Open all'}
-      </button>
-      <button className={s.exploded ? 'active' : ''} onClick={() => s.setUi({ exploded: !s.exploded })}>Explode</button>
-      {s.exploded && (
-        <input
-          type="range" min={0.1} max={1} step={0.05} value={s.explodeAmount} style={{ width: 80 }}
-          title="Explode amount"
-          onChange={(e) => s.setUi({ explodeAmount: Number(e.target.value) })}
-        />
-      )}
+      <ViewControls />
       <div className="sep" />
       <button onClick={onCutList}>Cut list</button>
+      <button onClick={onShare} title="Copy a read-only link to this design">Share</button>
+      <button className={chatOpen ? 'active' : ''} onClick={onChat} title="Edit the design by chatting with an AI model">AI</button>
     </header>
   );
 }
