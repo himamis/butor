@@ -16,7 +16,13 @@ function SingleObject({ o }: { o: SceneObject }) {
       <h3>{t.name}</h3>
       <div className="row">
         <label>Name</label>
-        <input type="text" value={o.name} onChange={(e) => s.updateObjectsLive([o.id], (x) => ({ ...x, name: e.target.value }))} onFocus={s.beginDrag} onBlur={s.endDrag} />
+        <input
+          key={o.id}
+          type="text"
+          defaultValue={o.name}
+          onBlur={(e) => e.target.value !== o.name && update((x) => ({ ...x, name: e.target.value }))}
+          onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        />
       </div>
 
       <h3>Size (mm)</h3>

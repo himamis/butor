@@ -69,7 +69,9 @@ export function SelectionGizmo() {
         return { ...o, position: { x: st.position.x + delta.x, y: st.position.y + delta.y, z: st.position.z + delta.z } };
       });
     } else {
-      const deg = Math.round((pivot.current.rotation.y * 180) / Math.PI);
+      // Read yaw in YXZ order: the default XYZ order limits rotation.y to ±90°.
+      const yaw = new THREE.Euler().setFromQuaternion(pivot.current.quaternion, 'YXZ').y;
+      const deg = Math.round((yaw * 180) / Math.PI);
       const cx = toMm(d.p0.x);
       const cz = toMm(d.p0.z);
       s.updateObjectsLive(ids, (o) => {
@@ -97,7 +99,7 @@ export function SelectionGizmo() {
           showX={mode === 'translate'}
           showZ={mode === 'translate'}
           showY
-          rotationSnap={Math.PI / 12}
+          rotationSnap={Math.PI / 2}
           size={0.8}
           onMouseDown={onMouseDown}
           onMouseUp={onMouseUp}

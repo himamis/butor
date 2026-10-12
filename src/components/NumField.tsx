@@ -14,7 +14,8 @@ export function NumField({ value, onCommit, step = 1, min, max }: {
   const commit = () => {
     const v = parseFloat(text);
     if (Number.isFinite(v) && v !== round(value)) onCommit(v);
-    else setText(String(round(value)));
+    // If the store clamps back to the same value, the effect won't fire — reset here.
+    setText(String(round(value)));
   };
 
   return (

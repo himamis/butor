@@ -51,7 +51,14 @@ const uid = () => crypto.randomUUID();
 
 const mapObjects = (d: Design, ids: string[], fn: (o: SceneObject) => SceneObject): Design => {
   const set = new Set(ids);
-  return { ...d, objects: d.objects.map((o) => (set.has(o.id) ? fn(o) : o)) };
+  let changed = false;
+  const objects = d.objects.map((o) => {
+    if (!set.has(o.id)) return o;
+    const n = fn(o);
+    if (n !== o) changed = true;
+    return n;
+  });
+  return changed ? { ...d, objects } : d;
 };
 
 /** Rotate a point around (cx, cz) by deg degrees about the vertical axis (matches three.js Y rotation). */
@@ -81,9 +88,11 @@ export const useStore = create<State>()((set, get) => ({
   doorsHidden: false,
 
   commit(fn) {
-    const { design, past } = get();
+    const { design, past, dragSnapshot } = get();
     const next = fn(design);
     if (next === design) return;
+    // During a drag (gizmo, color picker) changes are live; endDrag records one undo step.
+    if (dragSnapshot) return set({ design: next });
     set({ design: next, past: [...past, design].slice(-HISTORY), future: [] });
   },
 
@@ -104,6 +113,7 @@ export const useStore = create<State>()((set, get) => ({
   },
 
   beginDrag() {
+    if (get().dragSnapshot) return; // already inside a drag: keep the earliest snapshot
     set({ dragSnapshot: get().design });
   },
 
@@ -142,7 +152,7 @@ export const useStore = create<State>()((set, get) => ({
     get().commit((d) =>
       mapObjects(d, [id], (o) => {
         const def = getTemplate(o.templateId).params.find((p) => p.key === key);
-        if (!def) return o;
+        if (!def || clampParam(def, value) === o.params[key]) return o;
         return { ...o, params: { ...o.params, [key]: clampParam(def, value) } };
       }),
     );

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { FloorKind } from '../types';
 
-const cache = new Map<string, THREE.Texture>();
+let current: { key: string; tex: THREE.Texture } | null = null;
 const SIZE = 512;
 
 /** Deterministic pseudo-random so textures look the same on every load. */
@@ -21,8 +21,7 @@ function shade(hex: string, amt: number): string {
 /** Canvas texture for the floor. Each texture tile covers 1 m × 1 m. */
 export function floorTexture(kind: Exclude<FloorKind, 'color'>, color: string): THREE.Texture {
   const key = `${kind}:${color}`;
-  const hit = cache.get(key);
-  if (hit) return hit;
+  if (current?.key === key) return current.tex;
 
   const cv = document.createElement('canvas');
   cv.width = cv.height = SIZE;
@@ -79,6 +78,7 @@ export function floorTexture(kind: Exclude<FloorKind, 'color'>, color: string): 
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
-  cache.set(key, tex);
+  current?.tex.dispose(); // only the floor uses these; drop the previous one
+  current = { key, tex };
   return tex;
 }

@@ -4,6 +4,7 @@ import { ROOM_PRESETS, DEFAULT_COLOR } from '../state/defaults';
 import type { FloorKind } from '../types';
 import { NumField } from './NumField';
 import { ColorField } from './ColorField';
+import { ColorInput } from './ColorInput';
 
 const PRESET_LABELS: Record<keyof typeof ROOM_PRESETS, string> = {
   rectangle: 'Rectangle',
@@ -69,7 +70,7 @@ export function RoomPanel() {
         </select>
       </div>
       <div className="swatches">
-        <input type="color" value={room.floorColor} onChange={(e) => setRoom((r) => ({ ...r, floorColor: e.target.value }))} />
+        <ColorInput value={room.floorColor} onChange={(c) => setRoom((r) => ({ ...r, floorColor: c }))} />
         {['#b8895a', '#d8c3a0', '#8a6a4a', '#bdbdbd', '#ece8df'].map((c) => (
           <button key={c} className="swatch" style={{ background: c }} onClick={() => setRoom((r) => ({ ...r, floorColor: c }))} />
         ))}
@@ -77,7 +78,7 @@ export function RoomPanel() {
 
       <h3>Walls</h3>
       <div className="swatches">
-        <input type="color" value={room.wallColor} onChange={(e) => setRoom((r) => ({ ...r, wallColor: e.target.value }))} />
+        <ColorInput value={room.wallColor} onChange={(c) => setRoom((r) => ({ ...r, wallColor: c }))} />
         {['#eceae4', '#ffffff', '#dfe6e4', '#e9dfd3', '#c9ccd1'].map((c) => (
           <button key={c} className="swatch" style={{ background: c }} onClick={() => setRoom((r) => ({ ...r, wallColor: c }))} />
         ))}
