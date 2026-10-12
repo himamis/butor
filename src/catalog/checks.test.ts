@@ -24,6 +24,14 @@ describe('runChecks', () => {
     expect(checks(add(freshDesign(), unit(1000)).doc)).toEqual([]);
   });
 
+  it('a unit away from every wall is a warning; rotated against a side wall it is fine', () => {
+    const island = checks(add(freshDesign(), unit(2000, 1500)).doc);
+    expect(island).toEqual([expect.objectContaining({ kind: 'not-against-wall', severity: 'warning' })]);
+    // turned to face +x, its back (local −z) is on the left wall at x = 0
+    const side = add(freshDesign(), { ...unit(300, 1500), rotation: 90 }).doc;
+    expect(kinds(side)).not.toContain('not-against-wall');
+  });
+
   it('overlapping units are an error naming both; touching ones are fine', () => {
     const touching = apply(add(freshDesign(), unit(1000)).doc, [{ type: 'entity.add', entity: unit(1800) }]);
     expect(kinds(touching)).not.toContain('overlap');

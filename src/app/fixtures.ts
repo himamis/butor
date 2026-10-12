@@ -1,9 +1,38 @@
-import { applyTransaction, createIdGenerator, type Design, type Op } from '../core';
+import { applyTransaction, createIdGenerator, type Design, type Op, type Unit } from '../core';
 import { catalog, instantiatePreset, PRESETS } from '../catalog';
 import { newDesign } from './store';
 
 /** Deterministic designs for tests and performance budgets. */
-export function fixtureDesign(name: 'hundred-units' | 'reference'): Design {
+export type FixtureName = 'hundred-units' | 'reference' | 'broken';
+
+export function fixtureDesign(name: FixtureName): Design {
+  if (name === 'broken') {
+    // The reference design plus a unit holding an item whose template is missing, so building it throws
+    // (it bypasses the ops, as a damaged file or a template bug would): it must render as an error box,
+    // be listed in checks, and not stop the rest.
+    const d = fixtureDesign('reference');
+    const broken: Unit = {
+      kind: 'unit',
+      id: 'broken',
+      name: 'Broken unit',
+      template: { id: 'unit.standard', version: 1 },
+      position: { x: 3400, y: 0, z: 300 },
+      rotation: 0,
+      locked: false,
+      params: { thickness: 18, back: 'grooved', backThickness: 8, base: 'none', plinthHeight: 100, plinthRecess: 40 },
+      size: { w: 600, h: 2000, d: 600 },
+      materials: {},
+      columns: [
+        {
+          id: 'c1',
+          width: 'auto',
+          items: [{ id: 'i1', template: { id: 'item.missing', version: 1 }, y: 0, params: {} }],
+        },
+      ],
+      fronts: [],
+    };
+    return { ...d, entities: { ...d.entities, broken }, order: [...d.order, 'broken'] };
+  }
   const ids = createIdGenerator('fx');
   let d = newDesign();
   const ops: Op[] = [];

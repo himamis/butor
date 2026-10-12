@@ -8,6 +8,7 @@ import { PlaceTool, type EntityFactory } from '../interaction/tools/place';
 import { roomHandles, RoomTool } from '../interaction/tools/room';
 import { Renderer } from '../render/Renderer';
 import { editorPort } from './editorPort';
+import { registerFramer } from './frame';
 import { useApp, visibleDesign } from './store';
 import { registerRenderer } from './testHooks';
 import { useUi } from './ui';
@@ -52,10 +53,12 @@ export function Viewport() {
     const r = new Renderer(host.current!);
     renderer.current = r;
     registerRenderer(r);
+    registerFramer((min, max) => r.frameBounds(min, max));
     controller.current = new InputController(host.current!, r, new SelectTool(editorPort, r));
     return () => {
       controller.current?.dispose();
       registerRenderer(null);
+      registerFramer(null);
       r.dispose();
       renderer.current = null;
     };

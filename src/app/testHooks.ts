@@ -8,13 +8,15 @@ export interface ButorTestHooks {
   ready: boolean;
   secureContext: boolean;
   load(json: unknown): { ok: boolean; error?: string; warnings?: string[] };
-  fixture(name: 'hundred-units' | 'reference'): Promise<void>;
+  fixture(name: 'hundred-units' | 'reference' | 'broken'): Promise<void>;
   design(): Design;
   view(patch: Partial<ViewSettings>): void;
   settle(): void;
   stats(): { frames: number; calls: number; triangles: number };
   toScreen(p: { x: number; y: number; z: number }): { x: number; y: number };
   pick(x: number, y: number): unknown;
+  /** Parts of an entity that move when it opens, with their motion (scene model). */
+  motions(entityId: string): { part: string; motion: unknown }[];
   /** Undo depth and the current selection. */
   state(): { undo: number; selection: string[]; open: string[]; checks: { kind: string; entities: string[] }[] };
 }
@@ -54,6 +56,10 @@ export function installTestHooks(): void {
     stats: () => ({ ...need().stats }),
     toScreen: (p) => need().toScreen(p),
     pick: (x, y) => need().pick(x, y),
+    motions: (id) =>
+      (useApp.getState().scene.entities.get(id)?.parts ?? [])
+        .filter((p) => p.motion)
+        .map((p) => ({ part: p.id, motion: p.motion })),
     state: () => {
       const s = useApp.getState();
       return {

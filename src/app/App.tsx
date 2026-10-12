@@ -2,6 +2,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { HelpSheet } from './HelpSheet';
 import { Library } from './Library';
 import { RoomPanel } from './RoomPanel';
+import { SidePanel } from './SidePanel';
 import { installTestHooks } from './testHooks';
 import { useShortcuts } from './useShortcuts';
 import { Viewport } from './Viewport';
@@ -11,7 +12,7 @@ import { useUi } from './ui';
 
 installTestHooks();
 
-/** The editor (properties, materials and outputs panels arrive in M6–M7). */
+/** The editor: toolbar, library (or room panel), 3D view and the side panel. */
 export function App() {
   useShortcuts('editor');
   const tool = useUi((s) => s.tool);
@@ -39,6 +40,9 @@ export function App() {
           <Viewport />
         </ErrorBoundary>
       </main>
+      <div className="side-slot">
+        <SidePanel />
+      </div>
       <HelpSheet />
     </div>
   );

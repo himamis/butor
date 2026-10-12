@@ -147,6 +147,11 @@ export class Renderer {
     this.requestRender();
   }
 
+  /** Fits the camera to an axis-aligned box in room mm (e.g. the entities of a check). */
+  frameBounds(min: Vec3, max: Vec3) {
+    this.frame(new THREE.Box3(new THREE.Vector3(min.x, min.y, min.z), new THREE.Vector3(max.x, max.y, max.z)));
+  }
+
   requestRender() {
     if (this.frameRequested) return;
     this.frameRequested = true;

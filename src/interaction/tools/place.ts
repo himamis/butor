@@ -1,5 +1,6 @@
 import {
   defaultsOf,
+  drawerFrontSpan,
   newId,
   snapContext,
   snapItemY,
@@ -212,16 +213,15 @@ export class PlaceTool {
         return localY >= y0 - 30 && localY <= y1 + 30;
       });
       if (!free) return 'Add an external drawer to this column first';
-      const y0 = Math.max(0, layout.floorY + free.y - 10);
-      const y1 = Math.min(unit.size.h, layout.floorY + free.y + Number(free.params.height ?? 200) + 10);
-      if (covering.some(([a, b]) => a < y1 && y0 < b)) return 'There is already a front over that drawer';
+      const span = drawerFrontSpan(unit, ci, layout, { y: free.y, height: Number(free.params.height ?? 200) });
+      if (!span) return 'There is already a front over that drawer';
       return [
         {
           type: 'unit.front.add',
           unit: unit.id,
           template: { id: 'front.drawer' },
           columns: [ci, ci],
-          y: [Math.round(y0), Math.round(y1)],
+          y: span,
           drawer: free.id,
         },
       ];

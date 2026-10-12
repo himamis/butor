@@ -20,7 +20,8 @@ export interface Check {
     | 'door-swing'
     | 'pull-out'
     | 'opening'
-    | 'material';
+    | 'material'
+    | 'not-against-wall';
   severity: 'error' | 'warning';
   message: string;
   entities: string[];
@@ -29,6 +30,20 @@ export interface Check {
 const TOL = 0.5; // mm of overlap ignored (touching faces, rounding)
 
 /* ───────────────────────── room geometry ───────────────────────── */
+
+const WALL_GAP = 5; // mm between a unit's back and a wall that still counts as "against"
+
+/** Whether the middle of the unit's back face is within WALL_GAP of a wall. */
+function backAgainstWall(e: { position: { x: number; z: number }; rotation: number }, backZ: number, room: Room) {
+  const p = rotateXZ({ x: e.position.x, z: e.position.z + backZ }, e.position, e.rotation);
+  const cs = room.corners;
+  return cs.some((a, i) => {
+    const b = cs[(i + 1) % cs.length]!;
+    const len2 = (b.x - a.x) ** 2 + (b.z - a.z) ** 2;
+    const t = Math.max(0, Math.min(1, ((p.x - a.x) * (b.x - a.x) + (p.z - a.z) * (b.z - a.z)) / len2));
+    return Math.hypot(p.x - (a.x + t * (b.x - a.x)), p.z - (a.z + t * (b.z - a.z))) <= WALL_GAP;
+  });
+}
 
 function pointInRoom(p: { x: number; z: number }, room: Room): boolean {
   const pts = room.corners;
@@ -121,6 +136,15 @@ export function runChecks(design: Design, scene: SceneModel, _catalog: CatalogRe
         entities: [se.id],
       });
     }
+    // Units normally stand with their back against a wall (warning only: islands are allowed).
+    if (e.kind === 'unit' && !bad && !backAgainstWall(e, se.localBounds.min.z, room))
+      out.push({
+        id: `wall:${se.id}`,
+        kind: 'not-against-wall',
+        severity: 'warning',
+        message: `"${e.name}" does not stand against a wall`,
+        entities: [se.id],
+      });
     const top = se.bounds.center.y + se.bounds.half.y;
     if (top > room.height + TOL)
       out.push({

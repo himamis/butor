@@ -6,7 +6,7 @@ export const DEFAULT_MATERIALS: MaterialLibrary = {
   white: {
     kind: 'board',
     name: 'White melamine',
-    thicknesses: [8, 16, 18, 25],
+    thicknesses: [8, 12, 16, 18, 25],
     appearance: { color: '#f2f1ec', texture: 'plain', roughness: 0.75 },
     grain: 'none',
     price: { perM2: 22, currency: 'EUR' },
