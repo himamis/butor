@@ -14,7 +14,7 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'butor/no-concise-effect': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
