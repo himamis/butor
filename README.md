@@ -37,6 +37,7 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 | Key | Action |
 |---|---|
 | Ctrl/⌘ Z, Ctrl/⌘ Shift Z | Undo, redo |
+| Ctrl/⌘ C, Ctrl/⌘ V | Copy, paste (each paste lands 50 mm further along; works across opened designs) |
 | Ctrl/⌘ D | Duplicate |
 | Ctrl/⌘ G, Ctrl/⌘ Shift G | Group, ungroup |
 | Delete / Backspace | Delete selection |

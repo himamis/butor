@@ -28,6 +28,8 @@ interface State extends Ui {
   future: Design[];
   dragSnapshot: Design | null;
   readOnly: boolean; // shared-link viewer: the design can be looked at, never changed
+  clipboard: SceneObject[]; // copied objects (kept when another design is opened)
+  pasteCount: number; // pastes since the last copy, so repeated pastes fan out
 
   commit(fn: (d: Design) => Design): void;
   undo(): void;
@@ -42,6 +44,8 @@ interface State extends Ui {
   select(id: string | null, additive: boolean): void;
   deleteSelected(): void;
   duplicateSelected(): void;
+  copySelected(): void;
+  paste(): void;
   groupSelected(): void;
   ungroupSelected(): void;
   rotateSelected(deg: number): void;
@@ -82,6 +86,24 @@ export function rotateAround(p: Vec3, cx: number, cz: number, deg: number): Vec3
 
 export const normDeg = (deg: number) => ((Math.round(deg * 100) / 100) % 360 + 360) % 360;
 
+const PASTE_OFFSET = 50; // mm along x per duplicate / paste
+
+/** Adds copies (new ids, new group ids, unlocked) shifted by dx, selects them; one undo step. */
+function insertCopies(objs: SceneObject[], dx: number) {
+  if (!objs.length || useStore.getState().readOnly) return;
+  const groupMap = new Map<string, string>();
+  const copies = objs.map((o) => {
+    let groupId = o.groupId;
+    if (groupId) {
+      if (!groupMap.has(groupId)) groupMap.set(groupId, uid());
+      groupId = groupMap.get(groupId);
+    }
+    return { ...o, id: uid(), groupId, locked: false, params: { ...o.params }, position: { ...o.position, x: o.position.x + dx } };
+  });
+  useStore.getState().commit((d) => ({ ...d, objects: [...d.objects, ...copies] }));
+  useStore.setState({ selection: copies.map((c) => c.id) });
+}
+
 export const useStore = create<State>()((set, get) => ({
   design: loadAutosave() ?? defaultDesign(),
   selection: [],
@@ -90,6 +112,8 @@ export const useStore = create<State>()((set, get) => ({
   future: [],
   dragSnapshot: null,
   readOnly: false,
+  clipboard: [],
+  pasteCount: 0,
   mode: 'translate',
   view: '3d',
   grid: 10,
@@ -201,20 +225,22 @@ export const useStore = create<State>()((set, get) => ({
 
   duplicateSelected() {
     const sel = new Set(get().selection);
-    if (!sel.size) return;
-    const groupMap = new Map<string, string>();
-    const copies = get()
-      .design.objects.filter((o) => sel.has(o.id))
-      .map((o) => {
-        let groupId = o.groupId;
-        if (groupId) {
-          if (!groupMap.has(groupId)) groupMap.set(groupId, uid());
-          groupId = groupMap.get(groupId);
-        }
-        return { ...o, id: uid(), groupId, locked: false, position: { ...o.position, x: o.position.x + 50 } };
-      });
-    get().commit((d) => ({ ...d, objects: [...d.objects, ...copies] }));
-    set({ selection: copies.map((c) => c.id) });
+    insertCopies(get().design.objects.filter((o) => sel.has(o.id)), PASTE_OFFSET);
+  },
+
+  copySelected() {
+    const sel = new Set(get().selection);
+    const objs = get().design.objects.filter((o) => sel.has(o.id));
+    if (!objs.length) return;
+    // Snapshot now, so later edits to the originals don't change what gets pasted.
+    set({ clipboard: objs.map((o) => ({ ...o, params: { ...o.params }, position: { ...o.position } })), pasteCount: 0 });
+  },
+
+  paste() {
+    const { clipboard, pasteCount, readOnly } = get();
+    if (readOnly || !clipboard.length) return;
+    set({ pasteCount: pasteCount + 1 });
+    insertCopies(clipboard, PASTE_OFFSET * (pasteCount + 1));
   },
 
   groupSelected() {

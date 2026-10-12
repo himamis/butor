@@ -42,6 +42,11 @@ function useShortcuts() {
       if (mod && k === 'z') { e.preventDefault(); if (e.shiftKey) s.redo(); else s.undo(); }
       else if (mod && k === 'y') { e.preventDefault(); s.redo(); }
       else if (mod && k === 'd') { e.preventDefault(); s.duplicateSelected(); }
+      else if (mod && k === 'c') {
+        if (window.getSelection()?.toString()) return; // let the browser copy selected text
+        s.copySelected();
+      }
+      else if (mod && k === 'v') { e.preventDefault(); s.paste(); }
       else if (mod && k === 'g') { e.preventDefault(); if (e.shiftKey) s.ungroupSelected(); else s.groupSelected(); }
       else if (mod) return;
       else if (k === 'delete' || k === 'backspace') { e.preventDefault(); s.deleteSelected(); }

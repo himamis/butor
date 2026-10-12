@@ -132,3 +132,75 @@ describe('read-only viewer', () => {
     expect(s().exploded).toBe(true);
   });
 });
+
+describe('copy and paste', () => {
+  it('pastes a copy with a new id, offset, selected, as one undo step', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    const [a] = s().design.objects;
+    s().select(a.id, false);
+    s().copySelected();
+    const past = s().past.length;
+    s().paste();
+    const objs = s().design.objects;
+    expect(objs).toHaveLength(2);
+    expect(objs[1].id).not.toBe(a.id);
+    expect(objs[1]).toMatchObject({ templateId: 'carcass', params: a.params, position: { x: 450, y: 0, z: 400 } });
+    expect(s().selection).toEqual([objs[1].id]);
+    expect(s().past.length).toBe(past + 1);
+  });
+
+  it('repeated pastes fan out instead of stacking', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    s().copySelected();
+    s().paste();
+    s().paste();
+    expect(s().design.objects.map((o) => o.position.x)).toEqual([400, 450, 500]);
+  });
+
+  it('copies the clipboard at copy time, not later edits', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    const id = s().design.objects[0].id;
+    s().copySelected();
+    s().setParam(id, 'width', 1200);
+    s().paste();
+    expect(s().design.objects[1].params.width).toBe(800);
+  });
+
+  it('keeps groups together with a fresh group id', () => {
+    s().addObject('carcass', { x: 400, y: 0, z: 400 });
+    s().addObject('carcass', { x: 1200, y: 0, z: 400 });
+    const [a, b] = s().design.objects;
+    s().select(a.id, false);
+    s().select(b.id, true);
+    s().groupSelected();
+    s().copySelected();
+    s().paste();
+    const pasted = s().design.objects.slice(2);
+    expect(pasted).toHaveLength(2);
+    expect(pasted[0].groupId).toBeTruthy();
+    expect(pasted[0].groupId).toBe(pasted[1].groupId);
+    expect(pasted[0].groupId).not.toBe(a.groupId);
+  });
+
+  it('survives opening another design, and pastes nothing when empty', () => {
+    useStore.setState({ clipboard: [] });
+    s().paste();
+    expect(s().design.objects).toHaveLength(0);
+    s().addObject('door', { x: 400, y: 0, z: 400 });
+    s().copySelected();
+    s().loadDesign(defaultDesign());
+    s().paste();
+    expect(s().design.objects.map((o) => o.templateId)).toEqual(['door']);
+  });
+
+  it('pasted copies are unlocked, and the viewer cannot paste', () => {
+    s().addObject('door', { x: 400, y: 0, z: 400 });
+    s().updateObjects([s().design.objects[0].id], (o) => ({ ...o, locked: true }));
+    s().copySelected();
+    s().paste();
+    expect(s().design.objects[1].locked).toBe(false);
+    s().enterViewer(s().design);
+    s().paste();
+    expect(s().design.objects).toHaveLength(2);
+  });
+});
