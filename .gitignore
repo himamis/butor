@@ -2,5 +2,6 @@ node_modules
 dist
 .superpowers
 .DS_Store
-tsconfig.tsbuildinfo
-smoke-out
+playwright-report
+test-results
+*.tsbuildinfo
