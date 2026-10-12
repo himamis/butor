@@ -90,7 +90,7 @@ export function checkUnit(u: Unit, catalog: CatalogRegistry): string[] {
   const out: string[] = [];
   const t = catalog.get(u.template.id);
   if (!t || t.kind !== 'unit') return [`unit "${u.id}": "${u.template.id}" is not a unit template`];
-  const layout = unitLayout(u, t);
+  const layout = unitLayout(u, t, catalog);
   if ('error' in layout) return [`unit "${u.id}": ${layout.error}`];
 
   u.columns.forEach((col, ci) => {
@@ -135,9 +135,13 @@ export function checkUnit(u: Unit, catalog: CatalogRegistry): string[] {
   return out;
 }
 
-export function unitLayout(u: Unit, t: UnitTemplate): UnitLayout | { error: string } {
+export function unitLayout(u: Unit, t: UnitTemplate, catalog: CatalogRegistry): UnitLayout | { error: string } {
+  const trackFronts = u.fronts.some((f) => {
+    const ft = catalog.get(f.template.id);
+    return ft?.kind === 'front' && ft.mount === 'track';
+  });
   try {
-    return t.layout(u);
+    return t.layout(u, { trackFronts });
   } catch (e) {
     return { error: e instanceof Error ? e.message : String(e) };
   }

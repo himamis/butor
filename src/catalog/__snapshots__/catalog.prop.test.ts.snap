@@ -1,0 +1,2742 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`golden snapshots (bump the template version when these change) > front.door@v1 1`] = `
+[
+  {
+    "banding": {
+      "bottom": true,
+      "left": true,
+      "right": true,
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 1100,
+      "z": 309,
+    },
+    "grainAlong": "y",
+    "hardware": {
+      "count": 4,
+      "name": "Hinge",
+    },
+    "id": "front/door",
+    "key": "door",
+    "label": "Door",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "motion": {
+      "angle": -95,
+      "axis": "y",
+      "id": "id3:door",
+      "kind": "hinge",
+      "pivot": {
+        "x": -598.5,
+        "y": 0,
+        "z": 300,
+      },
+    },
+    "role": "front",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1197,
+      "y": 2197,
+      "z": 18,
+    },
+  },
+  {
+    "center": {
+      "x": 548.5,
+      "y": 1100,
+      "z": 330.5,
+    },
+    "hardware": {
+      "name": "Knob Ø30",
+    },
+    "id": "front/door-handle",
+    "key": "door-handle",
+    "label": "Knob Ø30",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "angle": -95,
+      "axis": "y",
+      "id": "id3:door",
+      "kind": "hinge",
+      "pivot": {
+        "x": -598.5,
+        "y": 0,
+        "z": 300,
+      },
+    },
+    "role": "handle",
+    "shape": {
+      "axis": "z",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 30,
+      "y": 30,
+      "z": 25,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > front.double-door@v1 1`] = `
+[
+  {
+    "banding": {
+      "bottom": true,
+      "left": true,
+      "right": true,
+      "top": true,
+    },
+    "center": {
+      "x": -300,
+      "y": 1100,
+      "z": 309,
+    },
+    "grainAlong": "y",
+    "hardware": {
+      "count": 4,
+      "name": "Hinge",
+    },
+    "id": "front/left",
+    "key": "left",
+    "label": "Door",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "motion": {
+      "angle": -95,
+      "axis": "y",
+      "id": "id3:left",
+      "kind": "hinge",
+      "pivot": {
+        "x": -598.5,
+        "y": 0,
+        "z": 300,
+      },
+    },
+    "role": "front",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 597,
+      "y": 2197,
+      "z": 18,
+    },
+  },
+  {
+    "center": {
+      "x": -51.5,
+      "y": 1100,
+      "z": 330.5,
+    },
+    "hardware": {
+      "name": "Knob Ø30",
+    },
+    "id": "front/left-handle",
+    "key": "left-handle",
+    "label": "Knob Ø30",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "angle": -95,
+      "axis": "y",
+      "id": "id3:left",
+      "kind": "hinge",
+      "pivot": {
+        "x": -598.5,
+        "y": 0,
+        "z": 300,
+      },
+    },
+    "role": "handle",
+    "shape": {
+      "axis": "z",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 30,
+      "y": 30,
+      "z": 25,
+    },
+  },
+  {
+    "banding": {
+      "bottom": true,
+      "left": true,
+      "right": true,
+      "top": true,
+    },
+    "center": {
+      "x": 300,
+      "y": 1100,
+      "z": 309,
+    },
+    "grainAlong": "y",
+    "hardware": {
+      "count": 4,
+      "name": "Hinge",
+    },
+    "id": "front/right",
+    "key": "right",
+    "label": "Door",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "motion": {
+      "angle": 95,
+      "axis": "y",
+      "id": "id3:right",
+      "kind": "hinge",
+      "pivot": {
+        "x": 598.5,
+        "y": 0,
+        "z": 300,
+      },
+    },
+    "role": "front",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 597,
+      "y": 2197,
+      "z": 18,
+    },
+  },
+  {
+    "center": {
+      "x": 51.5,
+      "y": 1100,
+      "z": 330.5,
+    },
+    "hardware": {
+      "name": "Knob Ø30",
+    },
+    "id": "front/right-handle",
+    "key": "right-handle",
+    "label": "Knob Ø30",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "angle": 95,
+      "axis": "y",
+      "id": "id3:right",
+      "kind": "hinge",
+      "pivot": {
+        "x": 598.5,
+        "y": 0,
+        "z": 300,
+      },
+    },
+    "role": "handle",
+    "shape": {
+      "axis": "z",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 30,
+      "y": 30,
+      "z": 25,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > front.drawer@v1 1`] = `
+[
+  {
+    "banding": {
+      "bottom": true,
+      "left": true,
+      "right": true,
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 120,
+      "z": 309,
+    },
+    "grainAlong": "x",
+    "id": "front/front",
+    "key": "front",
+    "label": "Drawer front",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "motion": {
+      "id": "dr",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "front",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1197,
+      "y": 237,
+      "z": 18,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 120,
+      "z": 333,
+    },
+    "hardware": {
+      "name": "Bar handle 160 mm",
+    },
+    "id": "front/handle",
+    "key": "handle",
+    "label": "Bar handle 160 mm",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "dr",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "handle",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 160,
+      "y": 12,
+      "z": 30,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > front.flap@v1 1`] = `
+[
+  {
+    "banding": {
+      "bottom": true,
+      "left": true,
+      "right": true,
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 1100,
+      "z": 309,
+    },
+    "grainAlong": "x",
+    "hardware": {
+      "count": 2,
+      "name": "Hinge",
+    },
+    "id": "front/flap",
+    "key": "flap",
+    "label": "Flap",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "motion": {
+      "angle": -100,
+      "axis": "x",
+      "id": "id3",
+      "kind": "hinge",
+      "pivot": {
+        "x": 0,
+        "y": 2198.5,
+        "z": 300,
+      },
+    },
+    "role": "front",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1197,
+      "y": 2197,
+      "z": 18,
+    },
+  },
+  {
+    "center": {
+      "x": -558.5,
+      "y": 2138.5,
+      "z": 270,
+    },
+    "hardware": {
+      "name": "Flap stay (pair)",
+    },
+    "id": "front/stay",
+    "key": "stay",
+    "label": "Flap stay",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "angle": -100,
+      "axis": "x",
+      "id": "id3",
+      "kind": "hinge",
+      "pivot": {
+        "x": 0,
+        "y": 2198.5,
+        "z": 300,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 20,
+      "y": 80,
+      "z": 40,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 61.5,
+      "z": 333,
+    },
+    "hardware": {
+      "name": "Bar handle 160 mm",
+    },
+    "id": "front/handle",
+    "key": "handle",
+    "label": "Bar handle 160 mm",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "angle": -100,
+      "axis": "x",
+      "id": "id3",
+      "kind": "hinge",
+      "pivot": {
+        "x": 0,
+        "y": 2198.5,
+        "z": 300,
+      },
+    },
+    "role": "handle",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 160,
+      "y": 12,
+      "z": 30,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > front.sliding@v1 1`] = `
+[
+  {
+    "banding": {
+      "bottom": true,
+      "left": true,
+      "right": true,
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 1100,
+      "z": 287,
+    },
+    "grainAlong": "y",
+    "hardware": {
+      "name": "Sliding door roller set",
+    },
+    "id": "front/door",
+    "key": "door",
+    "label": "Sliding door (grip hole)",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "motion": {
+      "id": "id3",
+      "kind": "slide",
+      "offset": {
+        "x": 1046,
+        "y": 0,
+        "z": 0,
+      },
+    },
+    "role": "front",
+    "shape": {
+      "holes": [
+        [
+          {
+            "x": 506,
+            "y": -60,
+          },
+          {
+            "x": 506,
+            "y": 60,
+          },
+          {
+            "x": 536,
+            "y": 60,
+          },
+          {
+            "x": 536,
+            "y": -60,
+          },
+        ],
+      ],
+      "kind": "extrusion",
+      "outline": [
+        {
+          "x": -581,
+          "y": -1081,
+        },
+        {
+          "x": 581,
+          "y": -1081,
+        },
+        {
+          "x": 581,
+          "y": 1081,
+        },
+        {
+          "x": -581,
+          "y": 1081,
+        },
+      ],
+    },
+    "size": {
+      "x": 1162,
+      "y": 2162,
+      "z": 18,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.basket@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 120,
+      "z": 20,
+    },
+    "hardware": {
+      "name": "Wire basket 1144×550 mm",
+    },
+    "id": "item:it/base",
+    "key": "base",
+    "label": "Basket base",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1144,
+      "y": 4,
+      "z": 550,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 294,
+      "z": 291,
+    },
+    "id": "item:it/rim-front",
+    "key": "rim-front",
+    "label": "Basket rim",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1144,
+      "y": 8,
+      "z": 8,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 294,
+      "z": -251,
+    },
+    "id": "item:it/rim-back",
+    "key": "rim-back",
+    "label": "Basket rim",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1144,
+      "y": 8,
+      "z": 8,
+    },
+  },
+  {
+    "center": {
+      "x": -568,
+      "y": 294,
+      "z": 20,
+    },
+    "id": "item:it/rim-left",
+    "key": "rim-left",
+    "label": "Basket rim",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 8,
+      "z": 534,
+    },
+  },
+  {
+    "center": {
+      "x": 568,
+      "y": 294,
+      "z": 20,
+    },
+    "id": "item:it/rim-right",
+    "key": "rim-right",
+    "label": "Basket rim",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 8,
+      "z": 534,
+    },
+  },
+  {
+    "center": {
+      "x": -568,
+      "y": 206,
+      "z": -251,
+    },
+    "id": "item:it/post-00",
+    "key": "post-00",
+    "label": "Basket post",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 168,
+      "z": 8,
+    },
+  },
+  {
+    "center": {
+      "x": 568,
+      "y": 206,
+      "z": -251,
+    },
+    "id": "item:it/post-10",
+    "key": "post-10",
+    "label": "Basket post",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 168,
+      "z": 8,
+    },
+  },
+  {
+    "center": {
+      "x": -568,
+      "y": 206,
+      "z": 291,
+    },
+    "id": "item:it/post-01",
+    "key": "post-01",
+    "label": "Basket post",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 168,
+      "z": 8,
+    },
+  },
+  {
+    "center": {
+      "x": 568,
+      "y": 206,
+      "z": 291,
+    },
+    "id": "item:it/post-11",
+    "key": "post-11",
+    "label": "Basket post",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 168,
+      "z": 8,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.drawer@v1 1`] = `
+[
+  {
+    "banding": {
+      "top": true,
+    },
+    "center": {
+      "x": -571,
+      "y": 218,
+      "z": 23,
+    },
+    "grainAlong": "z",
+    "hardware": {
+      "name": "Drawer runners 550 mm (pair)",
+    },
+    "id": "item:it/box-left",
+    "key": "box-left",
+    "label": "Drawer side",
+    "material": {
+      "id": "white",
+      "thickness": 12,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 12,
+      "y": 150,
+      "z": 550,
+    },
+  },
+  {
+    "banding": {
+      "top": true,
+    },
+    "center": {
+      "x": 571,
+      "y": 218,
+      "z": 23,
+    },
+    "grainAlong": "z",
+    "id": "item:it/box-right",
+    "key": "box-right",
+    "label": "Drawer side",
+    "material": {
+      "id": "white",
+      "thickness": 12,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 12,
+      "y": 150,
+      "z": 550,
+    },
+  },
+  {
+    "banding": {
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 218,
+      "z": -246,
+    },
+    "grainAlong": "x",
+    "id": "item:it/box-back",
+    "key": "box-back",
+    "label": "Drawer back",
+    "material": {
+      "id": "white",
+      "thickness": 12,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1130,
+      "y": 150,
+      "z": 12,
+    },
+  },
+  {
+    "banding": {
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 218,
+      "z": 292,
+    },
+    "grainAlong": "x",
+    "id": "item:it/box-front",
+    "key": "box-front",
+    "label": "Drawer box front",
+    "material": {
+      "id": "white",
+      "thickness": 12,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1130,
+      "y": 150,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 147,
+      "z": 23,
+    },
+    "grainAlong": "x",
+    "id": "item:it/box-bottom",
+    "key": "box-bottom",
+    "label": "Drawer bottom",
+    "material": {
+      "id": "hardboard",
+      "thickness": 8,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1130,
+      "y": 8,
+      "z": 526,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.pull-down-rail@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 178,
+      "z": 9,
+    },
+    "hardware": {
+      "name": "Pull-down wardrobe lift 1164 mm",
+    },
+    "id": "item:it/rail",
+    "key": "rail",
+    "label": "Hanging rail",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": -600,
+        "z": 250,
+      },
+    },
+    "role": "rail",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1160,
+      "y": 25,
+      "z": 25,
+    },
+  },
+  {
+    "center": {
+      "x": -570,
+      "y": 588,
+      "z": 9,
+    },
+    "id": "item:it/arm-left",
+    "key": "arm-left",
+    "label": "Lift arm",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": -600,
+        "z": 250,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 20,
+      "y": 860,
+      "z": 30,
+    },
+  },
+  {
+    "center": {
+      "x": 570,
+      "y": 588,
+      "z": 9,
+    },
+    "id": "item:it/arm-right",
+    "key": "arm-right",
+    "label": "Lift arm",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": -600,
+        "z": 250,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 20,
+      "y": 860,
+      "z": 30,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.rail@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 143,
+      "z": 9,
+    },
+    "hardware": {
+      "name": "Hanging rail 1160 mm",
+    },
+    "id": "item:it/rail",
+    "key": "rail",
+    "label": "Hanging rail",
+    "material": {
+      "id": "chrome",
+    },
+    "role": "rail",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1160,
+      "y": 25,
+      "z": 25,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.shelf@v1 1`] = `
+[
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 127,
+      "z": 9,
+    },
+    "grainAlong": "x",
+    "hardware": {
+      "count": 4,
+      "name": "Shelf pins",
+    },
+    "id": "item:it/shelf",
+    "key": "shelf",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1162,
+      "y": 18,
+      "z": 582,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.shoe-shelf@v1 1`] = `
+[
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 127,
+      "z": 9,
+    },
+    "grainAlong": "x",
+    "id": "item:it/shelf",
+    "key": "shelf",
+    "label": "Shoe shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1164,
+      "y": 18,
+      "z": 582,
+    },
+  },
+  {
+    "banding": {
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 156,
+      "z": 291,
+    },
+    "grainAlong": "x",
+    "id": "item:it/lip",
+    "key": "lip",
+    "label": "Shoe shelf lip",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1164,
+      "y": 40,
+      "z": 18,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.tie-rack@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 178,
+      "z": 20,
+    },
+    "hardware": {
+      "name": "Pull-out tie & belt rack",
+    },
+    "id": "item:it/rack",
+    "key": "rack",
+    "label": "Tie rack",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 80,
+      "y": 120,
+      "z": 550,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.tray@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 124,
+      "z": 20,
+    },
+    "grainAlong": "x",
+    "hardware": {
+      "name": "Drawer runners 550 mm (pair)",
+    },
+    "id": "item:it/bottom",
+    "key": "bottom",
+    "label": "Tray bottom",
+    "material": {
+      "id": "white",
+      "thickness": 12,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1154,
+      "y": 12,
+      "z": 550,
+    },
+  },
+  {
+    "banding": {
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 159,
+      "z": 289,
+    },
+    "grainAlong": "x",
+    "id": "item:it/front",
+    "key": "front",
+    "label": "Tray front",
+    "material": {
+      "id": "white",
+      "thickness": 12,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1154,
+      "y": 58,
+      "z": 12,
+    },
+  },
+  {
+    "banding": {
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 159,
+      "z": -249,
+    },
+    "grainAlong": "x",
+    "id": "item:it/back",
+    "key": "back",
+    "label": "Tray back",
+    "material": {
+      "id": "white",
+      "thickness": 12,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1154,
+      "y": 58,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": -192.33333333333331,
+      "y": 154,
+      "z": 20,
+    },
+    "grainAlong": "z",
+    "id": "item:it/divider-1",
+    "key": "divider-1",
+    "label": "Tray divider",
+    "material": {
+      "id": "white",
+      "thickness": 8,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 48,
+      "z": 526,
+    },
+  },
+  {
+    "center": {
+      "x": 192.33333333333337,
+      "y": 154,
+      "z": 20,
+    },
+    "grainAlong": "z",
+    "id": "item:it/divider-2",
+    "key": "divider-2",
+    "label": "Tray divider",
+    "material": {
+      "id": "white",
+      "thickness": 8,
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "drawer-box",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 48,
+      "z": 526,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > item.trouser-rack@v1 1`] = `
+[
+  {
+    "center": {
+      "x": -567,
+      "y": 168,
+      "z": 20,
+    },
+    "hardware": {
+      "name": "Pull-out trouser rack 1164 mm",
+    },
+    "id": "item:it/runner-left",
+    "key": "runner-left",
+    "label": "Trouser rack frame",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 20,
+      "y": 100,
+      "z": 550,
+    },
+  },
+  {
+    "center": {
+      "x": 567,
+      "y": 168,
+      "z": 20,
+    },
+    "id": "item:it/runner-right",
+    "key": "runner-right",
+    "label": "Trouser rack frame",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 20,
+      "y": 100,
+      "z": 550,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 206,
+      "z": -235,
+    },
+    "id": "item:it/bar-1",
+    "key": "bar-1",
+    "label": "Trouser bar",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1114,
+      "y": 12,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 206,
+      "z": -162.14285714285714,
+    },
+    "id": "item:it/bar-2",
+    "key": "bar-2",
+    "label": "Trouser bar",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1114,
+      "y": 12,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 206,
+      "z": -89.28571428571428,
+    },
+    "id": "item:it/bar-3",
+    "key": "bar-3",
+    "label": "Trouser bar",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1114,
+      "y": 12,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 206,
+      "z": -16.428571428571416,
+    },
+    "id": "item:it/bar-4",
+    "key": "bar-4",
+    "label": "Trouser bar",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1114,
+      "y": 12,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 206,
+      "z": 56.428571428571445,
+    },
+    "id": "item:it/bar-5",
+    "key": "bar-5",
+    "label": "Trouser bar",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1114,
+      "y": 12,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 206,
+      "z": 129.28571428571433,
+    },
+    "id": "item:it/bar-6",
+    "key": "bar-6",
+    "label": "Trouser bar",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1114,
+      "y": 12,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 206,
+      "z": 202.14285714285717,
+    },
+    "id": "item:it/bar-7",
+    "key": "bar-7",
+    "label": "Trouser bar",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1114,
+      "y": 12,
+      "z": 12,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 206,
+      "z": 275,
+    },
+    "id": "item:it/bar-8",
+    "key": "bar-8",
+    "label": "Trouser bar",
+    "material": {
+      "id": "chrome",
+    },
+    "motion": {
+      "id": "it",
+      "kind": "slide",
+      "offset": {
+        "x": 0,
+        "y": 0,
+        "z": 495,
+      },
+    },
+    "role": "hardware",
+    "shape": {
+      "axis": "x",
+      "kind": "cylinder",
+    },
+    "size": {
+      "x": 1114,
+      "y": 12,
+      "z": 12,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.back-panel@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 1100,
+      "z": 0,
+    },
+    "grainAlong": "y",
+    "id": "part/back",
+    "key": "back",
+    "label": "Back panel",
+    "material": {
+      "id": "hardboard",
+      "thickness": 8,
+    },
+    "role": "back",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 800,
+      "y": 2200,
+      "z": 8,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.cornice@v1 1`] = `
+[
+  {
+    "banding": {
+      "front": true,
+      "left": true,
+      "right": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 51,
+      "z": 0,
+    },
+    "grainAlong": "x",
+    "id": "part/top",
+    "key": "top",
+    "label": "Cornice top",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "trim",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1020,
+      "y": 18,
+      "z": 620,
+    },
+  },
+  {
+    "banding": {
+      "bottom": true,
+      "left": true,
+      "right": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 21,
+      "z": 301,
+    },
+    "grainAlong": "x",
+    "id": "part/fascia",
+    "key": "fascia",
+    "label": "Cornice fascia",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "trim",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1020,
+      "y": 42,
+      "z": 18,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.end-panel@v1 1`] = `
+[
+  {
+    "banding": {
+      "front": true,
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 1100,
+      "z": 0,
+    },
+    "grainAlong": "y",
+    "id": "part/panel",
+    "key": "panel",
+    "label": "End panel",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 18,
+      "y": 2200,
+      "z": 600,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.filler@v1 1`] = `
+[
+  {
+    "banding": {
+      "left": true,
+      "right": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 1100,
+      "z": 0,
+    },
+    "grainAlong": "y",
+    "id": "part/filler",
+    "key": "filler",
+    "label": "Filler strip",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "trim",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 50,
+      "y": 2200,
+      "z": 18,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.light-strip@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 4,
+      "z": 0,
+    },
+    "hardware": {
+      "name": "LED strip 1000 mm",
+    },
+    "id": "part/strip",
+    "key": "strip",
+    "label": "LED strip",
+    "material": {
+      "id": "chrome",
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1000,
+      "y": 8,
+      "z": 16,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.panel@v1 1`] = `
+[
+  {
+    "banding": {
+      "left": true,
+      "right": true,
+      "top": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 360,
+      "z": 0,
+    },
+    "grainAlong": "y",
+    "id": "part/panel",
+    "key": "panel",
+    "label": "Panel",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 600,
+      "y": 720,
+      "z": 18,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.plinth@v1 1`] = `
+[
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 50,
+      "z": 271,
+    },
+    "grainAlong": "x",
+    "id": "part/front",
+    "key": "front",
+    "label": "Plinth front",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "trim",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 800,
+      "y": 100,
+      "z": 18,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 50,
+      "z": -271,
+    },
+    "grainAlong": "x",
+    "id": "part/back",
+    "key": "back",
+    "label": "Plinth back",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "trim",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 800,
+      "y": 100,
+      "z": 18,
+    },
+  },
+  {
+    "center": {
+      "x": -391,
+      "y": 50,
+      "z": 0,
+    },
+    "grainAlong": "z",
+    "id": "part/left",
+    "key": "left",
+    "label": "Plinth side",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "trim",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 18,
+      "y": 100,
+      "z": 524,
+    },
+  },
+  {
+    "center": {
+      "x": 391,
+      "y": 50,
+      "z": 0,
+    },
+    "grainAlong": "z",
+    "id": "part/right",
+    "key": "right",
+    "label": "Plinth side",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "trim",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 18,
+      "y": 100,
+      "z": 524,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.shelf@v1 1`] = `
+[
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 9,
+      "z": 0,
+    },
+    "grainAlong": "x",
+    "id": "part/shelf",
+    "key": "shelf",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 800,
+      "y": 18,
+      "z": 580,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > part.wall-rail@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 20,
+      "z": 0,
+    },
+    "hardware": {
+      "name": "Wall-mounting rail 1000 mm",
+    },
+    "id": "part/rail",
+    "key": "rail",
+    "label": "Wall rail",
+    "material": {
+      "id": "chrome",
+    },
+    "role": "hardware",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1000,
+      "y": 40,
+      "z": 12,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > unit.corner@v1 1`] = `
+[
+  {
+    "center": {
+      "x": 0,
+      "y": 1100,
+      "z": -596,
+    },
+    "grainAlong": "y",
+    "id": "carcass/back-a",
+    "key": "back-a",
+    "label": "Back panel",
+    "material": {
+      "id": "hardboard",
+      "thickness": 8,
+    },
+    "role": "back",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1200,
+      "y": 2200,
+      "z": 8,
+    },
+  },
+  {
+    "center": {
+      "x": -596,
+      "y": 1100,
+      "z": 4,
+    },
+    "grainAlong": "y",
+    "id": "carcass/back-b",
+    "key": "back-b",
+    "label": "Back panel",
+    "material": {
+      "id": "hardboard",
+      "thickness": 8,
+    },
+    "role": "back",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 8,
+      "y": 2200,
+      "z": 1192,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": 591,
+      "y": 1100,
+      "z": -306,
+    },
+    "grainAlong": "y",
+    "id": "carcass/end-a",
+    "key": "end-a",
+    "label": "Side panel",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 18,
+      "y": 2200,
+      "z": 572,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -306,
+      "y": 1100,
+      "z": 591,
+    },
+    "grainAlong": "y",
+    "id": "carcass/end-b",
+    "key": "end-b",
+    "label": "Side panel",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 572,
+      "y": 2200,
+      "z": 18,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -5,
+      "y": 9,
+      "z": -306,
+    },
+    "grainAlong": "x",
+    "id": "carcass/bottom-a",
+    "key": "bottom-a",
+    "label": "Bottom",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1174,
+      "y": 18,
+      "z": 572,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -306,
+      "y": 9,
+      "z": 281,
+    },
+    "grainAlong": "z",
+    "id": "carcass/bottom-b",
+    "key": "bottom-b",
+    "label": "Bottom",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 572,
+      "y": 18,
+      "z": 602,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -5,
+      "y": 445.4,
+      "z": -306,
+    },
+    "grainAlong": "x",
+    "id": "carcass/shelf-1-a",
+    "key": "shelf-1-a",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1174,
+      "y": 18,
+      "z": 572,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -306,
+      "y": 445.4,
+      "z": 281,
+    },
+    "grainAlong": "z",
+    "id": "carcass/shelf-1-b",
+    "key": "shelf-1-b",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 572,
+      "y": 18,
+      "z": 602,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -5,
+      "y": 881.8,
+      "z": -306,
+    },
+    "grainAlong": "x",
+    "id": "carcass/shelf-2-a",
+    "key": "shelf-2-a",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1174,
+      "y": 18,
+      "z": 572,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -306,
+      "y": 881.8,
+      "z": 281,
+    },
+    "grainAlong": "z",
+    "id": "carcass/shelf-2-b",
+    "key": "shelf-2-b",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 572,
+      "y": 18,
+      "z": 602,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -5,
+      "y": 1318.1999999999998,
+      "z": -306,
+    },
+    "grainAlong": "x",
+    "id": "carcass/shelf-3-a",
+    "key": "shelf-3-a",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1174,
+      "y": 18,
+      "z": 572,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -306,
+      "y": 1318.1999999999998,
+      "z": 281,
+    },
+    "grainAlong": "z",
+    "id": "carcass/shelf-3-b",
+    "key": "shelf-3-b",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 572,
+      "y": 18,
+      "z": 602,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -5,
+      "y": 1754.6,
+      "z": -306,
+    },
+    "grainAlong": "x",
+    "id": "carcass/shelf-4-a",
+    "key": "shelf-4-a",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1174,
+      "y": 18,
+      "z": 572,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -306,
+      "y": 1754.6,
+      "z": 281,
+    },
+    "grainAlong": "z",
+    "id": "carcass/shelf-4-b",
+    "key": "shelf-4-b",
+    "label": "Shelf",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "shelf",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 572,
+      "y": 18,
+      "z": 602,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -5,
+      "y": 2191,
+      "z": -306,
+    },
+    "grainAlong": "x",
+    "id": "carcass/top-a",
+    "key": "top-a",
+    "label": "Top",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 1174,
+      "y": 18,
+      "z": 572,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -306,
+      "y": 2191,
+      "z": 281,
+    },
+    "grainAlong": "z",
+    "id": "carcass/top-b",
+    "key": "top-b",
+    "label": "Top",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 572,
+      "y": 18,
+      "z": 602,
+    },
+  },
+]
+`;
+
+exports[`golden snapshots (bump the template version when these change) > unit.standard@v1 1`] = `
+[
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": -491,
+      "y": 1100,
+      "z": 0,
+    },
+    "grainAlong": "y",
+    "id": "carcass/side-left",
+    "key": "side-left",
+    "label": "Side panel",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 18,
+      "y": 2200,
+      "z": 600,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": 491,
+      "y": 1100,
+      "z": 0,
+    },
+    "grainAlong": "y",
+    "id": "carcass/side-right",
+    "key": "side-right",
+    "label": "Side panel",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 18,
+      "y": 2200,
+      "z": 600,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 9,
+      "z": 0,
+    },
+    "grainAlong": "x",
+    "id": "carcass/bottom",
+    "key": "bottom",
+    "label": "Bottom",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 964,
+      "y": 18,
+      "z": 600,
+    },
+  },
+  {
+    "banding": {
+      "front": true,
+    },
+    "center": {
+      "x": 0,
+      "y": 2191,
+      "z": 0,
+    },
+    "grainAlong": "x",
+    "id": "carcass/top",
+    "key": "top",
+    "label": "Top",
+    "material": {
+      "id": "white",
+      "thickness": 18,
+    },
+    "role": "carcass",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 964,
+      "y": 18,
+      "z": 600,
+    },
+  },
+  {
+    "center": {
+      "x": 0,
+      "y": 1100,
+      "z": -286,
+    },
+    "grainAlong": "y",
+    "id": "carcass/back",
+    "key": "back",
+    "label": "Back panel",
+    "material": {
+      "id": "hardboard",
+      "thickness": 8,
+    },
+    "role": "back",
+    "shape": {
+      "kind": "box",
+    },
+    "size": {
+      "x": 964,
+      "y": 2164,
+      "z": 8,
+    },
+  },
+]
+`;

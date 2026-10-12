@@ -263,7 +263,7 @@ function resize(
   };
 
   let out: Unit = { ...u, size: next, position };
-  const layout = unitLayout(out, t);
+  const layout = unitLayout(out, t, ctx.catalog);
   if ('error' in layout) return fail(`cannot resize "${u.name}": ${layout.error}`);
 
   // Height reflow: items keep their y; ones that no longer fit are pushed down below the next item / the top.

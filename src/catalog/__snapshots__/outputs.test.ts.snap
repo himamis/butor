@@ -1,0 +1,84 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cut list > matches the reference snapshot 1`] = `
+[
+  {
+    "banding": {
+      "length": 0,
+      "width": 0,
+    },
+    "length": 2164,
+    "material": "hardboard",
+    "materialName": "White hardboard",
+    "part": "Back panel",
+    "qty": 1,
+    "thickness": 8,
+    "width": 964,
+  },
+  {
+    "banding": {
+      "length": 1,
+      "width": 0,
+    },
+    "length": 2200,
+    "material": "white",
+    "materialName": "White melamine",
+    "part": "Side panel",
+    "qty": 2,
+    "thickness": 18,
+    "width": 600,
+  },
+  {
+    "banding": {
+      "length": 2,
+      "width": 2,
+    },
+    "length": 2197,
+    "material": "white",
+    "materialName": "White melamine",
+    "part": "Door",
+    "qty": 2,
+    "thickness": 18,
+    "width": 497,
+  },
+  {
+    "banding": {
+      "length": 1,
+      "width": 0,
+    },
+    "length": 964,
+    "material": "white",
+    "materialName": "White melamine",
+    "part": "Bottom",
+    "qty": 1,
+    "thickness": 18,
+    "width": 600,
+  },
+  {
+    "banding": {
+      "length": 1,
+      "width": 0,
+    },
+    "length": 964,
+    "material": "white",
+    "materialName": "White melamine",
+    "part": "Top",
+    "qty": 1,
+    "thickness": 18,
+    "width": 600,
+  },
+  {
+    "banding": {
+      "length": 1,
+      "width": 0,
+    },
+    "length": 964,
+    "material": "white",
+    "materialName": "White melamine",
+    "part": "Shelf",
+    "qty": 1,
+    "thickness": 18,
+    "width": 582,
+  },
+]
+`;

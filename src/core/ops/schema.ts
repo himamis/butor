@@ -70,7 +70,7 @@ export const PartInput = z.strictObject({
   material: z.string().optional(),
 });
 export const EntityInput = z.discriminatedUnion('kind', [UnitInput, PartInput]);
-export type EntityInput = z.infer<typeof EntityInput>;
+export type EntityInput = z.input<typeof EntityInput>;
 
 const Anchor = z.enum(['min', 'center', 'max']);
 

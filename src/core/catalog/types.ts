@@ -1,5 +1,15 @@
 import type { ParamsSchema } from './params';
 import type { Unit } from '../schema/entities';
+import type { Motion, PartDraft } from '../geometry/part';
+
+/** Material ids a build should use, resolved from the entity, then the design defaults. */
+export interface ResolvedMaterials {
+  carcass: string;
+  back: string;
+  interior: string;
+  front: string;
+  handle: string;
+}
 
 export type TemplateKind = 'unit' | 'item' | 'front' | 'part';
 export type Category = 'Wardrobes' | 'Cabinets' | 'Fronts' | 'Interior' | 'Panels' | 'Base & trim';
@@ -24,15 +34,24 @@ export interface UnitLayout {
   innerZ: [back: number, front: number]; // interior depth range (local z)
   columns: { x0: number; width: number }[]; // inner x ranges, left → right (local x, unit spans −w/2…w/2)
   dividerThickness: number;
+  /** Depth range in front of the interior reserved for fronts on tracks (sliding doors), if any. */
+  trackZone?: [back: number, front: number];
+}
+
+/** Facts about a unit's contents the layout needs but cannot know without the catalog. */
+export interface LayoutHints {
+  trackFronts: boolean; // the unit has fronts on tracks (sliding doors) → reserve a track zone
 }
 
 export interface UnitTemplate extends TemplateBase {
   kind: 'unit';
   minColumnWidth: number;
   /** Computes the layout, or explains why the unit's structure cannot be built. */
-  layout(unit: Unit): UnitLayout | { error: string };
+  layout(unit: Unit, hints: LayoutHints): UnitLayout | { error: string };
   sizeLimits: { w: [number, number]; h: [number, number]; d: [number, number] };
   defaultSize: { w: number; h: number; d: number };
+  /** Carcass parts: sides, top, bottom, dividers, back, base. Items and fronts are built by their templates. */
+  build(unit: Unit, layout: UnitLayout, materials: ResolvedMaterials): PartDraft[];
 }
 
 export interface ItemContext {
@@ -40,22 +59,51 @@ export interface ItemContext {
   column: number;
 }
 
+/** Everything an item build needs: its column's box (unit-local mm) and where the item sits. */
+export interface ItemBuildContext extends ItemContext {
+  id: string; // item id (motion ids derive from it)
+  x0: number; // column inner left edge
+  width: number; // column inner width
+  y: number; // item bottom, unit-local (column floor + item.y)
+  innerZ: [back: number, front: number];
+  thickness: number; // interior board thickness
+  materials: ResolvedMaterials;
+}
+
+/** A front's covered rectangle (unit-local, gaps already applied) and mounting depth. */
+export interface FrontBuildContext {
+  id: string; // front id (motion ids derive from it)
+  rect: { x0: number; x1: number; y0: number; y1: number };
+  z: number; // overlay fronts: their back face sits here (the carcass front edge)
+  trackZone?: [back: number, front: number];
+  drawerMotion?: Motion; // drawer fronts move with their drawer
+  unit: { w: number; h: number; d: number }; // to tell outer edges from shared ones
+  opening: { x0: number; x1: number; y0: number; y1: number }; // the carcass's inner opening (between sides, bottom and top)
+  materials: ResolvedMaterials;
+}
+
 export interface ItemTemplate extends TemplateBase {
   kind: 'item';
   /** Vertical space the item occupies in its column, mm. */
   height(params: Record<string, unknown>, ctx: ItemContext): number;
   clearance?: { above?: number; below?: number };
+  build(params: Record<string, unknown>, ctx: ItemBuildContext): PartDraft[];
 }
 
 export interface FrontTemplate extends TemplateBase {
   kind: 'front';
   /** Minimum size of the covered rectangle. */
   minSize: { w: number; h: number };
+  /** overlay: in front of the carcass; track: inside a track zone at the front (sliding doors). */
+  mount: 'overlay' | 'track';
+  build(params: Record<string, unknown>, ctx: FrontBuildContext): PartDraft[];
 }
 
 export interface PartTemplate extends TemplateBase {
   kind: 'part';
   size(params: Record<string, unknown>): { w: number; h: number; d: number };
+  /** Parts centred on the entity origin (x/z) with the bottom at y = 0. */
+  build(params: Record<string, unknown>, materials: ResolvedMaterials): PartDraft[];
 }
 
 export type AnyTemplate = UnitTemplate | ItemTemplate | FrontTemplate | PartTemplate;
