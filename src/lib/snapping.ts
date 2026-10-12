@@ -7,7 +7,7 @@ const overlap1 = (aMin: number, aMax: number, bMin: number, bMax: number, pad: n
   aMin < bMax + pad && bMin < aMax + pad;
 
 /** Axis-aligned wall faces of the room as boxes with zero thickness on one axis. */
-function wallBoxes(room: Room): { axis: Axis; at: number; min: number; max: number }[] {
+export function wallBoxes(room: Room): { axis: Axis; at: number; min: number; max: number }[] {
   const out: { axis: Axis; at: number; min: number; max: number }[] = [];
   const pts = room.points;
   for (let i = 0; i < pts.length; i++) {

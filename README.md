@@ -19,7 +19,7 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 - **Add parts:** drag a template from the library on the left into the 3D view. The library has 24 templates in six categories (Wardrobes, Cabinets, Fronts, Interior, Panels, Base & trim). Filter with the category chips, collapse sections, or search (press `/`): every word must match a template's name, description or keywords, e.g. "shoe", "sliding door", "closet".
 - **Select:** click an object. Shift-click to add to the selection. Click empty space to deselect.
 - **Move / rotate:** use the gizmo (Move / Rotate in the toolbar), or type exact values in the right panel. Moves snap to the grid and flush against other objects and walls.
-- **Resize:** edit the size fields. Resizing changes the part's real dimensions, so panel thickness stays the same.
+- **Resize:** drag the small square handles on the selected object's faces (left/right = width, front/back = depth, top = height), or type exact sizes. The opposite face stays put, and the dragged face snaps to the grid or flush to a neighbour, wall, column or the ceiling. Resizing changes the part's real dimensions, so panel thickness stays the same.
 - **Room:** click empty space to see room settings: shape presets, editable corners, height, columns, floor finish (wood planks, chevron parquet, tiles, concrete or plain color) and wall color.
 - **Columns:** add floor-to-ceiling columns of any size anywhere in the room (center X/Z, width, depth in mm). Units snap against them and turn red if they overlap one.
 - **Views:** 3D, Front, Top and Side in the toolbar. Walls facing the camera are hidden automatically.

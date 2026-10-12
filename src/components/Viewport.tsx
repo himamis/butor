@@ -11,6 +11,7 @@ import { objectExplodeOffset } from '../lib/explode';
 import { RoomMesh } from './RoomMesh';
 import { ObjectMesh } from './ObjectMesh';
 import { SelectionGizmo, gizmoActivity } from './SelectionGizmo';
+import { ResizeHandles } from './ResizeHandles';
 import { BoxDimensions } from './Dimensions';
 
 type ThreeHandle = { camera: THREE.Camera; gl: THREE.WebGLRenderer };
@@ -139,6 +140,7 @@ export function Viewport() {
           />
         ))}
         <SelectionGizmo />
+        <ResizeHandles />
         {/* Dimensions describe the assembled design, so they are hidden while exploded. */}
         {selBox && explode === 0 && <BoxDimensions box={selBox} offset={60} color="#2f7cf6" />}
         {showOverall && explode === 0 && objects.length > 1 && allBox && <BoxDimensions box={allBox} offset={160} color="#e07a1f" />}

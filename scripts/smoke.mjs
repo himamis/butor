@@ -150,6 +150,29 @@ await page.click('button:has-text("Explode")'); await page.click('.toolbar >> te
 await S((d) => window.__store.getState().commit(() => d), snapshot);
 await page.waitForTimeout(300);
 
+// ---------- Resize handles ----------
+await S(() => { const s = window.__store.getState(); s.addObject('carcass', { x: 3000, y: 0, z: 290 }); });
+const resized = (await store()).design.objects.at(-1);
+await page.click('.toolbar >> text=Front'); await page.waitForTimeout(700);
+const dragHandle = async (from, toMmX) => {
+  const a = await screen(from);
+  const b = await screen({ ...from, x: toMmX });
+  await page.mouse.move(a.x, a.y); await page.mouse.down();
+  await page.mouse.move(b.x, b.y, { steps: 10 }); await page.mouse.up(); await page.waitForTimeout(200);
+};
+const pastResize = (await store()).past.length;
+await dragHandle({ x: 3400 + 45, y: 1100, z: 290 }, 3400 + 45 + 300); // +x handle, 300 mm to the right
+let r = (await store()).design.objects.find((o) => o.id === resized.id);
+check('dragging the right handle widens to the right', r.params.width === 1100 && r.position.x - r.params.width / 2 === 2600, `width ${r.params.width}, left ${r.position.x - r.params.width / 2}`);
+check('a resize drag is one undo step', (await store()).past.length === pastResize + 1);
+await dragHandle({ x: 3700 + 45, y: 1100, z: 290 }, 3990 + 45); // to 10 mm from the wall → snaps flush
+r = (await store()).design.objects.find((o) => o.id === resized.id);
+check('resizing snaps flush to the wall', r.position.x + r.params.width / 2 === 4000, `right face ${r.position.x + r.params.width / 2}`);
+await shot('12-resize');
+await S(() => { const s = window.__store.getState(); s.undo(); s.undo(); s.undo(); });
+check('undo restores the original', !(await store()).design.objects.some((o) => o.id === resized.id));
+await page.click('.toolbar >> text=3D'); await page.waitForTimeout(300);
+
 // ---------- Room columns ----------
 await S(() => window.__store.getState().select(null, false)); await page.waitForTimeout(150);
 await page.click('text=+ Add column'); await page.waitForTimeout(100);
