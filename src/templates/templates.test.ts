@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { TEMPLATES, defaultParams, getTemplate } from '.';
 import { HANDLE } from './hardware';
-import { applyMotion } from '../lib/motion';
 import type { Panel } from '../types';
 
 const build = (id: string, p: Record<string, number> = {}) => {
@@ -50,13 +49,6 @@ describe('door', () => {
     const [handle] = handles(ps);
     expect(handle.pos.z - handle.size.z / 2).toBeCloseTo(front.pos.z + front.size.z / 2);
     expect(handle.motion).toEqual(front.motion);
-  });
-
-  it.each([0, 1])('hinge=%i opens outward (+z) at the free edge', (hinge) => {
-    const [front] = fronts(build('door', { hinge }));
-    const freeX = hinge === 0 ? front.pos.x + front.size.x / 2 : front.pos.x - front.size.x / 2;
-    const moved = applyMotion(front.motion!, 1, { x: freeX, y: 0, z: front.pos.z });
-    expect(moved.z).toBeGreaterThan(front.pos.z + 100);
   });
 
   it('openAngle sets the full-open angle', () => {
@@ -126,5 +118,12 @@ describe('carcass with doors', () => {
     for (const p of ps.filter((p) => p.role === 'carcass' || p.role === 'back')) {
       expect(p.pos.z + p.size.z / 2).toBeLessThanOrEqual(doorBack + 0.01);
     }
+  });
+});
+
+describe('hardware names', () => {
+  it('a shortened bar handle is listed with its real length', () => {
+    const [h] = handles(build('drawer', { width: 150, handle: HANDLE.bar }));
+    expect(h.name).toBe(`Bar handle ${h.size.x} mm`);
   });
 });

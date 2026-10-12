@@ -5,7 +5,7 @@ import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import type { Motion, Panel, SceneObject, Vec3 } from '../types';
 import { mm } from '../units';
 import { objectSize, panelsOf } from '../lib/geometry';
-import { motionAt } from '../lib/motion';
+import { partTransform } from '../lib/motion';
 import { partExplodeOffset } from '../lib/explode';
 import { frontOutline } from '../lib/cutoutShape';
 import { useStore } from '../state/store';
@@ -98,13 +98,10 @@ function AnimatedPart({ part, size, open, explode, children }: { part: Part; siz
     s.e = THREE.MathUtils.damp(s.e, explode, EXPLODE_SPEED, dt);
     if (Math.abs(s.t - (open ? 1 : 0)) < 1e-4) s.t = open ? 1 : 0;
     if (Math.abs(s.e - explode) < 1e-4) s.e = explode;
-    const ex = partExplodeOffset(anchor, size, s.e);
-    const m = part.motion;
-    const pivot = m?.kind === 'hinge' ? m.pivot : { x: 0, z: 0 };
-    const { angle, offset } = m ? motionAt(m, s.t) : { angle: 0, offset: { x: 0, y: 0, z: 0 } };
-    outer.current.position.set(mm(pivot.x + offset.x + ex.x), mm(offset.y + ex.y), mm(pivot.z + offset.z + ex.z));
-    outer.current.rotation.y = (angle * Math.PI) / 180;
-    inner.current.position.set(-mm(pivot.x), 0, -mm(pivot.z));
+    const tr = partTransform(part.motion, s.t, partExplodeOffset(anchor, size, s.e));
+    outer.current.position.set(mm(tr.outer.x), mm(tr.outer.y), mm(tr.outer.z));
+    outer.current.rotation.y = tr.rotationY;
+    inner.current.position.set(mm(tr.inner.x), mm(tr.inner.y), mm(tr.inner.z));
   });
 
   return (
@@ -127,6 +124,10 @@ export const ObjectMesh = memo(function ObjectMesh({ obj, selected, overlapping,
     const c = cur.current;
     c.x = THREE.MathUtils.damp(c.x, spread.x, EXPLODE_SPEED, dt);
     c.z = THREE.MathUtils.damp(c.z, spread.z, EXPLODE_SPEED, dt);
+    if (Math.abs(c.x - spread.x) < 0.01 && Math.abs(c.z - spread.z) < 0.01) {
+      c.x = spread.x; // settle exactly, so leaving explode restores the original position
+      c.z = spread.z;
+    }
     root.current.position.set(mm(obj.position.x + c.x), mm(obj.position.y), mm(obj.position.z + c.z));
   });
 

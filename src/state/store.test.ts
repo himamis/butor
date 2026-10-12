@@ -86,3 +86,17 @@ describe('view state: open / explode', () => {
     expect(s().openIds).toEqual([]);
   });
 });
+
+describe('open state follows the design', () => {
+  it('deleting an open unit forgets it, and undo brings it back closed', () => {
+    s().addObject('door', { x: 400, y: 0, z: 400 });
+    const id = s().design.objects[0].id;
+    s().toggleOpen(id);
+    s().select(id, false);
+    s().deleteSelected();
+    expect(s().openIds).toEqual([]);
+    s().undo();
+    expect(s().design.objects[0].id).toBe(id);
+    expect(s().openIds).toEqual([]);
+  });
+});

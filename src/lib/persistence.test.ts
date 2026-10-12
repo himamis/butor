@@ -30,3 +30,15 @@ describe('parseDesign', () => {
     expect(d.room.height).toBe(DEFAULT_ROOM.height);
   });
 });
+
+describe('older and hand-edited files', () => {
+  it('clamps out-of-range params so templates never build broken geometry', () => {
+    const json = { ...valid(), objects: [{ ...valid().objects[0], templateId: 'door', params: { width: 10, handle: 3 } }] };
+    expect(parseDesign(json)!.objects[0].params.width).toBe(100);
+  });
+
+  it('an old door without hardware params loads with defaults', () => {
+    const json = { ...valid(), objects: [{ ...valid().objects[0], templateId: 'door', params: { width: 400, height: 2190, depth: 18 } }] };
+    expect(parseDesign(json)!.objects[0].params).toMatchObject({ hinge: 0, openAngle: 95, handle: 1 });
+  });
+});

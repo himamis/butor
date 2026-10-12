@@ -72,7 +72,7 @@ export function frontWithHandle(o: {
   if (handle === HANDLE.bar) {
     const len = Math.min(BAR.len, (o.horizontal ? o.w : o.h) - 40);
     return [front, {
-      name: `Bar handle ${BAR.len} mm`, role: 'handle', motion: o.motion,
+      name: `Bar handle ${len} mm`, role: 'handle', motion: o.motion,
       pos: { x: o.hx, y: o.hy, z: face + BAR.proj / 2 },
       size: o.horizontal ? { x: len, y: BAR.t, z: BAR.proj } : { x: BAR.t, y: len, z: BAR.proj },
     }];

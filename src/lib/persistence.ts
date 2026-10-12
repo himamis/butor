@@ -1,5 +1,5 @@
 import type { Design, FloorKind, SceneObject } from '../types';
-import { defaultParams, getTemplate, hasTemplate } from '../templates';
+import { clampParam, defaultParams, getTemplate, hasTemplate } from '../templates';
 import { DEFAULT_COLOR, DEFAULT_ROOM } from '../state/defaults';
 
 const KEY = 'wardrobe-designer:autosave';
@@ -22,7 +22,7 @@ export function parseDesign(json: unknown): Design | null {
     if (!isObj(o.position) || !isNum(o.position.x) || !isNum(o.position.y) || !isNum(o.position.z)) return null;
     const t = getTemplate(o.templateId);
     const params = defaultParams(t);
-    if (isObj(o.params)) for (const k of Object.keys(params)) if (isNum(o.params[k])) params[k] = o.params[k] as number;
+    if (isObj(o.params)) for (const def of t.params) if (isNum(o.params[def.key])) params[def.key] = clampParam(def, o.params[def.key] as number);
     objects.push({
       id: str(o.id, crypto.randomUUID()),
       templateId: o.templateId,

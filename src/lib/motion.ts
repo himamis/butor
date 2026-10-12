@@ -7,19 +7,16 @@ export function motionAt(m: Motion, t: number): { angle: number; offset: Vec3 } 
     : { angle: 0, offset: { x: m.offset.x * t, y: m.offset.y * t, z: m.offset.z * t } };
 }
 
-/** Moves a local point p (mm) by motion m opened to fraction t. Rotation matches three.js Y rotation. */
-export function applyMotion(m: Motion, t: number, p: Vec3): Vec3 {
-  if (t === 0) return p;
-  if (m.kind === 'slide') {
-    const { offset } = motionAt(m, t);
-    return { x: p.x + offset.x, y: p.y + offset.y, z: p.z + offset.z };
-  }
-  const a = (m.angle * t * Math.PI) / 180;
-  const dx = p.x - m.pivot.x;
-  const dz = p.z - m.pivot.z;
+/**
+ * Transform of a part rendered as outer group (position + Y rotation) → inner group (position) → panels.
+ * Hinges rotate about their pivot: outer sits at the pivot, inner shifts back by it. All values in mm / radians.
+ */
+export function partTransform(m: Motion | undefined, t: number, explode: Vec3): { outer: Vec3; inner: Vec3; rotationY: number } {
+  const pivot = m?.kind === 'hinge' ? m.pivot : { x: 0, z: 0 };
+  const { angle, offset } = m ? motionAt(m, t) : { angle: 0, offset: { x: 0, y: 0, z: 0 } };
   return {
-    x: m.pivot.x + dx * Math.cos(a) + dz * Math.sin(a),
-    y: p.y,
-    z: m.pivot.z - dx * Math.sin(a) + dz * Math.cos(a),
+    outer: { x: pivot.x + offset.x + explode.x, y: offset.y + explode.y, z: pivot.z + offset.z + explode.z },
+    inner: { x: -pivot.x, y: 0, z: -pivot.z },
+    rotationY: (angle * Math.PI) / 180,
   };
 }

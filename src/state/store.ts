@@ -109,7 +109,10 @@ export const useStore = create<State>()((set, get) => ({
     const prev = past[past.length - 1];
     if (!prev) return;
     const ids = new Set(prev.objects.map((o) => o.id));
-    set({ design: prev, past: past.slice(0, -1), future: [design, ...future], selection: selection.filter((id) => ids.has(id)) });
+    set({
+      design: prev, past: past.slice(0, -1), future: [design, ...future],
+      selection: selection.filter((id) => ids.has(id)), openIds: get().openIds.filter((id) => ids.has(id)),
+    });
   },
 
   redo() {
@@ -117,7 +120,10 @@ export const useStore = create<State>()((set, get) => ({
     const next = future[0];
     if (!next) return;
     const ids = new Set(next.objects.map((o) => o.id));
-    set({ design: next, past: [...past, design], future: future.slice(1), selection: selection.filter((id) => ids.has(id)) });
+    set({
+      design: next, past: [...past, design], future: future.slice(1),
+      selection: selection.filter((id) => ids.has(id)), openIds: get().openIds.filter((id) => ids.has(id)),
+    });
   },
 
   beginDrag() {
@@ -182,7 +188,8 @@ export const useStore = create<State>()((set, get) => ({
     const sel = new Set(get().selection);
     if (!sel.size) return;
     get().commit((d) => ({ ...d, objects: d.objects.filter((o) => !sel.has(o.id) || o.locked) }));
-    set({ selection: [] });
+    const ids = new Set(get().design.objects.map((o) => o.id));
+    set({ selection: [], openIds: get().openIds.filter((id) => ids.has(id)) });
   },
 
   duplicateSelected() {

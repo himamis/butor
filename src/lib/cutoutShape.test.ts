@@ -41,3 +41,11 @@ describe('frontOutline', () => {
     expect(Math.abs(polygonArea(outline))).toBe(800 * 100 - 150 * 50);
   });
 });
+
+describe('fronts too small for a cutout', () => {
+  it.each(['hole', 'notch'] as const)('a 15 mm wide panel gets no %s instead of broken geometry', (kind) => {
+    const { outline, holes } = frontOutline(15, 600, { kind, cx: 0, cy: 0, w: 30, h: 120 });
+    expect(holes).toHaveLength(0);
+    expect(Math.abs(polygonArea(outline))).toBe(15 * 600);
+  });
+});

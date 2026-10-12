@@ -28,6 +28,8 @@ export function frontOutline(w: number, h: number, cutout?: Cutout): { outline: 
   if (!cutout) return { outline: rect, holes: [] };
 
   const m = CUTOUT_MARGIN;
+  // Too small to leave material around the cutout: keep the front solid.
+  if (w < 2 * m + 1 || (cutout.kind === 'hole' && h < 2 * m + 1)) return { outline: rect, holes: [] };
   const cw = clamp(cutout.w, 1, Math.max(1, w - 2 * m));
   const cx = clamp(cutout.cx, x0 + m + cw / 2, x1 - m - cw / 2);
 
