@@ -20,6 +20,7 @@ export const DEFAULT_ROOM: Room = {
   floorKind: 'wood',
   floorColor: '#b8895a',
   wallColor: '#eceae4',
+  columns: [],
 };
 
 export const COLOR_PRESETS: { name: string; hex: string }[] = [

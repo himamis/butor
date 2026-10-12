@@ -20,11 +20,12 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 - **Select:** click an object. Shift-click to add to the selection. Click empty space to deselect.
 - **Move / rotate:** use the gizmo (Move / Rotate in the toolbar), or type exact values in the right panel. Moves snap to the grid and flush against other objects and walls.
 - **Resize:** edit the size fields. Resizing changes the part's real dimensions, so panel thickness stays the same.
-- **Room:** click empty space to see room settings: shape presets, editable corners, height, floor finish and wall color.
+- **Room:** click empty space to see room settings: shape presets, editable corners, height, columns, floor finish and wall color.
+- **Columns:** add floor-to-ceiling columns of any size anywhere in the room (center X/Z, width, depth in mm). Units snap against them and turn red if they overlap one.
 - **Views:** 3D, Front, Top and Side in the toolbar. Walls facing the camera are hidden automatically.
 - **Doors, drawers & handles:** doors and drawers have a handle setting (none, knob, bar or cutout grip). Doors also have hinge side, opening angle and handle position. "Carcass with doors" is a ready-made unit with one or two doors.
 - **Open / close:** double-click a unit, tick "Open" in the right panel, or use Open all / Close all in the toolbar. This is only a view; it isn't saved.
-- **Exploded view:** toggle Explode in the toolbar and adjust the amount with the slider. Moving is disabled while exploded.
+- **Exploded view:** toggle Explode in the toolbar and adjust the amount with the slider. Walls and columns fade out so they don't hide the parts. Moving is disabled while exploded.
 - **Share:** the Share button copies a read-only link with the whole design inside it. Whoever opens it can look around, switch views, open doors and drawers, explode and see the cut list — but cannot change anything, and their own autosaved work is left alone. Links made on `localhost` only work on your computer; open the app via its network address to share with other devices.
 - **AI assistant:** the AI button opens a chat that edits the design. Each request is one undo step, and the reply lists what changed. See [AI setup](#ai-setup).
 - **Overlaps:** intersecting parts turn red and are counted in the status bar.

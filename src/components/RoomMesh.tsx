@@ -1,5 +1,6 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Edges } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Room } from '../types';
 import { mm } from '../units';
@@ -52,9 +53,19 @@ function wallsOf(room: Room) {
   });
 }
 
-/** Walls whose outer side faces the camera are hidden so they never block the view. */
-export function RoomMesh({ room, showWalls }: { room: Room; showWalls: boolean }) {
+const FADED_OPACITY = 0.12;
+
+/**
+ * Walls whose outer side faces the camera are hidden so they never block the view.
+ * `faded` (exploded view) fades walls and columns out so they never cover separated parts.
+ */
+export function RoomMesh({ room, showWalls, faded }: { room: Room; showWalls: boolean; faded: boolean }) {
   const wallRefs = useRef<(THREE.Mesh | null)[]>([]);
+  const fade = useRef(1);
+  // One shared material for walls and columns, so a single opacity animates all of them.
+  const solid = useMemo(() => new THREE.MeshStandardMaterial({ roughness: 0.95 }), []);
+  useEffect(() => () => solid.dispose(), [solid]);
+  solid.color.set(room.wallColor);
   const floorGeom = useMemo(() => {
     const shape = new THREE.Shape(room.points.map((p) => new THREE.Vector2(mm(p.x), -mm(p.z))));
     return new THREE.ShapeGeometry(shape);
@@ -63,7 +74,17 @@ export function RoomMesh({ room, showWalls }: { room: Room; showWalls: boolean }
   const map = room.floorKind === 'color' ? null : floorTexture(room.floorKind, room.floorColor);
   const walls = useMemo(() => wallsOf(room), [room]);
 
-  useFrame(({ camera }) => {
+  useFrame(({ camera }, dt) => {
+    fade.current = THREE.MathUtils.damp(fade.current, faded ? FADED_OPACITY : 1, 6, dt);
+    if (Math.abs(fade.current - (faded ? FADED_OPACITY : 1)) < 1e-3) fade.current = faded ? FADED_OPACITY : 1;
+    const translucent = fade.current < 0.999;
+    if (solid.transparent !== translucent) {
+      solid.transparent = translucent;
+      solid.depthWrite = !translucent;
+      solid.needsUpdate = true;
+    }
+    solid.opacity = fade.current;
+
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
     walls.forEach((w, i) => {
@@ -83,11 +104,16 @@ export function RoomMesh({ room, showWalls }: { room: Room; showWalls: boolean }
       </mesh>
       {showWalls &&
         walls.map((w) => (
-          <mesh key={w.key} ref={(m) => (wallRefs.current[w.key] = m)} receiveShadow position={[mm(w.x), mm(room.height) / 2, mm(w.z)]} rotation-y={w.rot}>
+          <mesh key={w.key} ref={(m) => (wallRefs.current[w.key] = m)} receiveShadow position={[mm(w.x), mm(room.height) / 2, mm(w.z)]} rotation-y={w.rot} material={solid}>
             <boxGeometry args={[mm(w.len), mm(room.height), mm(room.wallThickness)]} />
-            <meshStandardMaterial color={room.wallColor} roughness={0.95} />
           </mesh>
         ))}
+      {room.columns.map((c) => (
+        <mesh key={c.id} position={[mm(c.x), mm(room.height) / 2, mm(c.z)]} material={solid} castShadow receiveShadow>
+          <boxGeometry args={[mm(c.w), mm(room.height), mm(c.d)]} />
+          {!faded && <Edges color="#9a978f" />}
+        </mesh>
+      ))}
     </group>
   );
 }

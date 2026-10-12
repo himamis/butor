@@ -60,6 +60,15 @@ export interface SceneObject {
   locked?: boolean;
 }
 
+/** Floor-to-ceiling column (e.g. a structural pillar in a corner). Center x/z, size w × d, in mm. */
+export interface Column {
+  id: string;
+  x: number;
+  z: number;
+  w: number;
+  d: number;
+}
+
 export type FloorKind = 'color' | 'wood' | 'tiles' | 'concrete';
 
 export interface Room {
@@ -69,6 +78,7 @@ export interface Room {
   floorKind: FloorKind;
   floorColor: string;
   wallColor: string;
+  columns: Column[];
 }
 
 export interface Design {

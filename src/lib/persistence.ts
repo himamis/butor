@@ -47,6 +47,13 @@ export function parseDesign(json: unknown): Design | null {
       floorKind: FLOORS.includes(r.floorKind as FloorKind) ? (r.floorKind as FloorKind) : DEFAULT_ROOM.floorKind,
       floorColor: str(r.floorColor, DEFAULT_ROOM.floorColor),
       wallColor: str(r.wallColor, DEFAULT_ROOM.wallColor),
+      columns: Array.isArray(r.columns)
+        ? r.columns.flatMap((c) =>
+            isObj(c) && isNum(c.x) && isNum(c.z) && isNum(c.w) && isNum(c.d) && c.w > 0 && c.d > 0
+              ? [{ id: str(c.id, uid()), x: c.x, z: c.z, w: c.w, d: c.d }]
+              : [],
+          )
+        : [],
     },
     objects,
   };

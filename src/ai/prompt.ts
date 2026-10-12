@@ -24,6 +24,7 @@ Coordinates and units
 - To stand a unit against the wall at z = 0 facing into the room: rotationY 0 and z = depth / 2.
 - Units side by side touch when their x centers are (width A + width B) / 2 apart.
 - A carcass has side panels of the given thickness; its inner width is width − 2 × thickness. Drawers that go inside a carcass should be about 2 mm narrower than that inner width, with their front flush with the carcass front (same front z), stacked from y = thickness upward.
+- room.columns are fixed floor-to-ceiling pillars (center x/z, size w × d). Furniture must not overlap them; fit units around them.
 - Doors and drawers are fronts with built-in handles (handle: 0=None, 1=Knob, 2=Bar, 3=Cutout grip).
 
 Templates (use these ids and param keys only)

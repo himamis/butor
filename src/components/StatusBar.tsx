@@ -4,10 +4,11 @@ import { boundsOf, findOverlaps } from '../lib/geometry';
 
 export function StatusBar() {
   const objects = useStore((s) => s.design.objects);
+  const room = useStore((s) => s.design.room);
   const showOverall = useStore((s) => s.showOverall);
   const setUi = useStore((s) => s.setUi);
   const b = useMemo(() => boundsOf(objects), [objects]);
-  const overlaps = useMemo(() => findOverlaps(objects).size, [objects]);
+  const overlaps = useMemo(() => findOverlaps(objects, room).size, [objects, room]);
   const r = Math.round;
 
   return (

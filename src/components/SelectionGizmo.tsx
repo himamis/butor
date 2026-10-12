@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { TransformControls } from '@react-three/drei';
 import type { SceneObject } from '../types';
 import { mm, toMm } from '../units';
-import { boundsOf, objectBox, type Box } from '../lib/geometry';
+import { boundsOf, columnBoxes, objectBox, type Box } from '../lib/geometry';
 import { snapMove } from '../lib/snapping';
 import { normDeg, rotateAround, useStore } from '../state/store';
 
@@ -52,7 +52,7 @@ export function SelectionGizmo() {
       start: new Map(chosen.map((o) => [o.id, o])),
       p0: pivot.current.position.clone(),
       box,
-      others: s.design.objects.filter((o) => !s.selection.includes(o.id)).map(objectBox),
+      others: [...s.design.objects.filter((o) => !s.selection.includes(o.id)).map(objectBox), ...columnBoxes(s.design.room)],
     };
   };
 

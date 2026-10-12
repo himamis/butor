@@ -1,4 +1,4 @@
-import type { Panel, SceneObject, Vec3 } from '../types';
+import type { Panel, Room, SceneObject, Vec3 } from '../types';
 import { getTemplate } from '../templates';
 
 export type Box = { min: Vec3; max: Vec3 };
@@ -65,15 +65,26 @@ export function boundsOf(objs: SceneObject[]): Box | null {
   return unionBoxes(objs.map(objectBox));
 }
 
+export function columnBoxes(room: Room): Box[] {
+  return room.columns.map((c) => ({
+    min: { x: c.x - c.w / 2, y: 0, z: c.z - c.d / 2 },
+    max: { x: c.x + c.w / 2, y: room.height, z: c.z + c.d / 2 },
+  }));
+}
+
 const intersects = (a: Box, b: Box, tol: number) =>
   a.min.x < b.max.x - tol && b.min.x < a.max.x - tol &&
   a.min.y < b.max.y - tol && b.min.y < a.max.y - tol &&
   a.min.z < b.max.z - tol && b.min.z < a.max.z - tol;
 
-/** Ids of objects whose panels intersect another object's panels by more than tol (mm). */
-export function findOverlaps(objs: SceneObject[], tol = 0.5): Set<string> {
+/** Ids of objects whose panels intersect another object's panels, or a room column, by more than tol (mm). */
+export function findOverlaps(objs: SceneObject[], room?: Room, tol = 0.5): Set<string> {
   const out = new Set<string>();
   const data = objs.map((o) => ({ o, box: objectBox(o), panels: worldPanelBoxes(o).map((p) => p.box) }));
+  const cols = room ? columnBoxes(room) : [];
+  for (const d of data) {
+    if (cols.some((c) => intersects(d.box, c, tol) && d.panels.some((p) => intersects(p, c, tol)))) out.add(d.o.id);
+  }
   for (let i = 0; i < data.length; i++) {
     for (let j = i + 1; j < data.length; j++) {
       const a = data[i];

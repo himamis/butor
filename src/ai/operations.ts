@@ -165,6 +165,12 @@ function applyOne(d: Design, raw: unknown, newId: () => string): { design: Desig
         if (!FLOORS.includes(op.floorKind as FloorKind)) fail(`floorKind must be one of ${FLOORS.join(', ')}`);
         room.floorKind = op.floorKind as FloorKind;
       }
+      if (op.columns !== undefined) {
+        const cols = op.columns;
+        const valid = (c: unknown) => isObj(c) && isNum(c.x) && isNum(c.z) && isNum(c.w) && isNum(c.d) && (c.w as number) > 0 && (c.d as number) > 0;
+        if (!Array.isArray(cols) || cols.length > 50 || !cols.every(valid)) fail('columns must be a list of {x, z, w, d} in mm with w and d > 0 (it replaces all columns)');
+        room.columns = (cols as Rec[]).map((c) => ({ id: newId(), x: coord(c.x as number), z: coord(c.z as number), w: Math.min(5000, c.w as number), d: Math.min(5000, c.d as number) }));
+      }
       room.floorColor = color(op.floorColor, 'floorColor') ?? room.floorColor;
       room.wallColor = color(op.wallColor, 'wallColor') ?? room.wallColor;
       return { design: { ...d, room }, result: { ok: true, message: 'updated the room' } };
@@ -219,6 +225,11 @@ export const OPERATIONS_SCHEMA = {
           points: { type: 'array', items: { type: 'object', properties: { x: num, z: num } }, description: 'set_room: floor polygon corners in mm.' },
           height: { type: 'number', description: 'set_room: ceiling height in mm.' },
           floorKind: { type: 'string', enum: FLOORS },
+      columns: {
+        type: 'array',
+        items: { type: 'object', properties: { x: num, z: num, w: num, d: num } },
+        description: 'set_room: floor-to-ceiling columns, center x/z and size w × d in mm. Replaces all existing columns.',
+      },
           floorColor: { type: 'string' },
           wallColor: { type: 'string' },
         },

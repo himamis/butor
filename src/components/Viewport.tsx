@@ -68,7 +68,7 @@ export function Viewport() {
   const explode = useStore((s) => (s.exploded ? s.explodeAmount : 0));
   const handle = useRef<ThreeHandle | null>(null);
 
-  const overlaps = useMemo(() => findOverlaps(objects), [objects]);
+  const overlaps = useMemo(() => findOverlaps(objects, room), [objects, room]);
   const selBox = useMemo(() => boundsOf(objects.filter((o) => selection.includes(o.id))), [objects, selection]);
   const allBox = useMemo(() => boundsOf(objects), [objects]);
   const spreads = useMemo(() => {
@@ -125,7 +125,7 @@ export function Viewport() {
           shadow-bias={-0.0005}
         />
         <Cameras key={view} view={view} room={room} />
-        <RoomMesh room={room} showWalls={view !== 'top'} />
+        <RoomMesh room={room} showWalls={view !== 'top'} faded={explode > 0} />
         {objects.map((o) => (
           <ObjectMesh
             key={o.id}

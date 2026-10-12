@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useStore } from '../state/store';
 import { ROOM_PRESETS, DEFAULT_COLOR } from '../state/defaults';
-import type { FloorKind } from '../types';
+import type { Column, FloorKind } from '../types';
+import { uid } from '../lib/uid';
 import { NumField } from './NumField';
 import { ColorField } from './ColorField';
 import { ColorInput } from './ColorInput';
@@ -29,6 +30,18 @@ export function RoomPanel() {
       const mid = { x: Math.round((a.x + b.x) / 2), z: Math.round((a.z + b.z) / 2) };
       return { ...r, points: [...r.points.slice(0, i + 1), mid, ...r.points.slice(i + 1)] };
     });
+  const setColumn = (id: string, patch: Partial<Column>) =>
+    setRoom((r) => ({ ...r, columns: r.columns.map((c) => (c.id === id ? { ...c, ...patch } : c)) }));
+  const addColumn = () =>
+    setRoom((r) => {
+      // Start in the corner nearest the origin; the user then types the real position and size.
+      const x = Math.min(...r.points.map((p) => p.x));
+      const z = Math.min(...r.points.map((p) => p.z));
+      return { ...r, columns: [...r.columns, { id: uid(), x: x + 200, z: z + 200, w: 400, d: 400 }] };
+    });
+  const removeColumn = (id: string) => setRoom((r) => ({ ...r, columns: r.columns.filter((c) => c.id !== id) }));
+  const positive = (v: number) => Math.min(5000, Math.max(10, v));
+
   const remove = (i: number) => setRoom((r) => (r.points.length <= 3 ? r : { ...r, points: r.points.filter((_, j) => j !== i) }));
 
   return (
@@ -58,6 +71,27 @@ export function RoomPanel() {
         <label>Height</label>
         <NumField value={room.height} min={1500} max={6000} onCommit={(v) => setRoom((r) => ({ ...r, height: Math.min(6000, Math.max(1500, v)) }))} />
       </div>
+
+      <h3>Columns</h3>
+      {room.columns.map((c, i) => (
+        <div key={c.id} className="column-row">
+          <div className="row3">
+            <div><label>X center</label><NumField value={c.x} onCommit={(v) => setColumn(c.id, { x: v })} /></div>
+            <div><label>Z center</label><NumField value={c.z} onCommit={(v) => setColumn(c.id, { z: v })} /></div>
+            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+              <button title={`Remove column ${i + 1}`} onClick={() => removeColumn(c.id)} style={{ width: '100%' }}>Remove</button>
+            </div>
+          </div>
+          <div className="row3">
+            <div><label>Width (x)</label><NumField value={c.w} onCommit={(v) => setColumn(c.id, { w: positive(v) })} /></div>
+            <div><label>Depth (z)</label><NumField value={c.d} onCommit={(v) => setColumn(c.id, { d: positive(v) })} /></div>
+          </div>
+        </div>
+      ))}
+      <div className="buttons">
+        <button onClick={addColumn}>+ Add column</button>
+      </div>
+      <small style={{ color: 'var(--muted)' }}>Floor-to-ceiling, in mm. Units snap against columns and turn red if they overlap one.</small>
 
       <h3>Floor</h3>
       <div className="row">

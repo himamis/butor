@@ -122,3 +122,5 @@ h3:first-child { margin-top: 0; }
 .chat-input textarea { font: inherit; resize: vertical; min-height: 60px; border: 1px solid var(--border); border-radius: 6px; padding: 6px; }
 .chat-settings { margin: 0; border: 0; border-bottom: 1px solid var(--border); padding: 10px; border-bottom: 1px solid var(--border); background: #fafaf8; }
 .chat-settings .row { grid-template-columns: 80px 1fr; }
+
+.column-row { border: 1px solid var(--border); border-radius: 6px; padding: 6px; margin-bottom: 6px; }

@@ -111,6 +111,26 @@ check('invalid file keeps the design', (await store()).design.objects.length ===
 await page.waitForTimeout(700); await page.reload(); await page.waitForTimeout(1000);
 check('autosave restores after reload', (await store()).design.objects.length === n);
 
+// ---------- Room columns ----------
+await S(() => window.__store.getState().select(null, false)); await page.waitForTimeout(150);
+await page.click('text=+ Add column'); await page.waitForTimeout(100);
+const colRow = page.locator('.column-row').first();
+await colRow.locator('.row3').first().locator('input').nth(0).fill('3800'); await page.keyboard.press('Enter');
+await colRow.locator('.row3').first().locator('input').nth(1).fill('200'); await page.keyboard.press('Enter');
+await page.waitForTimeout(150);
+const cols = (await store()).design.room.columns;
+check('a column can be added and positioned', cols.length === 1 && cols[0].x === 3800 && cols[0].z === 200, JSON.stringify(cols));
+await S(() => window.__store.getState().addObject('carcass', { x: 3500, y: 0, z: 290 }));
+await page.waitForTimeout(150);
+check('furniture overlapping a column is flagged', (await page.textContent('.status')).includes('overlapping'));
+await page.click('text=3D'); await page.waitForTimeout(500);
+await shot('7-column');
+await page.click('button:has-text("Explode")'); await page.waitForTimeout(1500);
+await shot('8-exploded-faded-room');
+await page.click('button:has-text("Explode")'); await page.waitForTimeout(300);
+await S(() => window.__store.getState().undo());
+await page.waitForTimeout(800); // let the editor's debounced autosave settle before the viewer checks
+
 // ---------- Share link: read-only viewer ----------
 await page.click('text=Share'); await page.waitForTimeout(200);
 const link = await page.inputValue('.modal input');
