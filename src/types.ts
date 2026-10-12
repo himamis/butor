@@ -69,7 +69,7 @@ export interface Column {
   d: number;
 }
 
-export type FloorKind = 'color' | 'wood' | 'tiles' | 'concrete';
+export type FloorKind = 'color' | 'wood' | 'chevron' | 'tiles' | 'concrete';
 
 export interface Room {
   points: { x: number; z: number }[]; // floor polygon, mm

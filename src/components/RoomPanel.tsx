@@ -7,6 +7,8 @@ import { NumField } from './NumField';
 import { ColorField } from './ColorField';
 import { ColorInput } from './ColorInput';
 
+const CHEVRON_OAK = '#e8dcc8';
+
 const PRESET_LABELS: Record<keyof typeof ROOM_PRESETS, string> = {
   rectangle: 'Rectangle',
   'l-shape': 'L-shape',
@@ -96,8 +98,16 @@ export function RoomPanel() {
       <h3>Floor</h3>
       <div className="row">
         <label>Finish</label>
-        <select value={room.floorKind} onChange={(e) => setRoom((r) => ({ ...r, floorKind: e.target.value as FloorKind }))}>
+        <select
+          value={room.floorKind}
+          onChange={(e) => {
+            const kind = e.target.value as FloorKind;
+            // Chevron parquet is usually light whitewashed oak; start from that tone.
+            setRoom((r) => ({ ...r, floorKind: kind, ...(kind === 'chevron' ? { floorColor: CHEVRON_OAK } : {}) }));
+          }}
+        >
           <option value="wood">Wood planks</option>
+          <option value="chevron">Chevron parquet</option>
           <option value="tiles">Tiles</option>
           <option value="concrete">Concrete</option>
           <option value="color">Plain color</option>
@@ -105,7 +115,7 @@ export function RoomPanel() {
       </div>
       <div className="swatches">
         <ColorInput value={room.floorColor} onChange={(c) => setRoom((r) => ({ ...r, floorColor: c }))} />
-        {['#b8895a', '#d8c3a0', '#8a6a4a', '#bdbdbd', '#ece8df'].map((c) => (
+        {['#b8895a', CHEVRON_OAK, '#d8c3a0', '#8a6a4a', '#bdbdbd', '#ece8df'].map((c) => (
           <button key={c} className="swatch" style={{ background: c }} onClick={() => setRoom((r) => ({ ...r, floorColor: c }))} />
         ))}
       </div>

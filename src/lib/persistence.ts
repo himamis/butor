@@ -4,7 +4,7 @@ import { DEFAULT_COLOR, DEFAULT_ROOM } from '../state/defaults';
 import { uid } from './uid';
 
 const KEY = 'wardrobe-designer:autosave';
-const FLOORS: FloorKind[] = ['color', 'wood', 'tiles', 'concrete'];
+const FLOORS: FloorKind[] = ['color', 'wood', 'chevron', 'tiles', 'concrete'];
 
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;

@@ -20,7 +20,7 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 - **Select:** click an object. Shift-click to add to the selection. Click empty space to deselect.
 - **Move / rotate:** use the gizmo (Move / Rotate in the toolbar), or type exact values in the right panel. Moves snap to the grid and flush against other objects and walls.
 - **Resize:** edit the size fields. Resizing changes the part's real dimensions, so panel thickness stays the same.
-- **Room:** click empty space to see room settings: shape presets, editable corners, height, columns, floor finish and wall color.
+- **Room:** click empty space to see room settings: shape presets, editable corners, height, columns, floor finish (wood planks, chevron parquet, tiles, concrete or plain color) and wall color.
 - **Columns:** add floor-to-ceiling columns of any size anywhere in the room (center X/Z, width, depth in mm). Units snap against them and turn red if they overlap one.
 - **Views:** 3D, Front, Top and Side in the toolbar. Walls facing the camera are hidden automatically.
 - **Doors, drawers & handles:** doors and drawers have a handle setting (none, knob, bar or cutout grip). Doors also have hinge side, opening angle and handle position. "Carcass with doors" is a ready-made unit with one or two doors.

@@ -14,7 +14,7 @@ export interface OpResult {
   id?: string; // id of an added object
 }
 
-const FLOORS: FloorKind[] = ['color', 'wood', 'tiles', 'concrete'];
+const FLOORS: FloorKind[] = ['color', 'wood', 'chevron', 'tiles', 'concrete'];
 const MAX_COORD = 100000; // mm, ±100 m
 const MAX_POINTS = 200;
 const MAX_NAME = 200;
