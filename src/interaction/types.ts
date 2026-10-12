@@ -31,6 +31,7 @@ export interface EditorPort {
   selectInner(inner: Inner | null): void;
   setHover(id: string | null): void;
   toggleOpen(id: string): void;
+  apply(ops: Op[], label: string): ApplyResult; // one undo step
   preview(ops: Op[], label: string): ApplyResult;
   commitPreview(): void;
   cancelPreview(): void;

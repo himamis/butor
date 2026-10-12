@@ -17,3 +17,4 @@ export * from './checks';
 export * from './outputs';
 export * from './snapping';
 export * from './snapping/context';
+export * from './room';

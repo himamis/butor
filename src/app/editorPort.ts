@@ -25,6 +25,7 @@ export const editorPort: EditorPort = {
   selectInner: (inner) => useApp.getState().selectInner(inner),
   setHover: (id) => useApp.getState().setHover(id),
   toggleOpen: (id) => useApp.getState().toggleOpen(id),
+  apply: (ops, label) => useApp.getState().apply(ops, label),
   preview: (ops, label) => useApp.getState().preview(ops, label),
   commitPreview: () => useApp.getState().commitPreview(),
   cancelPreview: () => useApp.getState().cancelPreview(),

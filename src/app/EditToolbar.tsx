@@ -1,10 +1,12 @@
 import { useApp, type Grid } from './store';
+import { setTool, useUi } from './ui';
 
 export function EditToolbar() {
   const canUndo = useApp((s) => s.history.past.length > 0);
   const canRedo = useApp((s) => s.history.future.length > 0);
   const grid = useApp((s) => s.grid);
   const snapping = useApp((s) => s.snapping);
+  const tool = useUi((s) => s.tool);
   const s = useApp.getState;
   return (
     <div className="group" role="group" aria-label="Edit">
@@ -13,6 +15,14 @@ export function EditToolbar() {
       </button>
       <button type="button" onClick={() => s().redo()} disabled={!canRedo} title="Redo (Ctrl/⌘ ⇧ Z)" aria-label="Redo">
         ↷
+      </button>
+      <button
+        type="button"
+        aria-pressed={tool === 'room'}
+        onClick={() => setTool(tool === 'room' ? 'select' : 'room')}
+        title="Edit the room: corners, walls, openings, obstacles (G)"
+      >
+        Room
       </button>
       <select
         aria-label="Snap grid"

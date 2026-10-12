@@ -229,3 +229,28 @@ export function snapPoint(ctx: SnapContext, p: Vec3): { point: Vec3; guide?: str
   if (found) return { point: { x: found.x, y: p.y, z: found.z }, guide: found.label };
   return { point: { x: roundTo(p.x, ctx.grid), y: p.y, z: roundTo(p.z, ctx.grid) } };
 }
+
+/**
+ * A dragged room corner: lines up with a neighbouring corner on x or z (square walls) when within
+ * `threshold`, otherwise rounds to the grid. `square` names the axes that were lined up.
+ */
+export function snapCorner(
+  p: { x: number; z: number },
+  neighbours: { x: number; z: number }[],
+  grid: number,
+  threshold: number,
+): { x: number; z: number; square: ('x' | 'z')[] } {
+  const square: ('x' | 'z')[] = [];
+  const axis = (k: 'x' | 'z') => {
+    let best: number | null = null;
+    for (const n of neighbours)
+      if (Math.abs(n[k] - p[k]) <= threshold && (best === null || Math.abs(n[k] - p[k]) < Math.abs(best - p[k])))
+        best = n[k];
+    if (best !== null) {
+      square.push(k);
+      return best;
+    }
+    return roundTo(p[k], grid);
+  };
+  return { x: axis('x'), z: axis('z'), square };
+}

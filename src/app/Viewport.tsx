@@ -5,6 +5,7 @@ import { InputController } from '../interaction/controller';
 import { faceHandles } from '../interaction/handles';
 import { SelectTool } from '../interaction/tools/select';
 import { PlaceTool, type EntityFactory } from '../interaction/tools/place';
+import { roomHandles, RoomTool } from '../interaction/tools/room';
 import { Renderer } from '../render/Renderer';
 import { editorPort } from './editorPort';
 import { useApp, visibleDesign } from './store';
@@ -36,6 +37,7 @@ export function Viewport() {
   const previewing = useApp((s) => !!s.previewDoc);
   const marquee = useUi((s) => s.marquee);
   const status = useUi((s) => s.status);
+  const tool = useUi((s) => s.tool);
   const problems = useMemo(
     () => new Set(checks.filter((c) => c.severity === 'error').flatMap((c) => c.entities)),
     [checks],
@@ -60,6 +62,12 @@ export function Viewport() {
   }, []);
 
   useEffect(() => {
+    const r = renderer.current;
+    if (!r || !controller.current) return;
+    controller.current.setTool(tool === 'room' ? new RoomTool(editorPort, r) : new SelectTool(editorPort, r));
+  }, [tool]);
+
+  useEffect(() => {
     renderer.current?.setDesign(design, scene);
   }, [design, scene]);
 
@@ -77,6 +85,10 @@ export function Viewport() {
   useEffect(() => {
     const r = renderer.current;
     if (!r) return;
+    if (tool === 'room') {
+      r.setHandles(roomHandles(design.room), null); // follows the preview while dragging
+      return;
+    }
     const d = useApp.getState().design;
     const ids = selection.entities;
     const locked = ids.some((id) => d.entities[id]?.locked);
@@ -92,7 +104,7 @@ export function Viewport() {
     const maxZ = Math.max(...boxes.map((b) => b.center.z + Math.max(b.half.x, b.half.z)));
     const center = { x: (minX + maxX) / 2, y: 0, z: (minZ + maxZ) / 2 };
     r.setHandles(single ? faceHandles(single) : [], { center, radius: Math.max(maxX - minX, maxZ - minZ) / 2 + 150 });
-  }, [selection, scene, view.exploded, previewing]);
+  }, [selection, scene, view.exploded, previewing, tool, design.room]);
 
   const entryFromDrag = () => useUi.getState().dragEntry;
 
@@ -103,7 +115,7 @@ export function Viewport() {
       data-testid="canvas-host"
       onDragOver={(e) => {
         const entry = entryFromDrag();
-        if (!entry || !renderer.current) return;
+        if (!entry || !renderer.current || tool !== 'select') return;
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
         if (!placing.current) placing.current = new PlaceTool(editorPort, renderer.current, entry, factory);

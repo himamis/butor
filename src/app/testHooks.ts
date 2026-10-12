@@ -16,7 +16,7 @@ export interface ButorTestHooks {
   toScreen(p: { x: number; y: number; z: number }): { x: number; y: number };
   pick(x: number, y: number): unknown;
   /** Undo depth and the current selection. */
-  state(): { undo: number; selection: string[]; open: string[] };
+  state(): { undo: number; selection: string[]; open: string[]; checks: { kind: string; entities: string[] }[] };
 }
 
 declare global {
@@ -56,7 +56,12 @@ export function installTestHooks(): void {
     pick: (x, y) => need().pick(x, y),
     state: () => {
       const s = useApp.getState();
-      return { undo: s.history.past.length, selection: s.selection.entities, open: [...s.view.open] };
+      return {
+        undo: s.history.past.length,
+        selection: s.selection.entities,
+        open: [...s.view.open],
+        checks: s.checks.map((c) => ({ kind: c.kind, entities: c.entities })),
+      };
     },
   };
 }

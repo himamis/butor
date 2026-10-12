@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { matchShortcut } from '../interaction/shortcuts';
 import { useApp } from './store';
-import { useUi } from './ui';
+import { setTool, useUi } from './ui';
 
 /** Keyboard shortcuts for the editor (one table: src/interaction/shortcuts.ts). */
 export function useShortcuts(scope: 'editor' | 'viewer') {
@@ -35,12 +35,15 @@ export function useShortcuts(scope: 'editor' | 'viewer') {
             elevationWall: s.view.elevationWall ?? Object.keys(s.design.room.walls)[0] ?? null,
           }),
         search: () => window.dispatchEvent(new Event('butor:search')),
+        'room-edit': () => setTool(useUi.getState().tool === 'room' ? 'select' : 'room'),
         escape: () =>
           useUi.getState().help
             ? useUi.getState().set({ help: false })
-            : s.selection.inner
-              ? s.selectInner(null)
-              : s.select([]),
+            : useUi.getState().tool !== 'select'
+              ? setTool('select')
+              : s.selection.inner
+                ? s.selectInner(null)
+                : s.select([]),
         help: () => useUi.getState().set({ help: !useUi.getState().help }),
       };
       const fn = run[action];
