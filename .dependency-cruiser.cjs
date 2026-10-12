@@ -2,13 +2,17 @@
 // Tests may import test tooling (vitest, fast-check); boundaries apply to production code.
 const TESTS = '\\.(test|prop\\.test)\\.ts$';
 
-const only = (from, allowed, comment) => ({
+const only = (from, allowed, comment, packages = []) => ({
   name: `${from}-boundary`,
   comment,
   severity: 'error',
   from: { path: `^src/${from}/`, pathNot: TESTS },
   to: {
-    pathNot: [`^src/${from}/`, ...allowed.map((a) => `^src/${a}/`), '^node_modules/zod/'],
+    pathNot: [
+      `^src/${from}/`,
+      ...allowed.map((a) => `^src/${a}/`),
+      ...['zod', ...packages].map((p) => `^node_modules/${p}/`),
+    ],
     dependencyTypesNot: ['type-only'],
   },
 });
@@ -35,7 +39,10 @@ module.exports = {
       from: { path: '^src/interaction/', pathNot: TESTS },
       to: { path: '^src/(app|viewer|persistence|ai|catalog)/' },
     },
-    only('persistence', ['core'], 'persistence builds on core only'),
+    only('persistence', ['core'], 'persistence builds on core (plus its storage and compression libraries)', [
+      'idb',
+      'fflate',
+    ]),
     {
       name: 'server-boundary',
       comment: 'server may use core and catalog, never browser code',

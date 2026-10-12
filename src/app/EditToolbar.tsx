@@ -1,5 +1,6 @@
 import { useApp, type Grid } from './store';
 import { setTool, useUi } from './ui';
+import { MeasureButtons } from './MeasureButtons';
 
 export function EditToolbar() {
   const canUndo = useApp((s) => s.history.past.length > 0);
@@ -24,6 +25,7 @@ export function EditToolbar() {
       >
         Room
       </button>
+      <MeasureButtons />
       <select
         aria-label="Snap grid"
         value={grid}

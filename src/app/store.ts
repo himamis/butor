@@ -16,6 +16,7 @@ import {
   type EntityInput,
   type History,
   type Op,
+  type Vec3,
   type OpContext,
   type SceneModel,
 } from '../core';
@@ -33,6 +34,7 @@ export interface ViewSettings {
   explodeAmount: number;
   open: Set<string>;
   hideFronts: boolean;
+  measurements: { a: Vec3; b: Vec3; distance: number }[]; // kept until cleared (view state, not the design)
 }
 
 export interface InnerSelection {
@@ -60,6 +62,7 @@ interface AppState {
   hover: string | null;
   grid: Grid;
   snapping: boolean;
+  readOnly: boolean; // the share-link viewer: every edit is refused
   clipboard: { entities: EntityInput[]; groups: string[][]; width: number } | null;
   pasteCount: number;
   apply(ops: Op[], label: string): ApplyResult;
@@ -69,6 +72,7 @@ interface AppState {
   undo(): void;
   redo(): void;
   load(design: Design): void;
+  setReadOnly(readOnly: boolean): void;
   setView(patch: Partial<ViewSettings>): void;
   toggleOpen(entityId: string): void;
   setOpenAll(open: boolean): void;
@@ -83,6 +87,13 @@ interface AppState {
   groupSelection(): void;
   ungroupSelection(): void;
 }
+
+const refused = (doc: Design): ApplyResult => ({
+  doc,
+  inverse: [],
+  results: [{ ok: false, message: 'This design is read-only' }],
+  ok: false,
+});
 
 export function newDesign(): Design {
   return createDesign({
@@ -194,21 +205,32 @@ export const useApp = create<AppState>()((set, get) => {
     previewDoc: null,
     pending: null,
     history: emptyHistory(),
-    view: { mode: '3d', elevationWall: null, exploded: false, explodeAmount: 0.6, open: new Set(), hideFronts: false },
+    view: {
+      mode: '3d',
+      elevationWall: null,
+      exploded: false,
+      explodeAmount: 0.6,
+      open: new Set(),
+      hideFronts: false,
+      measurements: [],
+    },
     selection: { entities: [], inner: null },
     hover: null,
     grid: 10,
     snapping: true,
+    readOnly: false,
     clipboard: null,
     pasteCount: 0,
 
     apply(ops, label) {
+      if (get().readOnly) return refused(get().design);
       const r = applyTransaction(get().design, { label, ops }, opContext());
       commit(r, label);
       return r;
     },
 
     preview(ops, label) {
+      if (get().readOnly) return refused(get().design);
       const r = applyTransaction(get().design, { label, ops }, opContext());
       if (r.ok) set({ previewDoc: r.doc, pending: { result: r, label }, ...derive(r.doc, false) });
       return r;
@@ -229,6 +251,7 @@ export const useApp = create<AppState>()((set, get) => {
     },
 
     undo() {
+      if (get().readOnly) return;
       if (get().previewDoc) return; // never in the middle of a drag
       const r = undoHistory(get().history, get().design, opContext());
       if (r)
@@ -236,10 +259,15 @@ export const useApp = create<AppState>()((set, get) => {
     },
 
     redo() {
+      if (get().readOnly) return;
       if (get().previewDoc) return;
       const r = redoHistory(get().history, get().design, opContext());
       if (r)
         set({ design: r.doc, history: r.history, ...derive(r.doc), selection: cleanSelection(r.doc, get().selection) });
+    },
+
+    setReadOnly(readOnly) {
+      set({ readOnly });
     },
 
     load(design) {

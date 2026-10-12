@@ -17,6 +17,18 @@ export interface ButorTestHooks {
   pick(x: number, y: number): unknown;
   /** Parts of an entity that move when it opens, with their motion (scene model). */
   motions(entityId: string): { part: string; motion: unknown }[];
+  /** An entity's bounding box (scene model, closed state). */
+  bounds(entityId: string): {
+    center: { x: number; y: number; z: number };
+    half: { x: number; y: number; z: number };
+    rotation: number;
+  } | null;
+  /** A part's box (scene model, closed state). */
+  part(partId: string): {
+    center: { x: number; y: number; z: number };
+    half: { x: number; y: number; z: number };
+    rotation: number;
+  } | null;
   /** Undo depth and the current selection. */
   state(): { undo: number; selection: string[]; open: string[]; checks: { kind: string; entities: string[] }[] };
 }
@@ -39,7 +51,9 @@ export function installTestHooks(): void {
     return renderer;
   };
   window.__butor = {
-    ready: true,
+    get ready() {
+      return renderer !== null; // the editor (or viewer) is on screen
+    },
     secureContext: window.isSecureContext,
     load(json) {
       const r = importDesign(json, catalog);
@@ -60,6 +74,8 @@ export function installTestHooks(): void {
       (useApp.getState().scene.entities.get(id)?.parts ?? [])
         .filter((p) => p.motion)
         .map((p) => ({ part: p.id, motion: p.motion })),
+    bounds: (id) => useApp.getState().scene.entities.get(id)?.bounds ?? null,
+    part: (id) => useApp.getState().scene.parts.get(id)?.obb ?? null,
     state: () => {
       const s = useApp.getState();
       return {

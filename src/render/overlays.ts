@@ -37,6 +37,8 @@ const RING_MAT = new THREE.MeshBasicMaterial({
 });
 const GUIDE_MAT = new THREE.LineBasicMaterial({ color: '#e5484d', depthTest: false });
 const TARGET_MAT = new THREE.LineBasicMaterial({ color: '#30a46c', depthTest: false });
+const MEASURE_MAT = new THREE.LineBasicMaterial({ color: '#8e4ec6', depthTest: false });
+const TICK = 40; // mm, end ticks of a measurement
 
 export class Overlays {
   readonly group = new THREE.Group();
@@ -45,6 +47,7 @@ export class Overlays {
   private guides: THREE.LineSegments | null = null;
   private target: THREE.LineSegments | null = null;
   private hot: string | null = null;
+  private measures: THREE.LineSegments | null = null;
 
   constructor() {
     this.group.name = 'overlays';
@@ -114,6 +117,34 @@ export class Overlays {
     this.group.add(this.target);
   }
 
+  /** Measurement lines with small end ticks across them. */
+  setMeasures(lines: GuideSpec[]) {
+    if (this.measures) {
+      this.group.remove(this.measures);
+      this.measures.geometry.dispose();
+      this.measures = null;
+    }
+    if (!lines.length) return;
+    const pts: THREE.Vector3[] = [];
+    for (const l of lines) {
+      const a = new THREE.Vector3(l.from.x, l.from.y, l.from.z);
+      const b = new THREE.Vector3(l.to.x, l.to.y, l.to.z);
+      pts.push(a, b);
+      const dir = b.clone().sub(a);
+      if (dir.lengthSq() < 1e-9) continue;
+      const side = new THREE.Vector3()
+        .crossVectors(
+          dir,
+          Math.abs(dir.y) > 0.9 * dir.length() ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0),
+        )
+        .setLength(TICK / 2);
+      for (const p of [a, b]) pts.push(p.clone().add(side), p.clone().sub(side));
+    }
+    this.measures = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts), MEASURE_MAT);
+    this.measures.renderOrder = 22;
+    this.group.add(this.measures);
+  }
+
   pickTargets(): THREE.Object3D[] {
     return [...this.handles, ...(this.ring ? [this.ring] : [])];
   }
@@ -122,5 +153,6 @@ export class Overlays {
     this.setHandles([], null);
     this.setGuides([]);
     this.setTarget(null);
+    this.setMeasures([]);
   }
 }

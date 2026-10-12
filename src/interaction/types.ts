@@ -39,6 +39,8 @@ export interface EditorPort {
   snapping(): boolean;
   setMarquee(rect: { x0: number; y0: number; x1: number; y1: number } | null): void;
   setStatus(text: string | null): void; // short hint near the cursor / status bar
+  addMeasurement(m: { a: Vec3; b: Vec3; distance: number }): void;
+  previewMeasurement(m: { a: Vec3; b: Vec3; distance: number } | null): void;
 }
 
 export interface ToolPointer {

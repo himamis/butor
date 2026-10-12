@@ -37,6 +37,7 @@ export function useShortcuts(scope: 'editor' | 'viewer') {
           }),
         frame: () => frameEntities(sel),
         search: () => window.dispatchEvent(new Event('butor:search')),
+        measure: () => setTool(useUi.getState().tool === 'measure' ? 'select' : 'measure'),
         'room-edit': () => setTool(useUi.getState().tool === 'room' ? 'select' : 'room'),
         escape: () =>
           useUi.getState().help

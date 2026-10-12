@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { newId } from '../core';
 import { instantiatePreset, PRESETS } from '../catalog';
 import { InputController } from '../interaction/controller';
@@ -6,9 +6,13 @@ import { faceHandles } from '../interaction/handles';
 import { SelectTool } from '../interaction/tools/select';
 import { PlaceTool, type EntityFactory } from '../interaction/tools/place';
 import { roomHandles, RoomTool } from '../interaction/tools/room';
+import { MeasureTool } from '../interaction/tools/measure';
+import { ViewTool } from '../interaction/tools/view';
+import { MeasureLabels } from './MeasureLabels';
 import { Renderer } from '../render/Renderer';
 import { editorPort } from './editorPort';
 import { registerFramer } from './frame';
+import { registerThumbnail } from './thumbnail';
 import { useApp, visibleDesign } from './store';
 import { registerRenderer } from './testHooks';
 import { useUi } from './ui';
@@ -24,7 +28,7 @@ const factory: EntityFactory = (entry, position) => {
 };
 
 /** Mounts the renderer and the input controller, and keeps them in sync with the app state. */
-export function Viewport() {
+export function Viewport({ readOnly = false }: { readOnly?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   const renderer = useRef<Renderer | null>(null);
   const controller = useRef<InputController | null>(null);
@@ -39,6 +43,8 @@ export function Viewport() {
   const marquee = useUi((s) => s.marquee);
   const status = useUi((s) => s.status);
   const tool = useUi((s) => s.tool);
+  const measurePreview = useUi((s) => s.measurePreview);
+  const [mounted, setMounted] = useState<Renderer | null>(null);
   const problems = useMemo(
     () => new Set(checks.filter((c) => c.severity === 'error').flatMap((c) => c.entities)),
     [checks],
@@ -53,22 +59,34 @@ export function Viewport() {
     const r = new Renderer(host.current!);
     renderer.current = r;
     registerRenderer(r);
+    setMounted(r);
     registerFramer((min, max) => r.frameBounds(min, max));
-    controller.current = new InputController(host.current!, r, new SelectTool(editorPort, r));
+    registerThumbnail(() => r.thumbnail());
+    controller.current = new InputController(host.current!, r, new ViewTool(editorPort)); // the tool effect sets the real one
     return () => {
       controller.current?.dispose();
       registerRenderer(null);
       registerFramer(null);
+      registerThumbnail(null);
       r.dispose();
       renderer.current = null;
+      setMounted(null);
     };
   }, []);
 
   useEffect(() => {
     const r = renderer.current;
     if (!r || !controller.current) return;
-    controller.current.setTool(tool === 'room' ? new RoomTool(editorPort, r) : new SelectTool(editorPort, r));
-  }, [tool]);
+    controller.current.setTool(
+      tool === 'measure'
+        ? new MeasureTool(editorPort, r)
+        : readOnly
+          ? new ViewTool(editorPort)
+          : tool === 'room'
+            ? new RoomTool(editorPort, r)
+            : new SelectTool(editorPort, r),
+    );
+  }, [tool, readOnly]);
 
   useEffect(() => {
     renderer.current?.setDesign(design, scene);
@@ -84,10 +102,19 @@ export function Viewport() {
     });
   }, [view, tints]);
 
+  useEffect(() => {
+    const all = measurePreview ? [...view.measurements, measurePreview] : view.measurements;
+    renderer.current?.setMeasures(all.map((m) => ({ from: m.a, to: m.b })));
+  }, [view.measurements, measurePreview]);
+
   // Resize handles on a single selected unit; a rotate ring under any selection (hidden while dragging).
   useEffect(() => {
     const r = renderer.current;
     if (!r) return;
+    if (tool === 'measure' || readOnly) {
+      r.setHandles([], null);
+      return;
+    }
     if (tool === 'room') {
       r.setHandles(roomHandles(design.room), null); // follows the preview while dragging
       return;
@@ -107,7 +134,7 @@ export function Viewport() {
     const maxZ = Math.max(...boxes.map((b) => b.center.z + Math.max(b.half.x, b.half.z)));
     const center = { x: (minX + maxX) / 2, y: 0, z: (minZ + maxZ) / 2 };
     r.setHandles(single ? faceHandles(single) : [], { center, radius: Math.max(maxX - minX, maxZ - minZ) / 2 + 150 });
-  }, [selection, scene, view.exploded, previewing, tool, design.room]);
+  }, [selection, scene, view.exploded, previewing, tool, design.room, readOnly]);
 
   const entryFromDrag = () => useUi.getState().dragEntry;
 
@@ -118,7 +145,7 @@ export function Viewport() {
       data-testid="canvas-host"
       onDragOver={(e) => {
         const entry = entryFromDrag();
-        if (!entry || !renderer.current || tool !== 'select') return;
+        if (!entry || !renderer.current || tool !== 'select' || readOnly) return;
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
         if (!placing.current) placing.current = new PlaceTool(editorPort, renderer.current, entry, factory);
@@ -148,6 +175,7 @@ export function Viewport() {
           }}
         />
       )}
+      <MeasureLabels renderer={mounted} host={host.current} />
       {status && (
         <div className="status-pill" role="status">
           {status}

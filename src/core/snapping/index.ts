@@ -1,4 +1,4 @@
-import { obbAabb, type OBB } from '../geometry/obb';
+import { obbAabb, obbCorners, type OBB } from '../geometry/obb';
 import type { Axis } from '../geometry/part';
 import type { Vec3 } from '../schema/primitives';
 
@@ -253,4 +253,56 @@ export function snapCorner(
     return roundTo(p[k], grid);
   };
   return { x: axis('x'), z: axis('z'), square };
+}
+
+/**
+ * Measure snapping on a box: the nearest corner within `threshold`, else the nearest point on an edge
+ * within `threshold`, else the point itself (a face hit is already exact along the face normal).
+ */
+export function snapToBox(p: Vec3, box: OBB, threshold: number): { point: Vec3; kind: 'corner' | 'edge' | 'face' } {
+  const xz = obbCorners(box);
+  const y0 = box.center.y - box.half.y;
+  const y1 = box.center.y + box.half.y;
+  const corners: Vec3[] = [
+    ...xz.map((c) => ({ x: c.x, y: y0, z: c.z })),
+    ...xz.map((c) => ({ x: c.x, y: y1, z: c.z })),
+  ];
+  const dist = (a: Vec3, b: Vec3) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+  let best: { point: Vec3; d: number } | null = null;
+  for (const c of corners) {
+    const d = dist(c, p);
+    if (d <= threshold && (!best || d < best.d)) best = { point: c, d };
+  }
+  if (best) return { point: best.point, kind: 'corner' };
+  const edges: [number, number][] = [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [3, 0],
+    [4, 5],
+    [5, 6],
+    [6, 7],
+    [7, 4],
+    [0, 4],
+    [1, 5],
+    [2, 6],
+    [3, 7],
+  ];
+  for (const [i, j] of edges) {
+    const a = corners[i]!,
+      b = corners[j]!;
+    const ab = { x: b.x - a.x, y: b.y - a.y, z: b.z - a.z };
+    const len2 = ab.x ** 2 + ab.y ** 2 + ab.z ** 2;
+    const t = Math.max(0, Math.min(1, ((p.x - a.x) * ab.x + (p.y - a.y) * ab.y + (p.z - a.z) * ab.z) / len2));
+    const q = { x: a.x + ab.x * t, y: a.y + ab.y * t, z: a.z + ab.z * t };
+    const d = dist(q, p);
+    if (d <= threshold && (!best || d < best.d)) best = { point: q, d };
+  }
+  return best ? { point: best.point, kind: 'edge' } : { point: p, kind: 'face' };
+}
+
+/** A measurement: from `a` along the unit normal `n` of the first face to the plane through the second point. */
+export function measureAlong(a: Vec3, n: Vec3, b: Vec3): { distance: number; end: Vec3 } {
+  const d = (b.x - a.x) * n.x + (b.y - a.y) * n.y + (b.z - a.z) * n.z;
+  return { distance: d, end: { x: a.x + n.x * d, y: a.y + n.y * d, z: a.z + n.z * d } };
 }

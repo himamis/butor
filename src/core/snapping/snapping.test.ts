@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { snapMove, snapFace, snapItemY, snapPoint, type SnapContext } from '.';
+import { measureAlong, snapMove, snapFace, snapItemY, snapPoint, snapToBox, type SnapContext } from '.';
 import type { OBB } from '../geometry/obb';
 
 const box = (x0: number, x1: number, z0: number, z1: number, y0 = 0, y1 = 2000, rotation = 0): OBB => ({
@@ -117,5 +117,25 @@ describe('snapPoint', () => {
     expect(snapPoint(ctx, { x: 1806, y: 0, z: 595 }).point).toEqual({ x: 1800, y: 0, z: 600 });
     expect(snapPoint(ctx, { x: 3990, y: 0, z: 8 }).point).toEqual({ x: 4000, y: 0, z: 0 });
     expect(snapPoint(ctx, { x: 2503, y: 0, z: 1507 }).point).toEqual({ x: 2500, y: 0, z: 1510 });
+  });
+});
+
+describe('measure snapping', () => {
+  const box = { center: { x: 0, y: 500, z: 0 }, half: { x: 300, y: 500, z: 200 }, rotation: 0 };
+  it('a corner, then an edge, then the face point itself', () => {
+    expect(snapToBox({ x: 295, y: 995, z: 200 }, box, 10)).toEqual({
+      point: { x: 300, y: 1000, z: 200 },
+      kind: 'corner',
+    });
+    expect(snapToBox({ x: 100, y: 994, z: 200 }, box, 10)).toEqual({
+      point: { x: 100, y: 1000, z: 200 },
+      kind: 'edge',
+    });
+    expect(snapToBox({ x: 100, y: 500, z: 200 }, box, 10).kind).toBe('face');
+  });
+  it('measures along the first normal, whatever the in-plane offset of the second point', () => {
+    const r = measureAlong({ x: 3300, y: 1500, z: 0 }, { x: 0, y: 0, z: 1 }, { x: 600, y: 300, z: 619.5 });
+    expect(r.distance).toBe(619.5);
+    expect(r.end).toEqual({ x: 3300, y: 1500, z: 619.5 });
   });
 });

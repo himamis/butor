@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { ChecksPanel } from './ChecksPanel';
 import { ErrorBoundary } from './ErrorBoundary';
 import { MaterialsPanel } from './MaterialsPanel';
+import { OutputsPanel } from './OutputsPanel';
 import { PropertiesPanel } from './PropertiesPanel';
 import { useApp } from './store';
 
-type Tab = 'properties' | 'materials' | 'checks';
+type Tab = 'properties' | 'materials' | 'checks' | 'outputs';
 
 /** The right-hand panel: properties, materials and checks, each in its own error boundary. */
 export function SidePanel() {
@@ -16,6 +17,7 @@ export function SidePanel() {
     ['properties', 'Properties'],
     ['materials', 'Materials'],
     ['checks', 'Checks'],
+    ['outputs', 'Lists'],
   ];
   return (
     <aside className="side-panel" aria-label="Side panel">
@@ -39,6 +41,7 @@ export function SidePanel() {
           {tab === 'properties' && <PropertiesPanel />}
           {tab === 'materials' && <MaterialsPanel />}
           {tab === 'checks' && <ChecksPanel />}
+          {tab === 'outputs' && <OutputsPanel />}
         </ErrorBoundary>
       </div>
     </aside>

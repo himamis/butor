@@ -174,3 +174,4 @@ export function costEstimate(
   const total = lines.reduce((s, l) => s + l.amount, 0);
   return { currency, lines, total, unpriced };
 }
+export * from './elevation';

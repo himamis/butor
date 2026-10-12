@@ -59,6 +59,7 @@ export class Renderer {
     tints: { selected: new Set(), problems: new Set(), hover: null, hideFronts: false },
   };
   private frameRequested = false;
+  private readonly renderListeners = new Set<() => void>();
   private lastFrame = 0;
   private spreadTarget = new Map<string, Vec3>();
   readonly stats = { frames: 0, calls: 0, triangles: 0 };
@@ -147,6 +148,17 @@ export class Renderer {
     this.requestRender();
   }
 
+  /** A small PNG of the current view (start-screen thumbnails). Drawn and read in the same task. */
+  thumbnail(width = 240): string {
+    this.draw();
+    const src = this.gl.domElement;
+    const c = document.createElement('canvas');
+    c.width = width;
+    c.height = Math.max(1, Math.round((width * src.height) / Math.max(1, src.width)));
+    c.getContext('2d')?.drawImage(src, 0, 0, c.width, c.height);
+    return c.toDataURL('image/png');
+  }
+
   /** Fits the camera to an axis-aligned box in room mm (e.g. the entities of a check). */
   frameBounds(min: Vec3, max: Vec3) {
     this.frame(new THREE.Box3(new THREE.Vector3(min.x, min.y, min.z), new THREE.Vector3(max.x, max.y, max.z)));
@@ -228,6 +240,17 @@ export class Renderer {
     this.requestRender();
   }
 
+  setMeasures(lines: GuideSpec[]) {
+    this.overlays.setMeasures(lines);
+    this.requestRender();
+  }
+
+  /** Called after every frame (HTML labels that follow the camera). Returns an unsubscribe function. */
+  onRender(cb: () => void): () => void {
+    this.renderListeners.add(cb);
+    return () => this.renderListeners.delete(cb);
+  }
+
   setTarget(box: Parameters<Overlays['setTarget']>[0]) {
     this.overlays.setTarget(box);
     this.requestRender();
@@ -291,6 +314,7 @@ export class Renderer {
     this.stats.frames++;
     this.stats.calls = this.gl.info.render.calls;
     this.stats.triangles = this.gl.info.render.triangles;
+    for (const cb of this.renderListeners) cb();
   }
 
   private worldNormal(h: THREE.Intersection): Vec3 {

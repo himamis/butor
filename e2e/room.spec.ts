@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 async function boot(page: Page) {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/');
+  await page.goto('/new');
   await expect.poll(() => page.evaluate(() => window.__butor?.ready)).toBe(true);
   return errors;
 }

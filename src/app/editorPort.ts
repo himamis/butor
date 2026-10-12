@@ -33,4 +33,9 @@ export const editorPort: EditorPort = {
   snapping: () => useApp.getState().snapping,
   setMarquee: (rect) => useUi.getState().set({ marquee: rect }),
   setStatus: (text) => useUi.getState().set({ status: text }),
+  addMeasurement: (m) => {
+    const v = useApp.getState().view;
+    useApp.getState().setView({ measurements: [...v.measurements, m] });
+  },
+  previewMeasurement: (m) => useUi.getState().set({ measurePreview: m }),
 };
