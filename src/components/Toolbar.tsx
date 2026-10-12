@@ -54,6 +54,18 @@ export function Toolbar({ onCutList }: { onCutList: () => void }) {
         <button key={v.id} className={s.view === v.id ? 'active' : ''} onClick={() => s.setUi({ view: v.id })}>{v.label}</button>
       ))}
       <div className="sep" />
+      <button onClick={() => s.setOpenAll(s.openIds.length === 0)} title="Double-click a unit to open just that one">
+        {s.openIds.length ? 'Close all' : 'Open all'}
+      </button>
+      <button className={s.exploded ? 'active' : ''} onClick={() => s.setUi({ exploded: !s.exploded })}>Explode</button>
+      {s.exploded && (
+        <input
+          type="range" min={0.1} max={1} step={0.05} value={s.explodeAmount} style={{ width: 80 }}
+          title="Explode amount"
+          onChange={(e) => s.setUi({ explodeAmount: Number(e.target.value) })}
+        />
+      )}
+      <div className="sep" />
       <button onClick={onCutList}>Cut list</button>
     </header>
   );

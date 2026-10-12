@@ -58,3 +58,31 @@ describe('store', () => {
     expect(s().selection.sort()).toEqual([a.id, b.id].sort());
   });
 });
+
+describe('view state: open / explode', () => {
+  it('toggling a door open or exploding never touches the design or undo history', () => {
+    s().addObject('door', { x: 400, y: 0, z: 400 });
+    s().addObject('carcass', { x: 1200, y: 0, z: 400 });
+    const [door] = s().design.objects;
+    const design = s().design;
+    const past = s().past.length;
+    s().toggleOpen(door.id);
+    expect(s().openIds).toEqual([door.id]);
+    s().toggleOpen(door.id);
+    expect(s().openIds).toEqual([]);
+    s().setUi({ exploded: true, explodeAmount: 0.8 });
+    expect(s().design).toBe(design);
+    expect(s().past.length).toBe(past);
+  });
+
+  it('open all opens only objects that have moving parts; close all closes them', () => {
+    s().addObject('door', { x: 400, y: 0, z: 400 });
+    s().addObject('carcass', { x: 1200, y: 0, z: 400 });
+    s().addObject('drawer', { x: 2000, y: 0, z: 400 });
+    const [door, , drawer] = s().design.objects;
+    s().setOpenAll(true);
+    expect(s().openIds.sort()).toEqual([door.id, drawer.id].sort());
+    s().setOpenAll(false);
+    expect(s().openIds).toEqual([]);
+  });
+});

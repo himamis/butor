@@ -1,5 +1,6 @@
 import { useStore } from '../state/store';
 import { getTemplate } from '../templates';
+import { hasMovingParts } from '../lib/geometry';
 import type { SceneObject } from '../types';
 import { NumField } from './NumField';
 import { ColorField } from './ColorField';
@@ -8,6 +9,7 @@ import { RoomPanel } from './RoomPanel';
 function SingleObject({ o }: { o: SceneObject }) {
   const s = useStore();
   const t = getTemplate(o.templateId);
+  const movable = hasMovingParts(o);
   const update = (fn: (o: SceneObject) => SceneObject) => s.updateObjects([o.id], fn);
   const setPos = (axis: 'x' | 'y' | 'z', v: number) => update((x) => ({ ...x, position: { ...x.position, [axis]: axis === 'y' ? Math.max(0, v) : v } }));
 
@@ -26,12 +28,28 @@ function SingleObject({ o }: { o: SceneObject }) {
       </div>
 
       <h3>Size (mm)</h3>
-      {t.params.map((p) => (
+      {t.params.filter((p) => !p.options).map((p) => (
         <div className="row" key={p.key}>
           <label>{p.label}</label>
           <NumField value={o.params[p.key]} min={p.min} max={p.max} step={p.step} onCommit={(v) => s.setParam(o.id, p.key, v)} />
         </div>
       ))}
+
+      {t.params.some((p) => p.options) && <h3>Fronts &amp; hardware</h3>}
+      {t.params.filter((p) => p.options).map((p) => (
+        <div className="row" key={p.key}>
+          <label>{p.label}</label>
+          <select value={o.params[p.key]} onChange={(e) => s.setParam(o.id, p.key, Number(e.target.value))}>
+            {p.options!.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+          </select>
+        </div>
+      ))}
+      {movable && (
+        <label className="check">
+          <input type="checkbox" checked={s.openIds.includes(o.id)} onChange={() => s.toggleOpen(o.id)} />
+          Open (or double-click it)
+        </label>
+      )}
 
       <h3>Position (mm)</h3>
       <div className="row3">

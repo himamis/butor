@@ -22,6 +22,7 @@ export function SelectionGizmo() {
   const selection = useStore((s) => s.selection);
   const objects = useStore((s) => s.design.objects);
   const mode = useStore((s) => s.mode);
+  const exploded = useStore((s) => s.exploded);
   const pivot = useRef<THREE.Group>(null!);
   const drag = useRef<DragState | null>(null);
 
@@ -92,7 +93,7 @@ export function SelectionGizmo() {
   return (
     <>
       <group ref={pivot} />
-      {sel.length > 0 && !locked && (
+      {sel.length > 0 && !locked && !exploded && (
         <TransformControls
           object={pivot}
           mode={mode}

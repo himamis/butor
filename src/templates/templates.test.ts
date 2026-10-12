@@ -16,7 +16,7 @@ describe('every template', () => {
     const handleVariants = t.params.some((p) => p.key === 'handle') ? [HANDLE.none, HANDLE.knob, HANDLE.bar, HANDLE.cutout] : [undefined];
     for (const h of handleVariants) {
       it(`${t.id}${h === undefined ? '' : ` handle=${h}`}: closed panels lie inside width × height × depth`, () => {
-        const p = { ...defaultParams(t), ...(h === undefined ? {} : { handle: h }) };
+        const p: Record<string, number> = { ...defaultParams(t), ...(h === undefined ? {} : { handle: h }) };
         const panels = t.build(p);
         expect(panels.length).toBeGreaterThan(0);
         for (const pn of panels) {

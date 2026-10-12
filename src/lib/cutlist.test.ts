@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cutList, toCsv } from './cutlist';
+import { cutList, hardwareList, toCsv } from './cutlist';
 import { obj } from '../test/fixtures';
 
 describe('cutList', () => {
@@ -20,5 +20,26 @@ describe('cutList', () => {
   it('escapes CSV fields', () => {
     const csv = toCsv([{ part: 'Shelf, "deep"', length: 1, width: 2, thickness: 3, color: '#fff', qty: 1 }]);
     expect(csv.split('\n')[1]).toBe('"Shelf, ""deep""",1,2,3,#fff,1');
+  });
+});
+
+describe('hardware and cutouts', () => {
+  it('handles are listed as hardware, not as panels', () => {
+    const objs = [obj('carcass-doors', {}, { doors: 2, handle: 1 }), obj('drawer', {}, { handle: 2 }), obj('drawer', {}, { handle: 2 })];
+    expect(cutList(objs).some((r) => r.part.startsWith('Knob') || r.part.startsWith('Bar'))).toBe(false);
+    expect(hardwareList(objs)).toEqual([
+      { part: 'Bar handle 160 mm', qty: 2 },
+      { part: 'Knob Ø30', qty: 2 },
+    ]);
+  });
+
+  it('fronts with a cutout are named so the workshop knows', () => {
+    const rows = cutList([obj('door', {}, { handle: 3 }), obj('drawer', {}, { handle: 3 })]);
+    expect(rows.map((r) => r.part)).toEqual(expect.arrayContaining(['Door (grip hole)', 'Drawer front (grip notch)']));
+  });
+
+  it('CSV appends hardware rows', () => {
+    const csv = toCsv([], [{ part: 'Knob Ø30', qty: 4 }]);
+    expect(csv.split('\n')).toContain('Knob Ø30,,,,hardware,4');
   });
 });

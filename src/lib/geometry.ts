@@ -11,6 +11,11 @@ export function panelsOf(o: SceneObject): Panel[] {
   return getTemplate(o.templateId).build(o.params);
 }
 
+/** True if the object has doors or drawers that can open. */
+export function hasMovingParts(o: SceneObject): boolean {
+  return panelsOf(o).some((p) => p.motion);
+}
+
 /** Local → room coords (mm), rotating about Y like three.js. */
 export function toWorld(o: SceneObject, p: Vec3): Vec3 {
   const a = (o.rotationY * Math.PI) / 180;

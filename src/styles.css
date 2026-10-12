@@ -27,7 +27,9 @@ html, body, #root { margin: 0; height: 100%; background: var(--bg); }
   display: flex; align-items: center; gap: 4px;
   padding: 0 8px;
   background: var(--panel); border-bottom: 1px solid var(--border);
+  overflow-x: auto; white-space: nowrap;
 }
+.toolbar > * { flex-shrink: 0; }
 .toolbar .title { font-weight: 600; margin-right: 12px; }
 .toolbar .sep { width: 1px; height: 22px; background: var(--border); margin: 0 6px; }
 
@@ -97,3 +99,5 @@ h3:first-child { margin-top: 0; }
 .modal th, .modal td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--border); }
 .modal td.num, .modal th.num { text-align: right; }
 .color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 4px; border: 1px solid var(--border); }
+
+@media (max-width: 1500px) { .toolbar .title { display: none; } }

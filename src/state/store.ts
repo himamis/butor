@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Design, Room, SceneObject, Vec3 } from '../types';
 import { clampParam, defaultParams, getTemplate } from '../templates';
-import { boundsOf } from '../lib/geometry';
+import { boundsOf, hasMovingParts } from '../lib/geometry';
 import { DEFAULT_COLOR, defaultDesign } from './defaults';
 import { loadAutosave } from '../lib/persistence';
 
@@ -15,11 +15,14 @@ interface Ui {
   grid: Grid;
   showOverall: boolean;
   doorsHidden: boolean;
+  exploded: boolean;
+  explodeAmount: number; // 0..1
 }
 
 interface State extends Ui {
   design: Design;
   selection: string[];
+  openIds: string[]; // objects shown open (view state, never saved)
   past: Design[];
   future: Design[];
   dragSnapshot: Design | null;
@@ -44,6 +47,8 @@ interface State extends Ui {
   setRoom(fn: (r: Room) => Room): void;
   loadDesign(d: Design): void;
   setUi(partial: Partial<Ui>): void;
+  toggleOpen(id: string): void;
+  setOpenAll(open: boolean): void;
 }
 
 const HISTORY = 100;
@@ -78,6 +83,7 @@ export const normDeg = (deg: number) => ((Math.round(deg * 100) / 100) % 360 + 3
 export const useStore = create<State>()((set, get) => ({
   design: loadAutosave() ?? defaultDesign(),
   selection: [],
+  openIds: [],
   past: [],
   future: [],
   dragSnapshot: null,
@@ -86,6 +92,8 @@ export const useStore = create<State>()((set, get) => ({
   grid: 10,
   showOverall: true,
   doorsHidden: false,
+  exploded: false,
+  explodeAmount: 0.6,
 
   commit(fn) {
     const { design, past, dragSnapshot } = get();
@@ -230,10 +238,19 @@ export const useStore = create<State>()((set, get) => ({
   },
 
   loadDesign(d) {
-    set({ design: d, past: [], future: [], selection: [], dragSnapshot: null });
+    set({ design: d, past: [], future: [], selection: [], openIds: [], dragSnapshot: null });
   },
 
   setUi(partial) {
     set(partial);
+  },
+
+  toggleOpen(id) {
+    const { openIds } = get();
+    set({ openIds: openIds.includes(id) ? openIds.filter((o) => o !== id) : [...openIds, id] });
+  },
+
+  setOpenAll(open) {
+    set({ openIds: open ? get().design.objects.filter(hasMovingParts).map((o) => o.id) : [] });
   },
 }));

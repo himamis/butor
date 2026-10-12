@@ -6,7 +6,8 @@ import type { Room } from '../types';
 import { mm, toMm } from '../units';
 import { useStore, type View } from '../state/store';
 import { hasTemplate } from '../templates';
-import { boundsOf, findOverlaps } from '../lib/geometry';
+import { boundsOf, findOverlaps, objectBox } from '../lib/geometry';
+import { objectExplodeOffset } from '../lib/explode';
 import { RoomMesh } from './RoomMesh';
 import { ObjectMesh } from './ObjectMesh';
 import { SelectionGizmo, gizmoActivity } from './SelectionGizmo';
@@ -63,11 +64,19 @@ export function Viewport() {
   const view = useStore((s) => s.view);
   const showOverall = useStore((s) => s.showOverall);
   const doorsHidden = useStore((s) => s.doorsHidden);
+  const openIds = useStore((s) => s.openIds);
+  const explode = useStore((s) => (s.exploded ? s.explodeAmount : 0));
   const handle = useRef<ThreeHandle | null>(null);
 
   const overlaps = useMemo(() => findOverlaps(objects), [objects]);
   const selBox = useMemo(() => boundsOf(objects.filter((o) => selection.includes(o.id))), [objects, selection]);
   const allBox = useMemo(() => boundsOf(objects), [objects]);
+  const spreads = useMemo(() => {
+    const zero = { x: 0, y: 0, z: 0 };
+    if (!allBox || explode === 0) return new Map(objects.map((o) => [o.id, zero]));
+    const mid = (b: typeof allBox) => ({ x: (b.min.x + b.max.x) / 2, y: 0, z: (b.min.z + b.max.z) / 2 });
+    return new Map(objects.map((o) => [o.id, objectExplodeOffset(mid(objectBox(o)), mid(allBox), explode)]));
+  }, [objects, allBox, explode]);
 
   const onDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -117,11 +126,21 @@ export function Viewport() {
         <Cameras key={view} view={view} room={room} />
         <RoomMesh room={room} showWalls={view !== 'top'} />
         {objects.map((o) => (
-          <ObjectMesh key={o.id} obj={o} selected={selection.includes(o.id)} overlapping={overlaps.has(o.id)} doorsHidden={doorsHidden} />
+          <ObjectMesh
+            key={o.id}
+            obj={o}
+            selected={selection.includes(o.id)}
+            overlapping={overlaps.has(o.id)}
+            doorsHidden={doorsHidden}
+            open={openIds.includes(o.id)}
+            explode={explode}
+            spread={spreads.get(o.id)!}
+          />
         ))}
         <SelectionGizmo />
-        {selBox && <BoxDimensions box={selBox} offset={60} color="#2f7cf6" />}
-        {showOverall && objects.length > 1 && allBox && <BoxDimensions box={allBox} offset={160} color="#e07a1f" />}
+        {/* Dimensions describe the assembled design, so they are hidden while exploded. */}
+        {selBox && explode === 0 && <BoxDimensions box={selBox} offset={60} color="#2f7cf6" />}
+        {showOverall && explode === 0 && objects.length > 1 && allBox && <BoxDimensions box={allBox} offset={160} color="#e07a1f" />}
       </Canvas>
     </div>
   );
