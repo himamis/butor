@@ -5,6 +5,7 @@ import { Animation } from './animation';
 import { PartBatches, type Tints } from './batches';
 import { MaterialCache } from './materials';
 import { RoomView } from './room';
+import { Overlays, type GuideSpec, type HandleSpec } from './overlays';
 
 export type ViewMode = '3d' | 'front' | 'top' | 'side' | 'elevation';
 
@@ -17,7 +18,8 @@ export interface ViewState {
 }
 
 export interface Hit {
-  kind: 'part' | 'floor' | 'wall' | 'obstacle';
+  kind: 'part' | 'floor' | 'wall' | 'obstacle' | 'handle';
+  handle?: string;
   point: Vec3; // mm
   normal: Vec3; // world, unit length
   partId?: string;
@@ -39,6 +41,7 @@ export class Renderer {
   private readonly parts = new PartBatches(this.materials);
   private readonly room = new RoomView();
   private readonly anim = new Animation();
+  readonly overlays = new Overlays();
   private readonly persp: THREE.PerspectiveCamera;
   private readonly ortho: THREE.OrthographicCamera;
   private camera: THREE.Camera;
@@ -77,7 +80,7 @@ export class Renderer {
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
     this.sun.shadow.bias = -0.0004;
-    this.scene.add(this.sun, this.sun.target, this.room.group, this.parts.group);
+    this.scene.add(this.sun, this.sun.target, this.room.group, this.parts.group, this.overlays.group);
 
     // Millimetres everywhere: near/far in mm.
     this.persp = new THREE.PerspectiveCamera(45, 1, 10, 200_000);
@@ -169,6 +172,16 @@ export class Renderer {
     const ndc = new THREE.Vector2(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
     const ray = new THREE.Raycaster();
     ray.setFromCamera(ndc, this.camera);
+    const handle = ray.intersectObjects(this.overlays.pickTargets(), false)[0];
+    if (handle) {
+      const p = handle.point;
+      return {
+        kind: 'handle',
+        handle: handle.object.userData.handle as string,
+        point: { x: p.x, y: p.y, z: p.z },
+        normal: { x: 0, y: 1, z: 0 },
+      };
+    }
     const hits = ray.intersectObjects([...this.parts.pickTargets(), ...this.room.pickTargets()], false);
     for (const h of hits) {
       if (this.view.mode === 'elevation' && this.clip.distanceToPoint(h.point) < 0) continue; // clipped away
@@ -187,6 +200,32 @@ export class Renderer {
         };
     }
     return null;
+  }
+
+  /** World ray (mm) through a screen point. */
+  ray(clientX: number, clientY: number): { origin: Vec3; dir: Vec3 } {
+    const r = this.gl.domElement.getBoundingClientRect();
+    const ndc = new THREE.Vector2(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
+    const rc = new THREE.Raycaster();
+    rc.setFromCamera(ndc, this.camera);
+    const o = rc.ray.origin;
+    const d = rc.ray.direction;
+    return { origin: { x: o.x, y: o.y, z: o.z }, dir: { x: d.x, y: d.y, z: d.z } };
+  }
+
+  setHandles(handles: HandleSpec[], ring: { center: Vec3; radius: number } | null) {
+    this.overlays.setHandles(handles, ring);
+    this.requestRender();
+  }
+
+  setGuides(lines: GuideSpec[]) {
+    this.overlays.setGuides(lines);
+    this.requestRender();
+  }
+
+  setTarget(box: Parameters<Overlays['setTarget']>[0]) {
+    this.overlays.setTarget(box);
+    this.requestRender();
   }
 
   /** Screen position (CSS px, relative to the canvas) of a point in mm — for overlays and tests. */
@@ -209,6 +248,7 @@ export class Renderer {
     this.controls.dispose();
     this.parts.dispose();
     this.room.dispose();
+    this.overlays.dispose();
     this.materials.dispose();
     this.gl.dispose();
     this.gl.domElement.remove();

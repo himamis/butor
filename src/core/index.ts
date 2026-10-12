@@ -15,3 +15,5 @@ export * from './geometry/motion';
 export * from './geometry/scene';
 export * from './checks';
 export * from './outputs';
+export * from './snapping';
+export * from './snapping/context';
