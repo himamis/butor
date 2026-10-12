@@ -47,6 +47,10 @@ To use the app from other devices on your network: `npm run dev -- --host` and o
 | M | Measure tool |
 | Esc | Deselect / cancel a measurement |
 
+## Next version
+
+The design specification for a from-scratch v2 (units with compartments, one operations layer, typed template schemas, instanced rendering) is in [docs/v2](docs/v2/README.md).
+
 ## Adding a template
 
 1. Create a file in `src/templates/` (or add to the category file: `wardrobes.ts`, `cabinets.ts`, `interior.ts`, `trim.ts`), exporting a `TemplateDef`:
