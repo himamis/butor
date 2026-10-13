@@ -3,6 +3,7 @@ import { newId } from '../core';
 import { catalog } from '../catalog';
 import { fileNameFor, parseDesignFile, serializeDesign } from '../persistence/files';
 import { downloadText, pickTextFile } from './download';
+import { legacyImport } from './legacy';
 import { getRepository } from './repo';
 import { navigate } from './router';
 import { ShareDialog } from './ShareDialog';
@@ -19,7 +20,7 @@ export function FileMenu() {
     close();
     const text = await pickTextFile('.json,application/json');
     if (text === null) return;
-    const r = parseDesignFile(text, catalog);
+    const r = parseDesignFile(text, catalog, legacyImport);
     if (!r.ok) {
       useUi.getState().set({ notice: r.error });
       return;

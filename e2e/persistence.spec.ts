@@ -125,6 +125,64 @@ test('files: a design with an unknown template imports with a warning; export �
   expect(JSON.parse(exported).entities.future.raw).toEqual(future);
 });
 
+test('files: a v1 design (old version) imports from the start screen as a new design (flow 8)', async ({ page }) => {
+  const v1 = {
+    version: 1,
+    room: {
+      points: [
+        { x: 0, z: 0 },
+        { x: 4000, z: 0 },
+        { x: 4000, z: 3500 },
+        { x: 0, z: 3500 },
+      ],
+      height: 2600,
+      wallThickness: 100,
+      floorKind: 'chevron',
+      floorColor: '#c8a77e',
+      wallColor: '#efece6',
+      columns: [],
+    },
+    objects: [
+      {
+        id: 'a',
+        templateId: 'wardrobe',
+        name: 'Old wardrobe',
+        params: { width: 1000, height: 2200, depth: 600, thickness: 18, doors: 2, handle: 2 },
+        position: { x: 600, y: 0, z: 300 },
+        rotationY: 0,
+        color: '#ffffff',
+      },
+      {
+        id: 'b',
+        templateId: 'drawer-unit',
+        name: 'Chest',
+        params: { width: 600, height: 800, depth: 500, thickness: 18, drawers: 3, handle: 2 },
+        position: { x: 1500, y: 0, z: 250 },
+        rotationY: 0,
+        color: '#8b5a2b',
+      },
+    ],
+  };
+  await page.goto('/');
+  const chooser = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Import file…' }).click();
+  await (
+    await chooser
+  ).setFiles({
+    name: 'wardrobe-2026-01-01.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(v1)),
+  });
+  await editorReady(page);
+  const d = await page.evaluate(() => window.__butor!.design());
+  expect(d.schemaVersion).toBe(1);
+  expect(Object.values(d.entities).map((e) => [e.name, e.kind])).toEqual([
+    ['Old wardrobe', 'unit'],
+    ['Chest', 'unit'],
+  ]);
+  expect(d.room.floor.finish).toBe('chevron');
+});
+
 test('share: the viewer cannot edit, leaves the visitor’s designs untouched, and reports damaged links (flow 7)', async ({
   page,
 }) => {

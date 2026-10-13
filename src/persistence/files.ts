@@ -8,8 +8,15 @@ export function serializeDesign(design: Design): string {
   return JSON.stringify({ format: FILE_FORMAT, ...design }, null, 2);
 }
 
-/** Reads a design file: format check, then the shared import pipeline (migrations, validation, opaque entities). */
-export function parseDesignFile(text: string, catalog: CatalogRegistry): ImportResult {
+/**
+ * Reads a design file: format check, then the shared import pipeline (migrations, validation, opaque entities).
+ * `legacy` converts files of the previous app (v1) and returns null for anything else.
+ */
+export function parseDesignFile(
+  text: string,
+  catalog: CatalogRegistry,
+  legacy?: (raw: unknown) => ImportResult | null,
+): ImportResult {
   let raw: unknown;
   try {
     raw = JSON.parse(text);
@@ -18,6 +25,8 @@ export function parseDesignFile(text: string, catalog: CatalogRegistry): ImportR
   }
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw))
     return { ok: false, error: 'This file is not a Butor design.' };
+  const old = legacy?.(raw);
+  if (old) return old;
   const { format, ...doc } = raw as Record<string, unknown>;
   if (format !== undefined && format !== FILE_FORMAT) return { ok: false, error: 'This file is not a Butor design.' };
   return importDesign(doc, catalog);
