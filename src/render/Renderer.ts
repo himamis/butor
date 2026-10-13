@@ -62,7 +62,7 @@ export class Renderer {
   private readonly renderListeners = new Set<() => void>();
   private lastFrame = 0;
   private spreadTarget = new Map<string, Vec3>();
-  readonly stats = { frames: 0, calls: 0, triangles: 0 };
+  readonly stats = { frames: 0, calls: 0, triangles: 0, guides: 0 };
 
   constructor(private readonly container: HTMLElement) {
     this.gl = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: false });
@@ -236,6 +236,7 @@ export class Renderer {
   }
 
   setGuides(lines: GuideSpec[]) {
+    this.stats.guides = lines.length;
     this.overlays.setGuides(lines);
     this.requestRender();
   }

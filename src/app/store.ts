@@ -299,7 +299,7 @@ export const useApp = create<AppState>()((set, get) => {
         ...derive(design),
         history: emptyHistory(),
         selection: { entities: [], inner: null },
-        view: { ...get().view, open: new Set() },
+        view: { ...get().view, open: new Set(), measurements: [] },
       });
     },
 

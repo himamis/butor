@@ -10,6 +10,7 @@ import { installTestHooks } from './testHooks';
 installTestHooks();
 
 const Viewer = lazy(() => import('../viewer/Viewer').then((m) => ({ default: m.Viewer })));
+const HelpPage = lazy(() => import('./HelpPage').then((m) => ({ default: m.HelpPage })));
 const PrintSheet = lazy(() => import('./print/PrintSheet').then((m) => ({ default: m.PrintSheet })));
 
 /** Creates a design and opens it. */
@@ -39,6 +40,7 @@ export function Root() {
   else if (path === '/new') page = <NewDesign />;
   else if (design) page = <EditorRoute key={design} id={design} />;
   else if (path === '/view') page = <Viewer />;
+  else if (path === '/help') page = <HelpPage />;
   else if (print) page = <PrintSheet id={print} />;
   else
     page = (

@@ -79,6 +79,10 @@ export function FileMenu() {
           <button type="button" role="menuitem" onClick={() => void print()}>
             Print sheet
           </button>
+          <hr />
+          <button type="button" role="menuitem" onClick={() => window.open('/help', '_blank')}>
+            Help
+          </button>
         </div>
       )}
       {share && <ShareDialog onClose={() => setShare(false)} />}

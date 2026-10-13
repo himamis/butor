@@ -30,7 +30,14 @@ jobs:
         with: { name: playwright-report, path: playwright-report }
 
   perf:
-    # Performance budgets (docs/v2/07-rendering.md) arrive with the renderer (milestone M3).
+    # Budgets from docs/v2/07 and 10: 100-unit draw calls, idle frames, rebuild and snapping times, JS size.
     runs-on: ubuntu-latest
     steps:
-      - run: echo "perf budgets not yet defined"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: node tools/bundle-budget.mjs
+      - run: npx playwright test e2e/perf --project=localhost

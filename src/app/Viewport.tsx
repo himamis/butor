@@ -143,6 +143,12 @@ export function Viewport({ readOnly = false }: { readOnly?: boolean }) {
       ref={host}
       className="canvas-host"
       data-testid="canvas-host"
+      role="application"
+      aria-label={
+        readOnly
+          ? '3D view: drag to orbit, double-click to open a unit'
+          : '3D view: click to select, drag to move, drag empty space to orbit; press ? for shortcuts'
+      }
       onDragOver={(e) => {
         const entry = entryFromDrag();
         if (!entry || !renderer.current || tool !== 'select' || readOnly) return;

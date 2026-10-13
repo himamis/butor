@@ -32,12 +32,15 @@ async function screen(page: Page, p: V) {
   return { x: box.x + s.x, y: box.y + s.y };
 }
 
+/** Drags; returns how many snap guides were showing just before release. */
 async function drag(page: Page, from: { x: number; y: number }, to: { x: number; y: number }) {
   await page.mouse.move(from.x, from.y);
   await page.mouse.down();
   for (let i = 1; i <= 8; i++)
     await page.mouse.move(from.x + ((to.x - from.x) * i) / 8, from.y + ((to.y - from.y) * i) / 8);
+  const guides = await page.evaluate(() => window.__butor!.stats().guides);
   await page.mouse.up();
+  return guides;
 }
 
 async function dropCard(page: Page, card: string, at: V) {
@@ -128,11 +131,13 @@ test('moving a unit snaps it flush to a wall, then another unit flush to it', as
   // b: aim its left edge 25 mm short of a's new right face.
   const aRight = a2.position.x + a2.size.w / 2;
   const bLeft = b!.position.x - b!.size.w / 2;
-  await drag(
+  const guides = await drag(
     page,
     await screen(page, { x: b!.position.x, y: top, z: b!.position.z }),
     await screen(page, { x: b!.position.x - (bLeft - aRight) + 25, y: top, z: b!.position.z }),
   );
+  expect(guides, 'snap guides while dragging').toBeGreaterThan(0);
+  expect(await page.evaluate(() => window.__butor!.stats().guides), 'guides after the drag').toBe(0);
   const b2 = await byId(b!.id);
   expect(b2.position.x - b2.size.w / 2).toBeCloseTo(aRight, 0);
   expect(b2.position.z).toBeCloseTo(b!.position.z, 0);
@@ -159,5 +164,28 @@ test('copy and paste a unit, then undo the paste', async ({ page }) => {
   expect((await state(page)).selection).toEqual([pasted!.id]);
   await page.keyboard.press('ControlOrMeta+z');
   expect(await units(page)).toHaveLength(2);
+  expect(errors).toEqual([]);
+});
+
+test('paste into another design (flow 6)', async ({ page }) => {
+  const errors = await boot(page);
+  await page.evaluate(() => window.__butor!.fixture('reference'));
+  await page.evaluate(() => window.__butor!.view({ mode: 'top' }));
+  const [a] = (await units(page)).sort((p, q) => p.position.x - q.position.x);
+  const p = await screen(page, { x: a!.position.x, y: 2400, z: a!.position.z });
+  await page.mouse.click(p.x, p.y);
+  await expect.poll(async () => (await state(page)).selection).toEqual([a!.id]);
+  await page.keyboard.press('ControlOrMeta+c');
+
+  // another design
+  await page.getByRole('button', { name: 'File ▾' }).click();
+  await page.getByRole('menuitem', { name: 'New design' }).click();
+  await expect.poll(async () => (await units(page)).length).toBe(0);
+  await expect.poll(() => page.evaluate(() => window.__butor?.ready === true)).toBe(true);
+  await page.keyboard.press('ControlOrMeta+v');
+  const pasted = await units(page);
+  expect(pasted).toHaveLength(1);
+  expect(pasted[0]!.size).toEqual(a!.size);
+  expect((await state(page)).undo).toBe(1);
   expect(errors).toEqual([]);
 });

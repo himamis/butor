@@ -3,7 +3,7 @@
   --panel: #ffffff;
   --border: #e2e0da;
   --text: #24252a;
-  --muted: #74767e;
+  --muted: #64666e; /* ≥ 4.5:1 on the page background (WCAG AA) */
   --accent: #2f6fed;
   --warn: #c7402d;
   font-family:
@@ -92,7 +92,11 @@ button[aria-pressed='true'] {
 }
 button:focus-visible,
 select:focus-visible,
-input:focus-visible {
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
@@ -907,4 +911,11 @@ a.button {
 }
 .chat {
   flex: 1;
+}
+.help h2 {
+  margin: 22px 0 6px;
+  font-size: 16px;
+}
+.help li {
+  margin: 4px 0;
 }

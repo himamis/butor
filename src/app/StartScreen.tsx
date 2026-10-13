@@ -84,6 +84,9 @@ export function StartScreen() {
           <button type="button" onClick={() => void importFile()}>
             Import file…
           </button>
+          <button type="button" onClick={() => navigate('/help')}>
+            Help
+          </button>
         </div>
       </header>
       {!persistent && (

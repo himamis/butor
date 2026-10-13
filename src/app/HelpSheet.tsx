@@ -29,9 +29,14 @@ export function HelpSheet() {
             </tr>
           </tbody>
         </table>
-        <button type="button" onClick={() => set({ help: false })}>
-          Close
-        </button>
+        <div className="row">
+          <button type="button" onClick={() => set({ help: false })}>
+            Close
+          </button>
+          <a className="button" href="/help" target="_blank" rel="noreferrer">
+            Full help
+          </a>
+        </div>
       </div>
     </div>
   );
