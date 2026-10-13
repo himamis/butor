@@ -179,7 +179,7 @@ describe('catalog invariants (random params)', () => {
                 columns: [0, isDrawer ? 0 : c1],
                 y: isDrawer ? [0, 330] : [y0, Math.min(2200, y0 + span)],
                 params,
-                ...(isDrawer ? { drawer: 'dr' } : {}),
+                ...(isDrawer ? { item: 'dr' } : {}),
               },
             ];
             const r = add(freshDesign(), unitInput({ columns: [{ width: 'auto', items }, { width: 'auto' }], fronts }));
@@ -234,9 +234,9 @@ describe('catalog invariants (random params)', () => {
   });
 });
 
-describe('golden snapshots (bump the template version when these change)', () => {
+describe('golden snapshots (review the diff when a template changes)', () => {
   for (const t of TEMPLATES) {
-    it(`${t.id}@v${t.version}`, () => {
+    it(t.id, () => {
       let entity: Parameters<typeof add>[1];
       if (t.kind === 'unit') entity = { kind: 'unit', template: { id: t.id }, position: { x: 0, z: 0 } };
       else if (t.kind === 'part') entity = { kind: 'part', template: { id: t.id }, position: { x: 0, z: 0 } };
@@ -249,7 +249,7 @@ describe('golden snapshots (bump the template version when these change)', () =>
         entity = unitInput({
           position: { x: 0, z: 0 },
           columns: [{ width: 'auto', items: [{ id: 'dr', template: { id: 'item.drawer' }, y: 0 }] }],
-          fronts: [{ template: { id: t.id }, columns: [0, 0], y: [0, 240], drawer: 'dr' }],
+          fronts: [{ template: { id: t.id }, columns: [0, 0], y: [0, 240], item: 'dr' }],
         });
       else
         entity = unitInput({

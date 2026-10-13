@@ -120,13 +120,13 @@ function buildUnit(u: Unit, catalog: CatalogRegistry, m: ResolvedMaterials): Par
   for (const f of u.fronts) {
     const ft = catalog.get(f.template.id);
     if (!ft || ft.kind !== 'front') throw new Error(`unknown front template "${f.template.id}"`);
-    const drawerMotion = f.drawer ? motions.get(f.drawer) : undefined;
+    const itemMotion = f.item ? motions.get(f.item) : undefined;
     const drafts = ft.build(f.params, {
       id: f.id,
       rect: frontRect(u, f, layout),
       z: u.size.d / 2,
       ...(layout.trackZone ? { trackZone: layout.trackZone } : {}),
-      ...(drawerMotion ? { drawerMotion } : {}),
+      ...(itemMotion ? { itemMotion } : {}),
       unit: { w: u.size.w, h: u.size.h, d: u.size.d },
       opening: {
         x0: layout.columns[0]!.x0,

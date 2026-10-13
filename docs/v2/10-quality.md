@@ -5,8 +5,8 @@
 | Layer | Tool | What | Where |
 |---|---|---|---|
 | Property tests | Vitest + fast-check | Core invariants over random inputs: ops ↔ inverse, catalog invariants (04), snapping never moves more than the threshold, scene build determinism | `src/core/**/*.prop.test.ts` |
-| Unit tests | Vitest | Pure functions: geometry, snapping cases, checks, cut list, hardware rules, migrations, share codec, AI loop with fake providers, server security | `*.test.ts` next to the code |
-| Golden snapshots | Vitest | Per template: parts for default params + edge cases; cut list of reference designs | `__snapshots__/` — changing them requires a template version bump (04) |
+| Unit tests | Vitest | Pure functions: geometry, snapping cases, checks, cut list, hardware rules, import, share codec, AI loop with fake providers, server security | `*.test.ts` next to the code |
+| Golden snapshots | Vitest | Per template: parts for default params + edge cases; cut list of reference designs | `__snapshots__/` — a change is reviewed and committed with the template change (04) |
 | End-to-end | Playwright test runner | User flows in a real browser (WebGL via SwiftShader in CI) | `e2e/` |
 | Visual regression | Playwright `toHaveScreenshot` | Key views of reference designs (3D, front, top, exploded, open, print sheet) | `e2e/visual/` |
 | Performance | Playwright + custom metrics | Budgets from 07 | `e2e/perf/` |
@@ -34,7 +34,7 @@
 5. Measure: wall → unit front (exact depth), floor → unit top (exact height).
 6. Copy/paste lines units up flush; paste into another design.
 7. Share: open link in the same context; edits are impossible; the visitor's designs are unchanged; damaged link message.
-8. Import an old-version file and a file with an unknown template; export; re-import; identical.
+8. Import a file with an unknown template; a file of another format version is refused; export; re-import; identical.
 9. Cut list and hardware of a reference design match snapshots; CSV downloads.
 10. AI with the mock server: one request → one transaction → undo; concurrent edit → conflict handling.
 11. Error containment: inject an entity whose build throws → error box + check entry; the rest renders.

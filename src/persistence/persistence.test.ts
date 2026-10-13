@@ -19,13 +19,13 @@ function reference(): Design {
   return r.doc;
 }
 
-/** A design with an entity this app cannot read (a newer template), kept as an opaque entity. */
+/** A design with an entity this app cannot read (a template it does not know), kept as an opaque entity. */
 function withOpaque(d: Design): Design {
   const raw = {
     kind: 'unit',
     id: 'future',
     name: 'From the future',
-    template: { id: 'unit.hologram', version: 1 },
+    template: { id: 'unit.hologram' },
     position: { x: 3000, y: 0, z: 300 },
     rotation: 0,
     locked: false,
@@ -52,7 +52,7 @@ describe('design files', () => {
     expect(r.ok && r.warnings).toEqual([]);
   });
 
-  it('refuses what is not a design, and files from a newer version', () => {
+  it('refuses what is not a design, and files from another format version', () => {
     expect(parseDesignFile('not json', catalog)).toMatchObject({
       ok: false,
       error: expect.stringContaining('not a Butor design'),
@@ -62,7 +62,7 @@ describe('design files', () => {
     newer.schemaVersion = 99;
     expect(parseDesignFile(JSON.stringify(newer), catalog)).toMatchObject({
       ok: false,
-      error: expect.stringContaining('newer version'),
+      error: expect.stringContaining('different version'),
     });
   });
 
@@ -88,7 +88,7 @@ describe('share links', () => {
     }
     expect(decodeShare(frag.replace('v=1', 'v=9'), catalog)).toMatchObject({
       ok: false,
-      error: expect.stringContaining('newer'),
+      error: expect.stringContaining('different version'),
     });
   });
 });

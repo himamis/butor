@@ -22,28 +22,22 @@ IndexedDB database `butor`, version 1:
 
 - Extension `.butor.json`, MIME `application/json`.
 - Content: `{ format: 'butor-design', ...Design }`.
-- Import pipeline: parse → `format` check → **schema migrations** (`core/migrate`, `schemaVersion` n → n+1
-  → …) → **template migrations** (per `TemplateRef.version`) → zod validation → structural invariants.
-  - Newer `schemaVersion` than the app knows → refused with "made with a newer version".
-  - Unknown templates / newer template versions → `OpaqueEntity`, listed in a warning, preserved on export.
+- Import pipeline: parse → `format` check → `schemaVersion` check → zod validation → structural invariants.
+  - There are **no migrations**: any `schemaVersion` other than the app's is refused with "made with a
+    different version". Backward compatibility with older files (including v1) is not a goal.
+  - Unknown templates → `OpaqueEntity`, listed in a warning, preserved on export.
   - Invalid entities → kept as `OpaqueEntity` with the validation error, never silently dropped.
 - Export writes the current document unchanged (opaque entities included).
-
-### Migration rules
-
-- Migrations are pure functions `(old) => new`, one per version step, each with a fixture test
-  (`fixtures/schema-v{n}.json` → expected v{n+1}).
-- Migrations never depend on the current catalog code (they are frozen snapshots of logic at that version).
 
 ## Share links
 
 - Format: `{origin}/view#d=<base64url(deflate-raw(JSON))>&v=1`.
-  - Compression via `CompressionStream('deflate-raw')`, with a pure-JS fallback for browsers without it.
+  - Compression with a pure-JS raw deflate (`fflate`): identical output in every browser and in Node tests.
   - The fragment (`#`) never reaches the server.
 - Contents: the design document with materials; no view state except an optional initial camera.
 - The viewer route:
   - does not open the IndexedDB `designs` store at all (cannot read or overwrite the visitor's designs);
-  - validates and migrates the shared document exactly like an import;
+  - validates the shared document exactly like an import (other format versions are refused);
   - shows "This link is damaged" for anything that fails to decode or validate.
 - Typical size: 10–20 units ≈ 2–4 KB of URL. Above 60 KB the Share dialog offers **"Download as file"**
   instead (some chat apps truncate long URLs).

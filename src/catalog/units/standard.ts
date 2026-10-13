@@ -32,7 +32,6 @@ function geometry(p: P, size: { w: number; h: number; d: number }, trackFronts: 
 /** A carcass: two sides, top and bottom between them, dividers between columns, a back and an optional plinth. */
 export const standardUnit: UnitTemplate = {
   id: 'unit.standard',
-  version: 1,
   kind: 'unit',
   name: 'Unit',
   category: 'Cabinets',

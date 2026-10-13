@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { rebase, type Design } from '../../src/core';
+import { noNewIds, rebase, type Design } from '../../src/core';
 import { catalog } from '../../src/catalog';
 import { newDesign } from '../../src/app/store';
 import { createApp } from '../app';
@@ -50,7 +50,7 @@ const lastResult = (h: unknown[]) =>
   h.filter((m) => (m as { role: string }).role === 'tool').at(-1) as { content: string; isError: boolean };
 
 describe('agent loop', () => {
-  it('applies a tool call, answers it, and returns one transaction whose replay creates the same ids', async () => {
+  it('applies a tool call, answers it, and returns one transaction that replays with the same ids', async () => {
     const p = fake((step) => (step === 0 ? { toolCalls: [call([addUnit])] } : { text: 'Added a unit.' }));
     const d = design();
     const out = await run(p, d);
@@ -59,10 +59,9 @@ describe('agent loop', () => {
     expect(out.changes).toHaveLength(1);
     expect(out.history).toHaveLength(4); // user, assistant, tool result, assistant
     const created = JSON.parse(lastResult(out.history).content).results[0].created[0];
-    // the browser replays it with the recorded ids
-    const queue = [...out.transaction.ids];
+    // the browser replays it without making any id: the ops carry them all
     const r = rebase(d, out.transaction, out.baseRevision, {
-      newId: () => queue.shift() ?? 'x',
+      newId: noNewIds,
       now: () => '',
       catalog,
       mode: 'strict',

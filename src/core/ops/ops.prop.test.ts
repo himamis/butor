@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { applyTransaction, type OpContext } from './transaction';
+import { noNewIds } from './ids';
 import type { Op } from './schema';
 import { testCatalog } from '../test/catalog';
 import { emptyDesign } from '../test/designs';
@@ -246,6 +247,37 @@ describe('operations (properties)', () => {
               const back = applyTransaction(r.doc, { label: 'undo', ops: r.inverse }, ctx);
               expect(back.ok).toBe(true);
               expect(strip(back.doc)).toEqual(strip(d));
+            }
+            d = r.doc;
+          }
+        },
+      ),
+      { numRuns: 300 },
+    );
+  });
+
+  it('applied ops are complete records: replaying them (partial mode, no id source) gives the same document', () => {
+    fc.assert(
+      fc.property(
+        fc.array(fc.array(recipe, { minLength: 1, maxLength: 4 }), { minLength: 1, maxLength: 15 }),
+        (txs) => {
+          const ctx: OpContext = {
+            newId: createIdGenerator('r'),
+            now: () => 't',
+            catalog: testCatalog,
+            mode: 'partial',
+          };
+          let d = emptyDesign();
+          for (const recipes of txs) {
+            const r = applyTransaction(d, { label: 'p', ops: recipes.map((x) => toOp(d, x)) }, ctx);
+            const replay = applyTransaction(
+              d,
+              { label: 'replay', ops: r.applied },
+              { ...ctx, newId: noNewIds, mode: 'strict' },
+            );
+            if (r.applied.length) {
+              expect(replay.ok).toBe(true);
+              expect(strip(replay.doc)).toEqual(strip(r.doc));
             }
             d = r.doc;
           }

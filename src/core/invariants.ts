@@ -122,9 +122,20 @@ export function checkUnit(u: Unit, catalog: CatalogRegistry): string[] {
     if (f.y[1] > u.size.h + 1e-6) out.push(`front "${f.id}" reaches above the unit`);
     const ft = catalog.get(f.template.id);
     if (!ft || ft.kind !== 'front') out.push(`front "${f.id}": "${f.template.id}" is not a front template`);
-    if (f.drawer) {
-      const inCovered = u.columns.slice(c0, c1 + 1).some((c) => c.items.some((it) => it.id === f.drawer));
-      if (!inCovered) out.push(`front "${f.id}" moves with drawer "${f.drawer}", which is not in a column it covers`);
+    // Attaching fronts and the items that take them are declared by the catalog (no template is special here).
+    const attaches = ft?.kind === 'front' && !!ft.attachesToItem;
+    if (attaches && !f.item) out.push(`front "${f.id}" must be attached to an item`);
+    if (!attaches && f.item) out.push(`front "${f.id}" does not attach to items`);
+    if (f.item) {
+      const item = u.columns
+        .slice(c0, c1 + 1)
+        .flatMap((c) => c.items)
+        .find((it) => it.id === f.item);
+      const it = item && catalog.get(item.template.id);
+      if (!item) out.push(`front "${f.id}" moves with item "${f.item}", which is not in a column it covers`);
+      else if (it?.kind !== 'item' || !it.takesFront?.(item.params))
+        out.push(`front "${f.id}" is attached to item "${f.item}", which does not take a front`);
+      if (u.fronts.some((g, j) => j !== i && g.item === f.item)) out.push(`item "${f.item}" has more than one front`);
     }
     for (const g of u.fronts.slice(i + 1)) {
       const colsOverlap = f.columns[0] <= g.columns[1] && g.columns[0] <= f.columns[1];

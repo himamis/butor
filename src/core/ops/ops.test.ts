@@ -42,7 +42,7 @@ describe('entity ops', () => {
       locked: false,
       params: { thickness: 18 },
       position: { x: 500, y: 0, z: 300 },
-      template: { id: 'test.unit', version: 1 },
+      template: { id: 'test.unit' },
     });
     expect(u(r.doc, id).columns).toHaveLength(1);
     expect(r.doc.order).toEqual([id]);
@@ -182,7 +182,14 @@ describe('unit structure ops', () => {
     ]).doc;
     const dr = u(d, 'u1').columns[0]!.items[0]!.id;
     d = run(d, [
-      { type: 'unit.front.add', unit: 'u1', template: { id: 'test.door' }, columns: [0, 0], y: [0, 240], drawer: dr },
+      {
+        type: 'unit.front.add',
+        unit: 'u1',
+        template: { id: 'test.drawer-front' },
+        columns: [0, 0],
+        y: [0, 240],
+        item: dr,
+      },
     ]).doc;
     d = run(d, [{ type: 'unit.item.remove', unit: 'u1', item: dr }]).doc;
     expect(u(d, 'u1').fronts).toEqual([]);

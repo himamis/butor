@@ -1,34 +1,27 @@
-import { parseParams } from '../catalog/params';
-import type { AnyTemplate, CatalogRegistry, TemplateKind } from '../catalog/types';
-import { checkDesign, checkUnit } from '../invariants';
-import { Design, SCHEMA_VERSION } from '../schema/design';
-import { Entity, type Group, type OpaqueEntity } from '../schema/entities';
+import { parseParams } from './catalog/params';
+import type { AnyTemplate, CatalogRegistry, TemplateKind } from './catalog/types';
+import { checkDesign, checkUnit } from './invariants';
+import { Design, SCHEMA_VERSION } from './schema/design';
+import { Entity, type Group, type OpaqueEntity } from './schema/entities';
 
 export type ImportResult = { ok: true; design: Design; warnings: string[] } | { ok: false; error: string };
-
-/** Document-shape migrations: SCHEMA_MIGRATIONS[n] turns a version-n document into version n + 1. */
-const SCHEMA_MIGRATIONS: Record<number, (doc: Record<string, unknown>) => Record<string, unknown>> = {};
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 
 /**
- * Turns untrusted JSON (a file, a share link, storage) into a valid current design (docs/v2/09).
- * Entities that cannot be interpreted are kept verbatim as opaque entities — never dropped.
+ * Turns untrusted JSON (a file, a share link, storage) into a valid design (docs/v2/09).
+ * Only the current format is accepted. Entities that cannot be interpreted are kept verbatim as opaque entities — never dropped.
  */
 export function importDesign(raw: unknown, catalog: CatalogRegistry): ImportResult {
   if (!isObj(raw) || typeof raw.schemaVersion !== 'number')
     return { ok: false, error: 'This is not a Butor design file.' };
-  if (raw.schemaVersion > SCHEMA_VERSION)
+  // No migrations: only the current format is read.
+  if (raw.schemaVersion !== SCHEMA_VERSION)
     return {
       ok: false,
-      error: `This design was made with a newer version of Butor (format ${raw.schemaVersion}). Update the app to open it.`,
+      error: `This design was made with a different version of Butor (format ${raw.schemaVersion}; this app reads format ${SCHEMA_VERSION}).`,
     };
-  let doc: Record<string, unknown> = raw;
-  for (let v = raw.schemaVersion; v < SCHEMA_VERSION; v++) {
-    const step = SCHEMA_MIGRATIONS[v];
-    if (!step) return { ok: false, error: `Cannot read design format ${raw.schemaVersion}.` };
-    doc = step(doc);
-  }
+  const doc = raw;
 
   // Everything except entities, order and groups must be valid as is.
   const shell = Design.safeParse({ ...doc, entities: {}, order: [], groups: {} });
@@ -86,23 +79,23 @@ function importEntity(key: string, raw: unknown, catalog: CatalogRegistry): Enti
       const t = template(catalog, e.template, 'part');
       return {
         ...e,
-        template: { id: t.id, version: t.version },
-        params: migrateParams(t, e.template.version, e.params),
+        template: { id: t.id },
+        params: validParams(t, e.params),
       };
     }
     const t = template(catalog, e.template, 'unit');
     const unit = {
       ...e,
-      template: { id: t.id, version: t.version },
-      params: migrateParams(t, e.template.version, e.params),
+      template: { id: t.id },
+      params: validParams(t, e.params),
       columns: e.columns.map((c) => ({
         ...c,
         items: c.items.map((i) => {
           const it = template(catalog, i.template, 'item');
           return {
             ...i,
-            template: { id: it.id, version: it.version },
-            params: migrateParams(it, i.template.version, i.params),
+            template: { id: it.id },
+            params: validParams(it, i.params),
           };
         }),
       })),
@@ -110,8 +103,8 @@ function importEntity(key: string, raw: unknown, catalog: CatalogRegistry): Enti
         const ft = template(catalog, f.template, 'front');
         return {
           ...f,
-          template: { id: ft.id, version: ft.version },
-          params: migrateParams(ft, f.template.version, f.params),
+          template: { id: ft.id },
+          params: validParams(ft, f.params),
         };
       }),
     };
@@ -125,24 +118,17 @@ function importEntity(key: string, raw: unknown, catalog: CatalogRegistry): Enti
 
 function template<K extends TemplateKind>(
   catalog: CatalogRegistry,
-  ref: { id: string; version: number },
+  ref: { id: string },
   kind: K,
 ): Extract<AnyTemplate, { kind: K }> {
   const t = catalog.get(ref.id);
   if (!t) throw new Error(`unknown template "${ref.id}"`);
   if (t.kind !== kind) throw new Error(`"${ref.id}" is not a ${kind} template`);
-  if (ref.version > t.version) throw new Error(`"${ref.id}" version ${ref.version} is newer than this app`);
   return t as Extract<AnyTemplate, { kind: K }>;
 }
 
-function migrateParams(t: AnyTemplate, from: number, params: Record<string, unknown>): Record<string, unknown> {
-  let p = params;
-  for (let v = from; v < t.version; v++) {
-    const step = t.migrate?.[v];
-    if (!step) throw new Error(`no migration for "${t.id}" from version ${v}`);
-    p = step(p);
-  }
-  const r = parseParams(t.params, {}, p);
+function validParams(t: AnyTemplate, params: Record<string, unknown>): Record<string, unknown> {
+  const r = parseParams(t.params, {}, params);
   if (!r.ok) throw new Error(`${t.name}: ${r.error}`);
   return r.value;
 }

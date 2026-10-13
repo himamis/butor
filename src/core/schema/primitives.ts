@@ -20,7 +20,7 @@ export type Hex = z.infer<typeof Hex>;
 
 export const Name = z.string().max(200);
 
-export const TemplateRef = z.object({ id: z.string().min(1).max(100), version: z.number().int().min(1) });
+export const TemplateRef = z.object({ id: z.string().min(1).max(100) });
 export type TemplateRef = z.infer<typeof TemplateRef>;
 
 /** Template parameters are validated by the template's own schema (src/core/catalog), not here. */

@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import {
   columnSpans,
   defaultsOf,
-  drawerFrontSpan,
+  freeFrontItems,
+  freeFrontSpan,
+  frontTakingItems,
+  itemFrontSpan,
   freeSpot,
   unitLayout,
   type Design,
@@ -90,18 +93,10 @@ export function UnitEditor(props: {
   const addFront = () => {
     const ft = catalog.get(frontTemplate);
     if (!ft || ft.kind !== 'front') return;
-    const n = u.columns.length;
-    if (ft.id === 'front.drawer') {
-      // A drawer front goes on the lowest external drawer that has none.
-      for (let ci = 0; ci < n; ci++) {
-        const free = u.columns[ci]!.items.filter(
-          (i) =>
-            i.template.id === 'item.drawer' &&
-            i.params.style === 'external' &&
-            !u.fronts.some((f) => f.drawer === i.id),
-        ).sort((a, b) => a.y - b.y)[0];
-        if (!free) continue;
-        const span = drawerFrontSpan(u, ci, layout, { y: free.y, height: Number(free.params.height ?? 200) });
+    if (ft.attachesToItem) {
+      // The lowest item that takes a front and has none (the catalog says which items do).
+      for (const slot of freeFrontItems(u, layout, catalog)) {
+        const span = itemFrontSpan(u, slot.column, layout, slot);
         if (!span) continue;
         run(
           [
@@ -109,29 +104,27 @@ export function UnitEditor(props: {
               type: 'unit.front.add',
               unit: u.id,
               template: { id: ft.id },
-              columns: [ci, ci],
+              columns: [slot.column, slot.column],
               y: span,
-              drawer: free.id,
+              item: slot.item,
             },
           ],
           `Add ${ft.name}`,
         );
         return;
       }
-      props.say('Add an external drawer first: a drawer front moves with its drawer');
+      props.say(
+        `A ${ft.name.toLowerCase()} goes on an item that takes one (${frontTakingItems(catalog).join(', ')}) — add one first.`,
+      );
       return;
     }
-    // Otherwise the tallest height span not covered by any front, across all columns.
-    const edges = [0, u.size.h, ...u.fronts.flatMap((f) => f.y)].sort((a, b) => a - b);
-    let best: [number, number] | null = null;
-    for (let i = 0; i < edges.length - 1; i++) {
-      const a = edges[i]!,
-        b = edges[i + 1]!;
-      if (u.fronts.some((f) => f.y[0] < b && a < f.y[1])) continue;
-      if (!best || b - a > best[1] - best[0]) best = [a, b];
+    const span = freeFrontSpan(u, [0, u.columns.length - 1]);
+    if (!span) {
+      props.say('There is no free space for another front.');
+      return;
     }
     run(
-      [{ type: 'unit.front.add', unit: u.id, template: { id: ft.id }, columns: [0, n - 1], y: best ?? [0, u.size.h] }],
+      [{ type: 'unit.front.add', unit: u.id, template: { id: ft.id }, columns: [0, u.columns.length - 1], y: span }],
       `Add ${ft.name}`,
     );
   };

@@ -12,7 +12,7 @@ const op = <T extends string, S extends z.ZodRawShape>(type: T, shape: S) =>
   z.strictObject({ type: z.literal(type), ...shape });
 
 const Ids = z.array(Id).min(1).max(2000);
-const RefInput = z.strictObject({ id: z.string().min(1), version: z.number().int().min(1).optional() });
+const RefInput = z.strictObject({ id: z.string().min(1) });
 const XZ = z.strictObject({ x: Mm, z: Mm });
 const Position = z.strictObject({ x: Mm, y: Mm.optional(), z: Mm });
 
@@ -34,7 +34,7 @@ const FrontInput = z.strictObject({
   columns: z.tuple([z.number().int().min(0), z.number().int().min(0)]),
   y: z.tuple([z.number().min(0), z.number().min(0)]),
   params: Params.optional(),
-  drawer: Id.optional(), // id of an item in the same input, or an existing item
+  item: Id.optional(), // the item an attaching front moves with: an item in the same input, or an existing one
   material: z.string().optional(),
 });
 const placement = {
@@ -151,7 +151,7 @@ export const PublicOp = z.discriminatedUnion('type', [
     columns: z.tuple([z.number().int().min(0), z.number().int().min(0)]),
     y: z.tuple([z.number().min(0), z.number().min(0)]),
     params: Params.optional(),
-    drawer: Id.optional(),
+    item: Id.optional(),
     id: Id.optional(),
     material: z.string().optional(),
   }),

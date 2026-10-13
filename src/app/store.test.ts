@@ -67,7 +67,7 @@ describe('editor store', () => {
     // drawer fronts of the copies still move with the copies' drawers
     const copy = s().design.entities[s().design.order[1]!] as Unit;
     const items = new Set(copy.columns.flatMap((c) => c.items.map((i) => i.id)));
-    expect(copy.fronts.every((f) => !f.drawer || items.has(f.drawer))).toBe(true);
+    expect(copy.fronts.every((f) => !f.item || items.has(f.item))).toBe(true);
   });
 
   it('deleting an inner selection removes just that item', () => {

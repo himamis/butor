@@ -7,7 +7,7 @@ interface U {
   size: { w: number; h: number; d: number };
   params: Record<string, unknown>;
   columns: { id: string; items: { id: string; template: { id: string } }[] }[];
-  fronts: { id: string; drawer?: string }[];
+  fronts: { id: string; item?: string }[];
 }
 
 async function boot(page: Page) {
@@ -55,9 +55,9 @@ test('flow 2: add a column and three drawers with fronts; open the unit; the dra
   await props.getByLabel('New front type').selectOption({ label: 'Drawer front' });
   for (let i = 0; i < 3; i++) await props.getByRole('button', { name: '+ Front' }).click();
   const u = await unit(page, id);
-  const drawerFronts = u.fronts.filter((f) => f.drawer);
+  const drawerFronts = u.fronts.filter((f) => f.item);
   expect(drawerFronts).toHaveLength(3);
-  expect(new Set(drawerFronts.map((f) => f.drawer))).toEqual(new Set(u.columns[1]!.items.map((i) => i.id)));
+  expect(new Set(drawerFronts.map((f) => f.item))).toEqual(new Set(u.columns[1]!.items.map((i) => i.id)));
   expect((await state(page)).undo).toBe(1 + 1 + 3 + 3); // every edit is one step
 
   await page.keyboard.press('o');
@@ -68,7 +68,7 @@ test('flow 2: add a column and three drawers with fronts; open the unit; the dra
   }[];
   for (const f of drawerFronts) {
     const front = motions.find((m) => m.part.includes(`front:${f.id}`))!;
-    const box = motions.find((m) => m.part.includes(`item:${f.drawer}`))!;
+    const box = motions.find((m) => m.part.includes(`item:${f.item}`))!;
     expect(front.motion.kind).toBe('slide');
     expect(front.motion.id).toBe(box.motion.id);
   }

@@ -30,7 +30,7 @@ export const Front = z.object({
   columns: z.tuple([z.number().int().min(0), z.number().int().min(0)]), // inclusive column index range
   y: z.tuple([z.number().min(0), z.number().min(0)]), // [bottom, top] from the unit's bottom edge, mm
   params: Params,
-  drawer: Id.optional(), // front.drawer: the item it moves with
+  item: Id.optional(), // fronts that attach to an item (FrontTemplate.attachesToItem): the item they move with
   material: z.string().optional(),
 });
 export type Front = z.infer<typeof Front>;

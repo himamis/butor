@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { importDesign } from './import';
-import { testCatalog } from '../test/catalog';
-import { emptyDesign, unit, withEntities } from '../test/designs';
-import { checkDesign } from '../invariants';
+import { testCatalog } from './test/catalog';
+import { emptyDesign, unit, withEntities } from './test/designs';
+import { checkDesign } from './invariants';
 
 const json = (v: unknown) => JSON.parse(JSON.stringify(v));
 
@@ -14,10 +14,10 @@ describe('importDesign', () => {
     expect(r.ok && r.design).toEqual(d);
   });
 
-  it('refuses files from a newer version and things that are not designs', () => {
+  it('refuses other format versions (no migrations) and things that are not designs', () => {
     expect(importDesign({ ...json(emptyDesign()), schemaVersion: 99 }, testCatalog)).toMatchObject({
       ok: false,
-      error: expect.stringMatching(/newer version/),
+      error: expect.stringMatching(/different version/),
     });
     expect(importDesign('nope', testCatalog)).toMatchObject({ ok: false });
     expect(importDesign({ hello: 1 }, testCatalog)).toMatchObject({
@@ -27,9 +27,7 @@ describe('importDesign', () => {
   });
 
   it('keeps entities with unknown templates as opaque entities (raw preserved), with a warning', () => {
-    const d = json(
-      withEntities(emptyDesign(), unit('u1'), unit('u2', { template: { id: 'future.unit', version: 1 } })),
-    );
+    const d = json(withEntities(emptyDesign(), unit('u1'), unit('u2', { template: { id: 'future.unit' } })));
     const r = importDesign(d, testCatalog);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -61,28 +59,6 @@ describe('importDesign', () => {
     broken.entities.u1.size = 'big';
     const r2 = importDesign(broken, testCatalog);
     expect(r2.ok && r2.design.entities.u1!.kind).toBe('opaque');
-  });
-
-  it('migrates template params from older template versions', () => {
-    const d = json(withEntities(emptyDesign(), unit('u1')));
-    const catalog = {
-      ...testCatalog,
-      get: (id: string) => {
-        const t = testCatalog.get(id);
-        if (id !== 'test.unit' || !t) return t;
-        return {
-          ...t,
-          version: 2,
-          migrate: { 1: (p: Record<string, unknown>) => ({ ...p, thickness: Number(p.thickness) + 1 }) },
-        };
-      },
-    };
-    const r = importDesign(d, catalog);
-    expect(r.ok && r.design.entities.u1).toMatchObject({
-      kind: 'unit',
-      template: { version: 2 },
-      params: { thickness: 19 },
-    });
   });
 
   it('drops invalid groups and repairs the order list, with warnings', () => {

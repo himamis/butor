@@ -23,14 +23,12 @@ and templates side by side.
 ```ts
 interface TemplateBase<P extends z.ZodTypeAny> {
   id: string;                    // 'item.drawer'
-  version: number;               // bump on any change to schema or build output
   kind: 'unit' | 'item' | 'front' | 'part';
   name: string;
   category: Category;            // 'Wardrobes' | 'Cabinets' | 'Fronts' | 'Interior' | 'Panels' | 'Base & trim'
   description: string;           // one line, searchable
   tags: string[];                // search synonyms: 'closet', 'chest', 'kickboard'
   params: P;                     // zod schema with UI metadata (below)
-  migrate?: Record<number, (old: unknown) => unknown>;  // from version N to N+1
   icon?: string;                 // generated thumbnail key
 }
 
@@ -57,7 +55,7 @@ Use small helpers so every param carries label, unit and limits once:
 
 ```ts
 const drawer = defineItem({
-  id: 'item.drawer', version: 1, name: 'Drawer', category: 'Interior',
+  id: 'item.drawer', name: 'Drawer', category: 'Interior',
   description: 'Drawer with box and runners; front inside the column or on the unit front.',
   tags: ['drawer', 'pull-out'],
   params: z.object({
@@ -99,20 +97,30 @@ buildEntity(entity, materials) →
          + validate: every part inside the unit's bounds (fronts/handles allowed in front zone), no NaN
   part:  template.build(params)
   opaque: one box from bounds, role 'invalid'
-→ Part[] (with stable ids) — cached by (entity revision, template versions, materials revision)
+→ Part[] (with stable ids) — cached by (entity object, materials revision)
 ```
 
 A build that throws or produces invalid parts yields one `invalid` part and a check entry; it never
 breaks the rest of the scene.
 
-## Versioning and migration
+## Changes to templates
 
-- Every stored `TemplateRef` has the version it was created with.
-- On load, `migrate` steps run from the stored version to the current one (`1 → 2 → 3`).
-- **Changing a template's build output without bumping the version is a test failure**: each template has
-  golden snapshots of its parts for its default params and two edge cases; a diff fails CI unless the version
-  is bumped and the snapshot updated in the same change.
-- Unknown template ids, or a version newer than the app knows, load as `OpaqueEntity` (03) and are saved back verbatim.
+- There is no template versioning and no migration: designs store `{ id }` only and are rebuilt with the
+  current template. Backward compatibility with older files is not a goal.
+- Each template has golden snapshots of its parts for its default params and edge cases; a diff fails CI
+  until it is reviewed and the snapshot updated in the same change.
+- Unknown template ids load as `OpaqueEntity` (03) and are saved back verbatim.
+
+## Fronts that belong to an item
+
+Pairing is declared by the catalog, never by testing template ids in core or UI:
+
+- `ItemTemplate.takesFront?(params): boolean` — the item, with these params, carries a front on the unit face
+  that moves with it (the drawer: when `style` is `external`).
+- `FrontTemplate.attachesToItem?: true` — the front belongs to one such item (named in `Front.item`) and takes
+  its motion (`FrontBuildContext.itemMotion`) instead of opening on its own (the drawer front).
+- Core helpers place them: `freeFrontItems` (items that take a front and have none), `itemFrontSpan`
+  (the item plus a reveal, cut back at neighbouring fronts) and `freeFrontSpan` for ordinary fronts.
 
 ## Catalog-wide invariants (property tests over every template)
 

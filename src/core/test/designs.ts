@@ -36,7 +36,7 @@ export function unit(id: string, patch: Partial<Unit> = {}): Unit {
     position: { x: 1000, y: 0, z: 300 },
     rotation: 0,
     locked: false,
-    template: { id: 'test.unit', version: 1 },
+    template: { id: 'test.unit' },
     params: { thickness: 18 },
     size: { w: 1000, h: 2200, d: 600 },
     materials: {},

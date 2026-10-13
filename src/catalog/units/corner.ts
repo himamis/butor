@@ -13,7 +13,6 @@ type P = z.infer<typeof params>;
 /** L-shaped open shelving for an inside corner (back-left), sized by its two arms (width along x, depth along z). */
 export const cornerUnit: UnitTemplate = {
   id: 'unit.corner',
-  version: 1,
   kind: 'unit',
   name: 'Corner shelving',
   category: 'Cabinets',

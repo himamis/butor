@@ -5,16 +5,16 @@ import { emptyDesign, unit, withEntities } from './test/designs';
 import { Design } from './schema';
 import type { Item, Front } from './schema';
 
-const shelf = (id: string, y: number): Item => ({ id, template: { id: 'test.shelf', version: 1 }, y, params: {} });
+const shelf = (id: string, y: number): Item => ({ id, template: { id: 'test.shelf' }, y, params: {} });
 const drawer = (id: string, y: number, height = 200): Item => ({
   id,
-  template: { id: 'test.drawer', version: 1 },
+  template: { id: 'test.drawer' },
   y,
   params: { height, style: 'external' },
 });
 const door = (id: string, columns: [number, number], y: [number, number], extra: Partial<Front> = {}): Front => ({
   id,
-  template: { id: 'test.door', version: 1 },
+  template: { id: 'test.door' },
   columns,
   y,
   params: { hinge: 'left' },
@@ -122,7 +122,7 @@ describe('checkDesign', () => {
     expect(errors(base([door('f1', [0, 0], [0, 1100]), door('f2', [0, 0], [1100, 2200])]))).toEqual([]);
   });
 
-  it('a drawer front must reference a drawer in a column it covers', () => {
+  it('an attaching front must reference an item in a column it covers', () => {
     const d = withEntities(
       emptyDesign(),
       unit('u1', {
@@ -130,14 +130,34 @@ describe('checkDesign', () => {
           { id: 'c1', width: 'auto', items: [drawer('dr1', 0)] },
           { id: 'c2', width: 'auto', items: [] },
         ],
-        fronts: [door('f1', [1, 1], [0, 220], { drawer: 'dr1' })],
+        fronts: [door('f1', [1, 1], [0, 220], { template: { id: 'test.drawer-front' }, params: {}, item: 'dr1' })],
       }),
     );
-    expect(errors(d).join()).toMatch(/front "f1".*drawer "dr1".*not in a column it covers/);
+    expect(errors(d).join()).toMatch(/front "f1".*item "dr1".*not in a column it covers/);
+  });
+
+  it('pairing follows the catalog: attaching fronts need an item that takes a front, one front per item', () => {
+    const front = (id: string, y: [number, number], extra: Partial<Front> = {}) =>
+      door(id, [0, 0], y, { template: { id: 'test.drawer-front' }, params: {}, ...extra });
+    const internal: Item = { ...drawer('in', 300), params: { height: 200, style: 'internal' } };
+    const d = (fronts: Front[]) =>
+      errors(
+        withEntities(
+          emptyDesign(),
+          unit('u1', { columns: [{ id: 'c1', width: 'auto', items: [drawer('dr1', 0), internal] }], fronts }),
+        ),
+      );
+    expect(d([front('f1', [0, 220], { item: 'dr1' })])).toEqual([]);
+    expect(d([front('f1', [0, 220])]).join()).toMatch(/"f1" must be attached to an item/);
+    expect(d([door('f1', [0, 0], [0, 220], { item: 'dr1' })]).join()).toMatch(/"f1" does not attach to items/);
+    expect(d([front('f1', [300, 520], { item: 'in' })]).join()).toMatch(/"in", which does not take a front/);
+    expect(d([front('f1', [0, 110], { item: 'dr1' }), front('f2', [110, 220], { item: 'dr1' })]).join()).toMatch(
+      /item "dr1" has more than one front/,
+    );
   });
 
   it('units must use a known unit template; locked flags and opaque entities are allowed', () => {
-    const d = withEntities(emptyDesign(), unit('u1', { template: { id: 'test.shelf', version: 1 } }));
+    const d = withEntities(emptyDesign(), unit('u1', { template: { id: 'test.shelf' } }));
     expect(errors(d).join()).toMatch(/not a unit template/);
   });
 });

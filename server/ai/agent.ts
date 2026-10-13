@@ -12,11 +12,10 @@ export interface TurnInput {
   history: unknown[];
 }
 
-/** What the browser commits: the applied ops in order, plus the ids they created, so a replay creates the same ids. */
+/** What the browser commits: the applied ops in order, each carrying every id it created (core `withIds`). */
 export interface AiTransaction {
   label: string;
   ops: Op[];
-  ids: string[];
 }
 
 export interface TurnOutput {
@@ -47,14 +46,13 @@ export async function runTurn(
   const tool = toolDef();
   let scratch = input.design;
   const applied: Op[] = [];
-  const ids: string[] = [];
   const changes: string[] = [];
   const replies: string[] = [];
 
   const userText = `${input.message}\n\n<design>\n${designSummary(scratch, buildScene(scratch, catalog))}\n</design>`;
   const history = [...input.history, ...provider.userMessage(userText)];
   const done = (extra: Partial<TurnOutput> = {}): TurnOutput => ({
-    transaction: { label: `AI: ${input.message.slice(0, 60)}`, ops: applied, ids },
+    transaction: { label: `AI: ${input.message.slice(0, 60)}`, ops: applied },
     changes,
     reply: replies.join('\n\n').trim(),
     history,
@@ -62,7 +60,7 @@ export async function runTurn(
     ...extra,
   });
 
-  /** Applies one tool call's operations one by one (partial), recording created ids per successful op. */
+  /** Applies one tool call's operations (partial: the valid ones apply) and records them with their ids. */
   const applyCall = (call: ToolCall): ToolResult => {
     if (call.name !== TOOL_NAME)
       return { id: call.id, isError: true, content: `Unknown tool "${call.name}". The only tool is ${TOOL_NAME}.` };
@@ -97,23 +95,18 @@ export async function runTurn(
           })),
         }),
       };
-    const results = parsed.data.operations.map((raw, index) => {
-      const made: string[] = [];
-      const r = applyTransaction(
-        scratch,
-        { label: 'ai', ops: [raw as Op] },
-        { newId: () => made[made.push(newId()) - 1]!, now: () => new Date().toISOString(), catalog, mode: 'partial' },
-      );
-      const res = r.results[0]!;
-      if (res.ok) {
-        scratch = r.doc;
-        applied.push(raw as Op);
-        ids.push(...made);
-        changes.push(res.message);
-      }
+    const r = applyTransaction(
+      scratch,
+      { label: 'ai', ops: parsed.data.operations as Op[] },
+      { newId, now: () => new Date().toISOString(), catalog, mode: 'partial' },
+    );
+    scratch = r.doc;
+    applied.push(...r.applied);
+    const results = r.results.map((res, index) => {
+      if (res.ok) changes.push(res.message);
       return {
         index,
-        type: opType(raw),
+        type: opType(parsed.data.operations[index]),
         ok: res.ok,
         message: res.message,
         ...(res.created ? { created: res.created } : {}),
@@ -131,7 +124,7 @@ export async function runTurn(
       return {
         ...done({ stopped: 'refusal', reply: 'The model declined this request.' }),
         history: input.history,
-        transaction: { label: '', ops: [], ids: [] },
+        transaction: { label: '', ops: [] },
         changes: [],
       };
     }

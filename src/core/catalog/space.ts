@@ -1,5 +1,5 @@
 import type { Unit } from '../schema/entities';
-import type { CatalogRegistry, UnitLayout } from './types';
+import type { CatalogRegistry, ItemTemplate, UnitLayout } from './types';
 
 export interface Span {
   id: string;
@@ -28,20 +28,20 @@ export function freeSpot(spans: Span[], height: number, innerH: number): number 
   return innerH - y >= height ? Math.ceil(y) : null;
 }
 
-const REVEAL = 10; // mm a drawer front extends past its box, above and below, where nothing else is in the way
+const REVEAL = 10; // mm an attached front extends past its item, above and below, where nothing else is in the way
 
 /**
- * The height span of a new front for an external drawer in column `ci` (from the unit's bottom edge): the
- * drawer box plus a reveal, cut back where it would meet an existing front over the same column.
+ * The height span of a new front for an item in column `ci` (from the unit's bottom edge): the item plus a
+ * reveal, cut back where it would meet an existing front over the same column.
  */
-export function drawerFrontSpan(
+export function itemFrontSpan(
   u: Unit,
   ci: number,
   layout: UnitLayout,
-  drawer: { y: number; height: number },
+  item: { y: number; height: number },
 ): [number, number] | null {
-  const box0 = layout.floorY + drawer.y;
-  const box1 = box0 + drawer.height;
+  const box0 = layout.floorY + item.y;
+  const box1 = box0 + item.height;
   let y0 = Math.max(0, box0 - REVEAL);
   let y1 = Math.min(u.size.h, box1 + REVEAL);
   for (const f of u.fronts) {
@@ -49,5 +49,56 @@ export function drawerFrontSpan(
     if (f.y[1] > y0 && f.y[0] < box0 + 1) y0 = Math.max(y0, f.y[1]); // a front below
     if (f.y[0] < y1 && f.y[1] > box1 - 1) y1 = Math.min(y1, f.y[0]); // a front above
   }
-  return y1 - y0 >= drawer.height / 2 ? [Math.round(y0), Math.round(y1)] : null;
+  return y1 - y0 >= item.height / 2 ? [Math.round(y0), Math.round(y1)] : null;
+}
+
+export interface FrontSlot {
+  item: string; // item id
+  column: number; // column index
+  y: number; // item bottom above the column floor
+  height: number;
+}
+
+/** Items that take a front (per their template) and have none yet, bottom first within each column. */
+export function freeFrontItems(u: Unit, layout: UnitLayout, catalog: CatalogRegistry): FrontSlot[] {
+  return u.columns.flatMap((c, ci) =>
+    c.items
+      .filter((i) => {
+        const t = catalog.get(i.template.id);
+        return t?.kind === 'item' && !!t.takesFront?.(i.params) && !u.fronts.some((f) => f.item === i.id);
+      })
+      .map((i) => {
+        const t = catalog.get(i.template.id) as ItemTemplate;
+        return { item: i.id, column: ci, y: i.y, height: t.height(i.params, { layout, column: ci }) };
+      })
+      .sort((a, b) => a.y - b.y),
+  );
+}
+
+/** Names of the item templates that can take a front (for messages). */
+export function frontTakingItems(catalog: CatalogRegistry): string[] {
+  return catalog
+    .all()
+    .filter((t) => t.kind === 'item' && t.takesFront)
+    .map((t) => t.name.toLowerCase());
+}
+
+/**
+ * A free height span (from the unit's bottom edge) for a new front over columns [c0, c1]: the one containing
+ * `at` when given, otherwise the tallest. Null when there is none.
+ */
+export function freeFrontSpan(u: Unit, columns: [number, number], at?: number): [number, number] | null {
+  const [c0, c1] = columns;
+  const covering = u.fronts.filter((f) => f.columns[0] <= c1 && c0 <= f.columns[1]).map((f) => f.y);
+  const edges = [0, u.size.h, ...covering.flat()].sort((a, b) => a - b);
+  let best: [number, number] | null = null;
+  for (let i = 0; i < edges.length - 1; i++) {
+    const a = edges[i]!;
+    const b = edges[i + 1]!;
+    if (b <= a || covering.some(([c, d]) => c < b && a < d)) continue;
+    if (at !== undefined) {
+      if (at >= a && at <= b) return [a, b];
+    } else if (!best || b - a > best[1] - best[0]) best = [a, b];
+  }
+  return at === undefined ? best : null;
 }

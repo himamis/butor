@@ -1,6 +1,9 @@
 import {
   defaultsOf,
-  drawerFrontSpan,
+  freeFrontItems,
+  freeFrontSpan,
+  frontTakingItems,
+  itemFrontSpan,
   newId,
   snapContext,
   snapItemY,
@@ -199,42 +202,25 @@ export class PlaceTool {
 
   /** A new front takes the free height span of the column under the cursor (between existing fronts). */
   private frontOps(unit: Unit, layout: UnitLayout, ci: number, localY: number): Op[] | string {
-    const covering = unit.fronts.filter((f) => ci >= f.columns[0] && ci <= f.columns[1]).map((f) => f.y);
-    if (this.entry.id === 'front.drawer') {
-      const free = unit.columns[ci]!.items.find((i) => {
-        if (
-          i.template.id !== 'item.drawer' ||
-          i.params.style !== 'external' ||
-          unit.fronts.some((f) => f.drawer === i.id)
-        )
-          return false;
-        const y0 = layout.floorY + i.y;
-        const y1 = y0 + Number(i.params.height ?? 200);
-        return localY >= y0 - 30 && localY <= y1 + 30;
-      });
-      if (!free) return 'Add an external drawer to this column first';
-      const span = drawerFrontSpan(unit, ci, layout, { y: free.y, height: Number(free.params.height ?? 200) });
-      if (!span) return 'There is already a front over that drawer';
+    const catalog = this.editor.catalog;
+    const ft = catalog.get(this.entry.id);
+    if (!ft || ft.kind !== 'front') return 'Unknown front';
+    if (ft.attachesToItem) {
+      // Onto the item under the cursor that takes a front (the catalog says which items do).
+      const slot = freeFrontItems(unit, layout, catalog).find(
+        (s) => s.column === ci && localY >= layout.floorY + s.y - 30 && localY <= layout.floorY + s.y + s.height + 30,
+      );
+      if (!slot)
+        return `A ${ft.name.toLowerCase()} goes on an item that takes one (${frontTakingItems(catalog).join(', ')})`;
+      const span = itemFrontSpan(unit, ci, layout, slot);
+      if (!span) return 'There is already a front there';
       return [
-        {
-          type: 'unit.front.add',
-          unit: unit.id,
-          template: { id: 'front.drawer' },
-          columns: [ci, ci],
-          y: span,
-          drawer: free.id,
-        },
+        { type: 'unit.front.add', unit: unit.id, template: { id: ft.id }, columns: [ci, ci], y: span, item: slot.item },
       ];
     }
-    const edges = [0, unit.size.h, ...covering.flat()].sort((a, b) => a - b);
-    let span: [number, number] | null = null;
-    for (let i = 0; i < edges.length - 1; i++) {
-      const a = edges[i]!,
-        b = edges[i + 1]!;
-      if (localY >= a && localY <= b && !covering.some(([c, d]) => c < b && a < d)) span = [a, b];
-    }
+    const span = freeFrontSpan(unit, [ci, ci], localY);
     if (!span || span[1] - span[0] < 100) return 'No free space for a front there';
     this.placed = null;
-    return [{ type: 'unit.front.add', unit: unit.id, template: { id: this.entry.id }, columns: [ci, ci], y: span }];
+    return [{ type: 'unit.front.add', unit: unit.id, template: { id: ft.id }, columns: [ci, ci], y: span }];
   }
 }

@@ -22,13 +22,13 @@ const front = (
   columns: [number, number],
   y: [number, number],
   params: Record<string, unknown> = {},
-  drawer?: string,
+  item?: string,
 ) => ({
   template: { id: template },
   columns,
   y,
   params,
-  ...(drawer ? { drawer } : {}),
+  ...(item ? { item } : {}),
 });
 // Standard unit, 18 mm boards, no plinth: column floor at 18, inner height = h − 36.
 const hangingSpace = (innerH: number, prefix: string) => [
@@ -231,7 +231,7 @@ export function instantiatePreset(
     fronts: e.fronts?.map((f) => ({
       ...f,
       id: fresh(f.id),
-      ...(f.drawer ? { drawer: ids.get(f.drawer) ?? f.drawer } : {}),
+      ...(f.item ? { item: ids.get(f.item) ?? f.item } : {}),
     })),
   };
 }

@@ -8,6 +8,7 @@ import { MAX_COORD } from '../schema/primitives';
 import { wallKey, type Room } from '../schema/room';
 import {
   fail,
+  need,
   normalizeEntity,
   normalizeFront,
   normalizeItem,
@@ -17,8 +18,8 @@ import {
 } from './normalize';
 import type { Op, ParsedOp } from './schema';
 
+/** Ops reaching applyOp carry all their ids (withIds), so applying needs no id source. */
 export interface ApplyCtx {
-  newId(): string;
   catalog: CatalogRegistry;
 }
 
@@ -97,7 +98,7 @@ function remapFronts(fronts: Front[], map: (c: number) => number | null): Front[
 function entityOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOutcome | null {
   switch (op.type) {
     case 'entity.add': {
-      const e = normalizeEntity(op.entity, ctx.catalog, ctx.newId, notes);
+      const e = normalizeEntity(op.entity, ctx.catalog, notes);
       if (d.entities[e.id]) fail(`an entity with id "${e.id}" already exists`);
       const doc: Design = { ...putEntity(d, e), order: [...d.order, e.id] };
       return {
@@ -188,7 +189,7 @@ function entityOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpO
         if (next.kind === 'opaque') fail(`"${e.name}" cannot be edited (unknown template)`);
         else {
           const t = resolveTemplate(ctx.catalog, next.template, next.kind === 'unit' ? 'unit' : 'part');
-          next = { ...next, params: templateParams(t.template, t.template.version, op.params, next.params, notes) };
+          next = { ...next, params: templateParams(t.template, op.params, next.params, notes) };
         }
       }
       if (op.materials !== undefined) {
@@ -310,7 +311,7 @@ function unitOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOut
       const u = unitOf(d, op.unit);
       const at = Math.min(op.at, u.columns.length);
       const columns = [...u.columns];
-      const id = op.id ?? ctx.newId();
+      const id = need(op.id);
       columns.splice(at, 0, { id, width: op.width, items: [] });
       // Fronts right of the insertion shift; a front spanning across the insertion point now covers it too.
       const fronts = remapFronts(u.fronts, (c) => (c >= at ? c + 1 : c)) as Front[];
@@ -330,7 +331,7 @@ function unitOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOut
       const items = new Set(u.columns[ci]!.items.map((i) => i.id));
       // Drawer fronts go with their drawers; fronts spanning several columns shrink; a front over only this column refuses.
       const spanning = remapSpanning(
-        u.fronts.filter((f) => !(f.drawer && items.has(f.drawer))),
+        u.fronts.filter((f) => !(f.item && items.has(f.item))),
         ci,
       );
       if (typeof spanning === 'string') fail(spanning);
@@ -384,7 +385,6 @@ function unitOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOut
       const item = normalizeItem(
         { id: op.id, template: op.template, y: op.y, params: op.params, material: op.material },
         ctx.catalog,
-        ctx.newId,
         notes,
       );
       const columns = u.columns.map((c, i) =>
@@ -406,9 +406,7 @@ function unitOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOut
       const next = {
         ...item,
         ...(op.y !== undefined ? { y: op.y } : {}),
-        ...(op.params !== undefined
-          ? { params: templateParams(t.template, t.template.version, op.params, item.params, notes) }
-          : {}),
+        ...(op.params !== undefined ? { params: templateParams(t.template, op.params, item.params, notes) } : {}),
         ...(op.material !== undefined ? { material: op.material } : {}),
       };
       const columns = u.columns.map((c, i) =>
@@ -428,7 +426,7 @@ function unitOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOut
       const columns = u.columns.map((c, i) =>
         i === ci ? { ...c, items: c.items.filter((x) => x.id !== op.item) } : c,
       );
-      const fronts = u.fronts.filter((f) => f.drawer !== op.item); // a drawer front goes with its drawer
+      const fronts = u.fronts.filter((f) => f.item !== op.item); // a drawer front goes with its drawer
       return {
         doc: putEntity(d, { ...u, columns, fronts }),
         inverse: [restore(u)],
@@ -441,7 +439,7 @@ function unitOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOut
       const u = unitOf(d, op.unit);
       const { ci, item } = findItem(u, op.item);
       const to = columnIndex(u, op.column);
-      const linked = u.fronts.find((f) => f.drawer === item.id);
+      const linked = u.fronts.find((f) => f.item === item.id);
       if (linked && (to < linked.columns[0] || to > linked.columns[1]))
         fail(`the drawer's front covers other columns — move or remove the front first`);
       const columns = u.columns.map((c, i) => {
@@ -466,11 +464,10 @@ function unitOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOut
           columns: op.columns,
           y: op.y,
           params: op.params,
-          drawer: op.drawer,
+          item: op.item,
           material: op.material,
         },
         ctx.catalog,
-        ctx.newId,
         notes,
       );
       return {
@@ -490,9 +487,7 @@ function unitOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOut
         ...f,
         ...(op.columns ? { columns: op.columns } : {}),
         ...(op.y ? { y: op.y } : {}),
-        ...(op.params !== undefined
-          ? { params: templateParams(t.template, t.template.version, op.params, f.params, notes) }
-          : {}),
+        ...(op.params !== undefined ? { params: templateParams(t.template, op.params, f.params, notes) } : {}),
         ...(op.material !== undefined ? { material: op.material } : {}),
       };
       return {
@@ -544,7 +539,7 @@ function roomChange(d: Design, room: Room, message: string, notes: string[]): Op
   return { doc: { ...d, room }, inverse: [{ type: 'room.put', room: d.room }], message, notes };
 }
 
-function otherOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOutcome | null {
+function otherOps(d: Design, op: ParsedOp, notes: string[]): OpOutcome | null {
   const room = d.room;
   switch (op.type) {
     case 'group.create': {
@@ -553,7 +548,7 @@ function otherOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOu
       for (const m of members) entity(d, m);
       const inGroup = Object.values(d.groups).find((g) => g.members.some((m) => members.includes(m)));
       if (inGroup) fail(`some of these are already in group "${inGroup.name ?? inGroup.id}" — ungroup first`);
-      const id = op.id ?? ctx.newId();
+      const id = need(op.id);
       const group: Group = { id, members, ...(op.name ? { name: op.name } : {}) };
       return {
         doc: { ...d, groups: { ...d.groups, [id]: group } },
@@ -601,7 +596,7 @@ function otherOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOu
       if (i < 0) fail(`no corner "${op.after}"`);
       const a = room.corners[i]!;
       const b = room.corners[(i + 1) % room.corners.length]!;
-      const n = { id: op.id ?? ctx.newId(), x: op.at.x, z: op.at.z };
+      const n = { id: need(op.id), x: op.at.x, z: op.at.z };
       const old = wallKey(a.id, b.id);
       const wall = room.walls[old]!;
       const walls = { ...room.walls };
@@ -650,7 +645,7 @@ function otherOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOu
       return roomChange(d, { ...room, walls: { ...room.walls, [op.key]: next } }, 'updated a wall', notes);
     }
     case 'room.opening.add': {
-      const o = { ...op.opening, id: op.opening.id ?? ctx.newId(), sill: op.opening.sill ?? 0 };
+      const o = { ...op.opening, id: need(op.opening.id), sill: op.opening.sill ?? 0 };
       if (!room.walls[o.wall]) fail(`no wall "${o.wall}"`);
       if (o.offset + o.width > wallLength(room, o.wall) + 1e-6)
         fail(`the opening extends beyond the wall (${Math.round(wallLength(room, o.wall))} mm)`);
@@ -682,7 +677,7 @@ function otherOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOu
       );
     }
     case 'room.obstacle.add': {
-      const o = { ...op.obstacle, id: op.obstacle.id ?? ctx.newId() };
+      const o = { ...op.obstacle, id: need(op.obstacle.id) };
       if (!(o.min.x < o.max.x && o.min.y < o.max.y && o.min.z < o.max.z))
         fail('an obstacle needs min < max on every axis');
       const out = roomChange(
@@ -764,6 +759,6 @@ function otherOps(d: Design, op: ParsedOp, ctx: ApplyCtx, notes: string[]): OpOu
 /** Applies one validated op. Throws OpError (caught by the transaction) for refusals. */
 export function applyOp(d: Design, op: ParsedOp, ctx: ApplyCtx): OpOutcome {
   const notes: string[] = [];
-  const out = entityOps(d, op, ctx, notes) ?? unitOps(d, op, ctx, notes) ?? otherOps(d, op, ctx, notes);
+  const out = entityOps(d, op, ctx, notes) ?? unitOps(d, op, ctx, notes) ?? otherOps(d, op, notes);
   return out ?? fail(`unsupported operation "${(op as { type: string }).type}"`);
 }

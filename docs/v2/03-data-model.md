@@ -7,7 +7,7 @@ geometry is derived (see 07 and 04).
 
 ```ts
 interface Design {
-  schemaVersion: 1;              // bumps with document-shape changes; migrations in core/migrate
+  schemaVersion: 1;              // the file format; other versions are refused (no migrations)
   id: Id;                        // stable across saves and exports
   name: string;
   revision: number;              // increments on every committed transaction (used by AI rebase)
@@ -68,7 +68,7 @@ interface Placement {
 interface Unit extends Placement {
   kind: 'unit';
   id: Id;
-  template: TemplateRef;         // e.g. { id: 'unit.standard', version: 2 }
+  template: TemplateRef;         // e.g. { id: 'unit.standard' }
   params: Record<string, unknown>; // validated by the template's schema (see 04)
   size: { w: number; h: number; d: number };
   materials: Partial<{ carcass: MaterialId; back: MaterialId; interior: MaterialId; front: MaterialId }>;
@@ -96,7 +96,7 @@ interface Front {
   columns: [first: number, last: number];  // inclusive column index range it covers
   y: [bottom: number, top: number];        // height range, mm from the unit's floor (0 = unit bottom edge)
   params: Record<string, unknown>;         // hinge side, handle, gap, track, …
-  drawer?: Id;                   // for 'front.drawer': the item it moves with
+  item?: Id;                     // fronts that attach to an item (FrontTemplate.attachesToItem): the item it moves with
   material?: MaterialId;
 }
 
@@ -108,7 +108,7 @@ interface FreePart extends Placement {
   material?: MaterialId;
 }
 
-/** An entity whose template is unknown (newer file, removed template). Kept verbatim, shown as a box. */
+/** An entity whose template is unknown (removed template, other app). Kept verbatim, shown as a box. */
 interface OpaqueEntity extends Placement {
   kind: 'opaque';
   id: Id;
@@ -117,7 +117,7 @@ interface OpaqueEntity extends Placement {
 }
 
 interface Group { id: Id; members: Id[]; name?: string }
-interface TemplateRef { id: string; version: number }
+interface TemplateRef { id: string }
 ```
 
 ### Structural invariants (checked by `core/schema` + ops; violating ops are refused)
@@ -126,7 +126,7 @@ interface TemplateRef { id: string; version: number }
 2. Items stay inside their column: `0 ≤ y` and `y + itemHeight ≤ column inner height`.
 3. Items in a column do not overlap each other (by their height ranges plus template clearances).
 4. Fronts on one unit do not overlap (column range × height range), and stay within the unit's front.
-5. A `front.drawer` references an existing `item.drawer` in a covered column, and vice versa for external drawers.
+5. A front whose template attaches to items names an item in a covered column whose template takes a front (with its params); other fronts name none; an item has at most one front. The catalog declares this — core and UI never test template ids.
 6. Group members exist and are not locked into two groups.
 7. Ids are unique across the document.
 

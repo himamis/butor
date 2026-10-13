@@ -35,8 +35,10 @@ function templateBlock(t: AnyTemplate): string {
     t.kind === 'unit'
       ? ` Size limits w ${t.sizeLimits.w.join('–')}, h ${t.sizeLimits.h.join('–')}, d ${t.sizeLimits.d.join('–')} mm; default ${t.defaultSize.w}×${t.defaultSize.h}×${t.defaultSize.d}.`
       : t.kind === 'front'
-        ? ` Mount: ${t.mount}; minimum ${t.minSize.w}×${t.minSize.h} mm.`
-        : '';
+        ? ` Mount: ${t.mount}; minimum ${t.minSize.w}×${t.minSize.h} mm.${t.attachesToItem ? " Attaches to one item that can take a front: give that item's id as `item`." : ''}`
+        : t.kind === 'item' && t.takesFront
+          ? ' Can take a front on the unit face that moves with it, depending on its parameters.'
+          : '';
   const params = describeParams(t.params).map((d) => `    - ${paramLine(d)}`);
   return [`- ${t.id} (${t.kind}, ${t.category}): ${t.name}. ${t.description}${extra}`, ...params].join('\n');
 }
@@ -55,7 +57,7 @@ export function systemPrompt(): string {
     '',
     'Units have columns (left → right, width in mm or "auto" sharing the rest), items in a column at a height y',
     '(mm above the column floor, bottom of the item), and fronts that cover a column range [first, last] (0-based, inclusive)',
-    "and a height range [bottom, top] measured from the unit's bottom edge. A drawer front names the external drawer item it moves with.",
+    "and a height range [bottom, top] measured from the unit's bottom edge. Some fronts attach to an item (see the templates) and name it in `item`.",
     '',
     'Rules:',
     '- The current design is attached to every user message as JSON. Use its ids; never invent ids of existing things.',

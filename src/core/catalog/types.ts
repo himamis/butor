@@ -16,15 +16,12 @@ export type Category = 'Wardrobes' | 'Cabinets' | 'Fronts' | 'Interior' | 'Panel
 
 export interface TemplateBase {
   id: string;
-  version: number;
   kind: TemplateKind;
   name: string;
   category: Category;
   description: string;
   tags: string[];
   params: ParamsSchema;
-  /** Migrations from version N (key) to N + 1. */
-  migrate?: Record<number, (params: Record<string, unknown>) => Record<string, unknown>>;
 }
 
 /** Where a unit's columns are, computed by its template from size, params and columns. Unit-local mm. */
@@ -76,7 +73,7 @@ export interface FrontBuildContext {
   rect: { x0: number; x1: number; y0: number; y1: number };
   z: number; // overlay fronts: their back face sits here (the carcass front edge)
   trackZone?: [back: number, front: number];
-  drawerMotion?: Motion; // drawer fronts move with their drawer
+  itemMotion?: Motion; // attaching fronts move with their item
   unit: { w: number; h: number; d: number }; // to tell outer edges from shared ones
   opening: { x0: number; x1: number; y0: number; y1: number }; // the carcass's inner opening (between sides, bottom and top)
   materials: ResolvedMaterials;
@@ -86,6 +83,8 @@ export interface ItemTemplate extends TemplateBase {
   kind: 'item';
   /** Vertical space the item occupies in its column, mm. */
   height(params: Record<string, unknown>, ctx: ItemContext): number;
+  /** Whether the item, with these params, carries a front on the unit face that moves with it (e.g. an external drawer). */
+  takesFront?(params: Record<string, unknown>): boolean;
   clearance?: { above?: number; below?: number };
   build(params: Record<string, unknown>, ctx: ItemBuildContext): PartDraft[];
 }
@@ -96,6 +95,8 @@ export interface FrontTemplate extends TemplateBase {
   minSize: { w: number; h: number };
   /** overlay: in front of the carcass; track: inside a track zone at the front (sliding doors). */
   mount: 'overlay' | 'track';
+  /** The front belongs to one item that takes a front (it names it in `item`) and moves with it instead of opening on its own. */
+  attachesToItem?: boolean;
   build(params: Record<string, unknown>, ctx: FrontBuildContext): PartDraft[];
 }
 

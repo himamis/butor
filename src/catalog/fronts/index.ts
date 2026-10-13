@@ -77,7 +77,6 @@ function leaf(p: Record<string, unknown>, c: FrontBuildContext, l: Leaf): PartDr
 
 export const door: FrontTemplate = {
   id: 'front.door',
-  version: 1,
   kind: 'front',
   name: 'Door',
   category: 'Fronts',
@@ -99,7 +98,6 @@ export const door: FrontTemplate = {
 
 export const doubleDoor: FrontTemplate = {
   id: 'front.double-door',
-  version: 1,
   kind: 'front',
   name: 'Double door',
   category: 'Fronts',
@@ -126,7 +124,6 @@ export const doubleDoor: FrontTemplate = {
 
 export const flap: FrontTemplate = {
   id: 'front.flap',
-  version: 1,
   kind: 'front',
   name: 'Lift-up flap',
   category: 'Fronts',
@@ -188,7 +185,6 @@ export const flap: FrontTemplate = {
 
 export const sliding: FrontTemplate = {
   id: 'front.sliding',
-  version: 1,
   kind: 'front',
   name: 'Sliding door',
   category: 'Fronts',
@@ -252,7 +248,6 @@ export const sliding: FrontTemplate = {
 
 export const drawerFront: FrontTemplate = {
   id: 'front.drawer',
-  version: 1,
   kind: 'front',
   name: 'Drawer front',
   category: 'Fronts',
@@ -261,6 +256,7 @@ export const drawerFront: FrontTemplate = {
   params: z.object({ ...handleParams('bar'), thickness: thickness() }),
   minSize: { w: 100, h: 60 },
   mount: 'overlay',
+  attachesToItem: true,
   build(p, c) {
     const t = Number(p.thickness);
     const { x0, x1, y0, y1 } = c.rect;
@@ -273,7 +269,7 @@ export const drawerFront: FrontTemplate = {
       along: 'x',
       panel,
       finish: c.materials.handle,
-      motion: c.drawerMotion,
+      motion: c.itemMotion,
       grip: 'notch',
     });
     return [
@@ -285,7 +281,7 @@ export const drawerFront: FrontTemplate = {
         thickness: t,
         material: c.materials.front,
         grain: 'x',
-        motion: c.drawerMotion,
+        motion: c.itemMotion,
         cutout: hd.cutout,
       }),
       ...hd.parts,

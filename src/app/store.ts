@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   applyTransaction,
+  noNewIds,
   rebase,
   buildScene,
   createDesign,
@@ -74,9 +75,9 @@ interface AppState {
   redo(): void;
   load(design: Design): void;
   setReadOnly(readOnly: boolean): void;
-  /** Commits a transaction prepared elsewhere (the assistant) against `baseRevision`, replaying its recorded ids. */
+  /** Commits a transaction prepared elsewhere (the assistant) against `baseRevision`. Its ops carry all their ids. */
   applyRemote(
-    tx: { label: string; ops: Op[]; ids: string[] },
+    tx: { label: string; ops: Op[] },
     baseRevision: number,
   ): { ok: boolean; conflict: boolean; revision: number; message?: string };
   setView(patch: Partial<ViewSettings>): void;
@@ -99,6 +100,7 @@ const refused = (doc: Design): ApplyResult => ({
   inverse: [],
   results: [{ ok: false, message: 'This design is read-only' }],
   ok: false,
+  applied: [],
 });
 
 export function newDesign(): Design {
@@ -144,7 +146,7 @@ function asInput(e: Entity): EntityInput | null {
     position: { ...e.position },
     rotation: e.rotation,
     name: e.name,
-    template: { id: e.template.id, version: e.template.version },
+    template: { id: e.template.id },
     params: structuredClone(e.params),
   };
   if (e.kind === 'part') return { kind: 'part', ...base, ...(e.material ? { material: e.material } : {}) };
@@ -168,7 +170,7 @@ function asInput(e: Entity): EntityInput | null {
     columns: [...f.columns] as [number, number],
     y: [...f.y] as [number, number],
     params: structuredClone(f.params),
-    ...(f.drawer ? { drawer: itemIds.get(f.drawer) ?? f.drawer } : {}),
+    ...(f.item ? { item: itemIds.get(f.item) ?? f.item } : {}),
     ...(f.material ? { material: f.material } : {}),
   }));
   return { kind: 'unit', ...base, size: { ...e.size }, materials: { ...e.materials }, columns, fronts };
@@ -186,7 +188,7 @@ function freshIds(e: EntityInput): EntityInput {
       i.id = id;
     }
   }
-  for (const f of copy.fronts ?? []) if (f.drawer) f.drawer = map.get(f.drawer) ?? f.drawer;
+  for (const f of copy.fronts ?? []) if (f.item) f.item = map.get(f.item) ?? f.item;
   return copy;
 }
 
@@ -275,10 +277,9 @@ export const useApp = create<AppState>()((set, get) => {
     applyRemote(tx, baseRevision) {
       if (get().readOnly)
         return { ok: false, conflict: false, revision: get().design.revision, message: 'This design is read-only' };
-      const queue = [...tx.ids];
       const r = rebase(get().design, { label: tx.label, ops: tx.ops }, baseRevision, {
         ...opContext(),
-        newId: () => queue.shift() ?? newId(),
+        newId: noNewIds,
       });
       if (!r.ok) {
         const message = r.results.find((x) => !x.ok)?.message;

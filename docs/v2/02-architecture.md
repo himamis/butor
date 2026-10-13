@@ -8,7 +8,7 @@
 2. **Derived, not stored.** The document stores intent (a unit with columns, items, fronts). Parts,
    bounds, collisions and lists are derived and cached.
 3. **One mutation path.** Nothing changes the document except `applyTransaction` in core.
-4. **Schemas generate the rest.** zod schemas drive validation, UI forms, AI tool schemas and migrations.
+4. **Schemas generate the rest.** zod schemas drive validation, UI forms and AI tool schemas.
 5. **Render is a projection.** The renderer reads the derived scene model and draws it; it owns no design state.
 6. **Explicit interaction.** One input controller routes pointer/keyboard input to one active tool.
 
@@ -24,7 +24,6 @@ src/
     snapping/      snap candidates + query
     checks/        overlap, door swing, drawer pull-out, ceiling, openings
     outputs/       cut list, hardware list, cost, print-sheet data
-    migrate/       schema migrations, template migrations
     ids.ts         id generation (insecure-context safe)
   catalog/         the templates (units, items, fronts, free parts), materials library defaults
   render/          three.js scene from the derived scene model; instancing; picking; animation; overlays
@@ -130,4 +129,4 @@ looking at it is view state.**
 - Every panel and the canvas sit in an error boundary with "Try again".
 - `buildScene` never throws for one bad entity: it returns an `invalid` part set for it (rendered as a red
   wireframe box with the error in the checks panel) and continues.
-- Unknown template ids or versions from files are preserved as **opaque entities** (see 03) and listed as warnings.
+- Unknown template ids from files are preserved as **opaque entities** (see 03) and listed as warnings.

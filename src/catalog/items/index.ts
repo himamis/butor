@@ -19,7 +19,6 @@ const slide = (id: string, depth: number): Motion => ({
 
 export const shelf: ItemTemplate = {
   id: 'item.shelf',
-  version: 1,
   kind: 'item',
   name: 'Shelf',
   category: 'Interior',
@@ -69,7 +68,6 @@ function railPart(c: ItemBuildContext, y: number, motion?: Motion): PartDraft {
 
 export const rail: ItemTemplate = {
   id: 'item.rail',
-  version: 1,
   kind: 'item',
   name: 'Hanging rail',
   category: 'Interior',
@@ -82,7 +80,6 @@ export const rail: ItemTemplate = {
 
 export const pullDownRail: ItemTemplate = {
   id: 'item.pull-down-rail',
-  version: 1,
   kind: 'item',
   name: 'Pull-down rail',
   category: 'Interior',
@@ -193,7 +190,6 @@ function drawerBox(
 
 export const drawer: ItemTemplate = {
   id: 'item.drawer',
-  version: 1,
   kind: 'item',
   name: 'Drawer',
   category: 'Interior',
@@ -210,6 +206,7 @@ export const drawer: ItemTemplate = {
     ...handleParams('grip'),
   }),
   height: (p) => Number(p.height),
+  takesFront: (p) => p.style === 'external',
   build(p, c) {
     const h = Number(p.height);
     const internal = p.style === 'internal';
@@ -267,7 +264,6 @@ export const drawer: ItemTemplate = {
 
 export const basket: ItemTemplate = {
   id: 'item.basket',
-  version: 1,
   kind: 'item',
   name: 'Wire basket',
   category: 'Interior',
@@ -359,7 +355,6 @@ export const basket: ItemTemplate = {
 
 export const trouserRack: ItemTemplate = {
   id: 'item.trouser-rack',
-  version: 1,
   kind: 'item',
   name: 'Trouser rack',
   category: 'Interior',
@@ -414,7 +409,6 @@ export const trouserRack: ItemTemplate = {
 
 export const tieRack: ItemTemplate = {
   id: 'item.tie-rack',
-  version: 1,
   kind: 'item',
   name: 'Tie & belt rack',
   category: 'Interior',
@@ -444,7 +438,6 @@ export const tieRack: ItemTemplate = {
 
 export const shoeShelf: ItemTemplate = {
   id: 'item.shoe-shelf',
-  version: 1,
   kind: 'item',
   name: 'Shoe shelf',
   category: 'Interior',
@@ -485,7 +478,6 @@ export const shoeShelf: ItemTemplate = {
 
 export const accessoryTray: ItemTemplate = {
   id: 'item.tray',
-  version: 1,
   kind: 'item',
   name: 'Accessory tray',
   category: 'Interior',

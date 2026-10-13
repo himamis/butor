@@ -6,7 +6,7 @@ export * from './history';
 export * from './invariants';
 export * from './design';
 export * from './ids';
-export { importDesign, type ImportResult } from './migrate/import';
+export { importDesign, type ImportResult } from './import';
 export * from './geometry/footprint';
 export * from './geometry/polygon';
 export * from './geometry/part';

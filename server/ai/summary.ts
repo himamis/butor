@@ -76,7 +76,7 @@ export function designSummary(design: Design, scene: SceneModel): string {
           columns: f.columns,
           y: f.y,
           params: f.params,
-          ...(f.drawer ? { drawer: f.drawer } : {}),
+          ...(f.item ? { item: f.item } : {}),
         })),
       };
     }),

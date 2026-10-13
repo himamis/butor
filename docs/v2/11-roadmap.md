@@ -12,14 +12,14 @@ rules are settled before anything depends on them.
 **Exit:** empty app shell renders in CI on both origins; a failing boundary import fails CI.
 
 ## M1 — Document, schemas, operations, history
-- zod schemas for Design, Room, entities, materials (03); ids; schema migration framework.
+- zod schemas for Design, Room, entities, materials (03); ids; import of the current format (no migrations).
 - Op set (05) incl. structural invariants, strict/partial modes, inverses, rebase.
 - History with preview/commit.
 
 **Exit:** property tests: inverse round-trip for every op, atomicity, invariants under random op sequences.
 
 ## M2 — Catalog & geometry engine
-- Template system with param helpers, registry, versioning + golden snapshots (04).
+- Template system with param helpers, registry, golden snapshots (04).
 - Shared builders: carcass, doors, flap, sliding door, drawer box, handles, hardware rules.
 - Launch catalog (04) + presets.
 - `buildScene` with per-entity caching, invalid-entity handling; collisions; checks (overlap, door swing,
@@ -54,7 +54,7 @@ rules are settled before anything depends on them.
 **Exit:** every template is editable without custom UI code; error containment e2e passes.
 
 ## M7 — Outputs, persistence, sharing
-- IndexedDB repository, autosave, import/export with migrations and opaque entities.
+- IndexedDB repository, autosave, import/export with opaque entities.
 - Share links + viewer route; print sheet (SVG elevations + tables), CSV exports.
 - Measure tool (also in viewer).
 
@@ -72,21 +72,7 @@ rules are settled before anything depends on them.
 
 **Exit:** all budgets green; full e2e suite green on both origins.
 
-## v1 import
+## No backward compatibility
 
-v2 imports v1 files (`version: 1` designs from this repository) through a one-way migration:
-
-| v1 | v2 |
-|---|---|
-| `room.points` | `corners` with generated ids; `walls` with `wallThickness` for each |
-| `room.columns[]` | `obstacles[]` with `kind: 'column'`, floor to ceiling |
-| `floorKind` `wood` | `floor.finish: 'planks'` (others map by name) |
-| `carcass`, `carcass-doors`, `wardrobe`, `sliding-wardrobe`, `drawer-unit`, `top-cabinet`, `shoe-cabinet`, `open-shelving` | `Unit` with columns/items/fronts reconstructed from their params |
-| `corner-unit` | `Unit` with template `unit.corner` |
-| Free `drawer`, `door`, `rail`, `shelf-rail`, interior items placed inside a unit's bounds | moved into that unit's column as items/fronts when they fit exactly; otherwise kept as free parts and listed in a "check these" warning |
-| `side-panel`, `horizontal-panel`, `back-panel`, `filler`, `plinth`, `cornice` | `FreePart` with matching templates |
-| `groupId` | `groups` |
-| Numeric options (`hinge: 0/1`, `handle: 0–3`) | string enums |
-| `color` / `doorColor` | design materials (a board per distinct colour) |
-
-A v1 reference design set (from this repository's smoke fixtures) is part of the migration tests.
+v2 does not read v1 files or older v2 formats: there is no importer and no migration code. Designs
+store template ids only and are rebuilt with the current templates.

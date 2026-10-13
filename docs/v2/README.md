@@ -15,12 +15,12 @@ here: read it in order, then build milestone by milestone ([11-roadmap.md](11-ro
 | 01 | [Features](01-features.md) | Everything the user can do, with acceptance criteria |
 | 02 | [Architecture](02-architecture.md) | Modules, dependency rules, stack, runtime topology |
 | 03 | [Data model](03-data-model.md) | The design document: room, units, columns, items, fronts, parts, materials |
-| 04 | [Catalog & templates](04-catalog.md) | Typed template schemas, build functions, versioning |
+| 04 | [Catalog & templates](04-catalog.md) | Typed template schemas, build functions, item/front pairing |
 | 05 | [Operations & history](05-operations.md) | The single validated mutation API, transactions, undo |
 | 06 | [Interaction & snapping](06-interaction.md) | Tool system, input controller, snapping engine |
 | 07 | [Rendering](07-rendering.md) | Scene model, instancing, picking, animation, performance budgets |
 | 08 | [AI assistant](08-ai.md) | Chat editing, providers, server, security |
-| 09 | [Persistence & sharing](09-persistence.md) | Design storage, files, share links, migrations |
+| 09 | [Persistence & sharing](09-persistence.md) | Design storage, files, share links |
 | 10 | [Quality](10-quality.md) | Unit, property, end-to-end and visual tests; budgets; CI |
 | 11 | [Roadmap](11-roadmap.md) | Milestones with exit criteria, in build order |
 | 12 | [Lessons from v1](12-lessons.md) | Concrete pitfalls already paid for — do not repeat |
@@ -32,7 +32,7 @@ here: read it in order, then build milestone by milestone ([11-roadmap.md](11-ro
 2. **One way to change a design.** The UI, the AI assistant, paste, import and undo all go through one
    validated operations layer. Rules live in one place.
 3. **Schemas are the source of truth.** Template parameters are typed schemas. Validation, the properties
-   panel, the AI tool schema, file migration and documentation are generated from them.
+   panel, the AI tool schema and documentation are generated from them.
 4. **Workshop-grade output.** Boards with thickness, grain and edge banding; hinges and runners; cost;
    a printable sheet. A cabinet maker can build from the export.
 5. **Fast with large designs.** 100 units at interactive frame rates; nothing renders while idle.

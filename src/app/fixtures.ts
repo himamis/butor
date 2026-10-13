@@ -15,7 +15,7 @@ export function fixtureDesign(name: FixtureName): Design {
       kind: 'unit',
       id: 'broken',
       name: 'Broken unit',
-      template: { id: 'unit.standard', version: 1 },
+      template: { id: 'unit.standard' },
       position: { x: 3400, y: 0, z: 300 },
       rotation: 0,
       locked: false,
@@ -26,7 +26,7 @@ export function fixtureDesign(name: FixtureName): Design {
         {
           id: 'c1',
           width: 'auto',
-          items: [{ id: 'i1', template: { id: 'item.missing', version: 1 }, y: 0, params: {} }],
+          items: [{ id: 'i1', template: { id: 'item.missing' }, y: 0, params: {} }],
         },
       ],
       fronts: [],

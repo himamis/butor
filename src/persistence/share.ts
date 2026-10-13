@@ -35,7 +35,7 @@ export function decodeShare(fragment: string, catalog: CatalogRegistry): ImportR
   const d = params.get('d');
   const v = Number(params.get('v') ?? SHARE_VERSION);
   if (!d) return { ok: false, error: DAMAGED };
-  if (v > SHARE_VERSION) return { ok: false, error: 'This link was made with a newer version of Butor.' };
+  if (v !== SHARE_VERSION) return { ok: false, error: 'This link was made with a different version of Butor.' };
   let raw: unknown;
   try {
     raw = JSON.parse(strFromU8(inflateSync(fromBase64Url(d))));

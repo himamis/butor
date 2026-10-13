@@ -78,7 +78,7 @@ describe('runChecks', () => {
       freshDesign(),
       unit(1000, 300, {
         columns: [{ width: 'auto', items: [{ id: 'dr', template: { id: 'item.drawer' }, y: 0 }] }],
-        fronts: [{ template: { id: 'front.drawer' }, columns: [0, 0], y: [0, 240], drawer: 'dr' }],
+        fronts: [{ template: { id: 'front.drawer' }, columns: [0, 0], y: [0, 240], item: 'dr' }],
       }),
     ).doc;
     expect(kinds(d)).not.toContain('pull-out');

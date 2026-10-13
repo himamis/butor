@@ -15,7 +15,7 @@ Features marked **(new)** did not exist in v1.
 AC
 - Creating, renaming, duplicating and deleting designs survives a page reload.
 - A file exported from one browser imports in another with identical geometry and cut list.
-- A file from an older schema version imports and is migrated; a file from a newer version is refused with a clear message.
+- Only the current file format is read: a file in any other format version is refused with a clear message (no migrations).
 - A design containing an unknown template still opens; the unknown entities are listed in a warning and kept untouched in the file (not dropped).
 
 ## F2. Room

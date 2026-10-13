@@ -4,7 +4,6 @@ import { catalog } from '../catalog';
 import { parseDesignFile } from '../persistence/files';
 import type { IndexEntry } from '../persistence/repository';
 import { pickTextFile } from './download';
-import { legacyImport } from './legacy';
 import { getRepository } from './repo';
 import { navigate } from './router';
 import { useUi } from './ui';
@@ -61,7 +60,7 @@ export function StartScreen() {
   const importFile = async () => {
     const text = await pickTextFile('.json,application/json');
     if (text === null) return;
-    const r = parseDesignFile(text, catalog, legacyImport);
+    const r = parseDesignFile(text, catalog);
     if (!r.ok) {
       setMessage(r.error);
       return;

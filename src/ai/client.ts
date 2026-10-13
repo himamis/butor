@@ -2,7 +2,7 @@ import type { Design, Op } from '../core';
 import type { AiSettings } from './settings';
 
 export interface AiFinal {
-  transaction: { label: string; ops: Op[]; ids: string[] };
+  transaction: { label: string; ops: Op[] };
   changes: string[];
   reply: string;
   history: unknown[];

@@ -9,7 +9,6 @@ const thickness = (def = 18) => mm({ label: 'Thickness', min: 4, max: 40, defaul
 
 export const panel: PartTemplate = {
   id: 'part.panel',
-  version: 1,
   kind: 'part',
   name: 'Panel',
   category: 'Panels',
@@ -39,7 +38,6 @@ export const panel: PartTemplate = {
 
 export const looseShelf: PartTemplate = {
   id: 'part.shelf',
-  version: 1,
   kind: 'part',
   name: 'Loose shelf',
   category: 'Panels',
@@ -69,7 +67,6 @@ export const looseShelf: PartTemplate = {
 
 export const endPanel: PartTemplate = {
   id: 'part.end-panel',
-  version: 1,
   kind: 'part',
   name: 'End panel',
   category: 'Panels',
@@ -99,7 +96,6 @@ export const endPanel: PartTemplate = {
 
 export const filler: PartTemplate = {
   id: 'part.filler',
-  version: 1,
   kind: 'part',
   name: 'Filler strip',
   category: 'Panels',
@@ -129,7 +125,6 @@ export const filler: PartTemplate = {
 
 export const backPanel: PartTemplate = {
   id: 'part.back-panel',
-  version: 1,
   kind: 'part',
   name: 'Back panel',
   category: 'Panels',
@@ -158,7 +153,6 @@ export const backPanel: PartTemplate = {
 
 export const plinth: PartTemplate = {
   id: 'part.plinth',
-  version: 1,
   kind: 'part',
   name: 'Plinth base',
   category: 'Base & trim',
@@ -197,7 +191,6 @@ export const plinth: PartTemplate = {
 
 export const cornice: PartTemplate = {
   id: 'part.cornice',
-  version: 1,
   kind: 'part',
   name: 'Cornice',
   category: 'Base & trim',
@@ -242,7 +235,6 @@ export const cornice: PartTemplate = {
 
 export const lightStrip: PartTemplate = {
   id: 'part.light-strip',
-  version: 1,
   kind: 'part',
   name: 'LED strip',
   category: 'Base & trim',
@@ -266,7 +258,6 @@ export const lightStrip: PartTemplate = {
 
 export const wallRail: PartTemplate = {
   id: 'part.wall-rail',
-  version: 1,
   kind: 'part',
   name: 'Wall-mounting rail',
   category: 'Base & trim',

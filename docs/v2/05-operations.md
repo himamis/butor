@@ -14,6 +14,7 @@ interface ApplyResult {
   inverse: Op[];                 // applying these restores the old document exactly
   results: OpResult[];           // one per op: { ok, message, created?: Id[] }
   ok: boolean;                   // all ops succeeded
+  applied: Op[];                 // the ops that applied, in order, with every id they created filled in
 }
 
 function applyTransaction(doc: Design, tx: Transaction, ctx: OpContext): ApplyResult;
@@ -24,6 +25,11 @@ interface OpContext { newId(): Id; now(): string; catalog: CatalogRegistry; mode
   transaction and the document is unchanged.
 - **partial** (AI): valid ops apply, invalid ops are reported; the model gets the report and can fix them.
 - `newId` and `now` are injected so results are deterministic in tests and on the server.
+- **Ids are assigned in one place**: before an op applies, `withIds(op, newId)` fills every id it would create
+  (an entity and its columns, items and fronts; columns, items, fronts, groups, corners, openings, obstacles).
+  `applied` therefore holds complete records: replaying them creates exactly the same ids. Replays (the AI
+  transaction in the browser) pass `noNewIds`, so an op that would still need an id fails loudly instead of
+  drifting.
 - The function is pure and synchronous; it never throws for bad input (bad input → failed `OpResult`).
 
 ## Operation set

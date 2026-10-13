@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`golden snapshots (bump the template version when these change) > front.door@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > front.door 1`] = `
 [
   {
     "banding": {
@@ -87,7 +87,7 @@ exports[`golden snapshots (bump the template version when these change) > front.
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > front.double-door@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > front.double-door 1`] = `
 [
   {
     "banding": {
@@ -256,7 +256,7 @@ exports[`golden snapshots (bump the template version when these change) > front.
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > front.drawer@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > front.drawer 1`] = `
 [
   {
     "banding": {
@@ -334,7 +334,7 @@ exports[`golden snapshots (bump the template version when these change) > front.
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > front.flap@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > front.flap 1`] = `
 [
   {
     "banding": {
@@ -456,7 +456,7 @@ exports[`golden snapshots (bump the template version when these change) > front.
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > front.sliding@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > front.sliding 1`] = `
 [
   {
     "banding": {
@@ -541,7 +541,7 @@ exports[`golden snapshots (bump the template version when these change) > front.
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.basket@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.basket 1`] = `
 [
   {
     "center": {
@@ -828,7 +828,7 @@ exports[`golden snapshots (bump the template version when these change) > item.b
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.drawer@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.drawer 1`] = `
 [
   {
     "banding": {
@@ -1013,7 +1013,7 @@ exports[`golden snapshots (bump the template version when these change) > item.d
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.pull-down-rail@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.pull-down-rail 1`] = `
 [
   {
     "center": {
@@ -1115,7 +1115,7 @@ exports[`golden snapshots (bump the template version when these change) > item.p
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.rail@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.rail 1`] = `
 [
   {
     "center": {
@@ -1146,7 +1146,7 @@ exports[`golden snapshots (bump the template version when these change) > item.r
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.shelf@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.shelf 1`] = `
 [
   {
     "banding": {
@@ -1182,7 +1182,7 @@ exports[`golden snapshots (bump the template version when these change) > item.s
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.shoe-shelf@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.shoe-shelf 1`] = `
 [
   {
     "banding": {
@@ -1241,7 +1241,7 @@ exports[`golden snapshots (bump the template version when these change) > item.s
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.tie-rack@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.tie-rack 1`] = `
 [
   {
     "center": {
@@ -1280,7 +1280,7 @@ exports[`golden snapshots (bump the template version when these change) > item.t
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.tray@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.tray 1`] = `
 [
   {
     "center": {
@@ -1459,7 +1459,7 @@ exports[`golden snapshots (bump the template version when these change) > item.t
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > item.trouser-rack@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > item.trouser-rack 1`] = `
 [
   {
     "center": {
@@ -1785,7 +1785,7 @@ exports[`golden snapshots (bump the template version when these change) > item.t
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.back-panel@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.back-panel 1`] = `
 [
   {
     "center": {
@@ -1814,7 +1814,7 @@ exports[`golden snapshots (bump the template version when these change) > part.b
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.cornice@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.cornice 1`] = `
 [
   {
     "banding": {
@@ -1877,7 +1877,7 @@ exports[`golden snapshots (bump the template version when these change) > part.c
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.end-panel@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.end-panel 1`] = `
 [
   {
     "banding": {
@@ -1910,7 +1910,7 @@ exports[`golden snapshots (bump the template version when these change) > part.e
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.filler@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.filler 1`] = `
 [
   {
     "banding": {
@@ -1943,7 +1943,7 @@ exports[`golden snapshots (bump the template version when these change) > part.f
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.light-strip@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.light-strip 1`] = `
 [
   {
     "center": {
@@ -1973,7 +1973,7 @@ exports[`golden snapshots (bump the template version when these change) > part.l
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.panel@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.panel 1`] = `
 [
   {
     "banding": {
@@ -2007,7 +2007,7 @@ exports[`golden snapshots (bump the template version when these change) > part.p
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.plinth@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.plinth 1`] = `
 [
   {
     "banding": {
@@ -2111,7 +2111,7 @@ exports[`golden snapshots (bump the template version when these change) > part.p
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.shelf@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.shelf 1`] = `
 [
   {
     "banding": {
@@ -2143,7 +2143,7 @@ exports[`golden snapshots (bump the template version when these change) > part.s
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > part.wall-rail@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > part.wall-rail 1`] = `
 [
   {
     "center": {
@@ -2173,7 +2173,7 @@ exports[`golden snapshots (bump the template version when these change) > part.w
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > unit.corner@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > unit.corner 1`] = `
 [
   {
     "center": {
@@ -2604,7 +2604,7 @@ exports[`golden snapshots (bump the template version when these change) > unit.c
 ]
 `;
 
-exports[`golden snapshots (bump the template version when these change) > unit.standard@v1 1`] = `
+exports[`golden snapshots (review the diff when a template changes) > unit.standard 1`] = `
 [
   {
     "banding": {

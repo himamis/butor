@@ -27,7 +27,6 @@ const board = (
 
 export const testUnit: UnitTemplate = {
   id: 'test.unit',
-  version: 1,
   kind: 'unit',
   name: 'Test unit',
   category: 'Cabinets',
@@ -80,7 +79,6 @@ export const testUnit: UnitTemplate = {
 
 export const testShelf: ItemTemplate = {
   id: 'test.shelf',
-  version: 1,
   kind: 'item',
   name: 'Shelf',
   category: 'Interior',
@@ -103,7 +101,6 @@ export const testShelf: ItemTemplate = {
 
 export const testDrawer: ItemTemplate = {
   id: 'test.drawer',
-  version: 1,
   kind: 'item',
   name: 'Drawer',
   category: 'Interior',
@@ -114,6 +111,7 @@ export const testDrawer: ItemTemplate = {
     style: choice({ label: 'Front', options: { internal: 'Inside', external: 'On unit front' }, default: 'internal' }),
   }),
   height: (p) => Number(p.height),
+  takesFront: (p) => p.style === 'external',
   build: (p, c) => [
     {
       ...board(
@@ -132,7 +130,6 @@ export const testDrawer: ItemTemplate = {
 
 export const testDoor: FrontTemplate = {
   id: 'test.door',
-  version: 1,
   kind: 'front',
   name: 'Door',
   category: 'Fronts',
@@ -155,7 +152,7 @@ export const testDoor: FrontTemplate = {
           c.materials.front,
           18,
         ),
-        motion: c.drawerMotion ?? {
+        motion: c.itemMotion ?? {
           id: c.id,
           kind: 'hinge',
           axis: 'y',
@@ -169,7 +166,6 @@ export const testDoor: FrontTemplate = {
 
 export const testPanel: PartTemplate = {
   id: 'test.panel',
-  version: 1,
   kind: 'part',
   name: 'Panel',
   category: 'Panels',
@@ -195,4 +191,13 @@ export const testPanel: PartTemplate = {
   ],
 };
 
-export const testCatalog = createRegistry([testUnit, testShelf, testDrawer, testDoor, testPanel]);
+/** A front that attaches to an item that takes a front (moves with it). */
+export const testDrawerFront: FrontTemplate = {
+  ...testDoor,
+  id: 'test.drawer-front',
+  name: 'Drawer front',
+  params: z.object({}),
+  attachesToItem: true,
+};
+
+export const testCatalog = createRegistry([testUnit, testShelf, testDrawer, testDoor, testDrawerFront, testPanel]);

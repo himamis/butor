@@ -16,7 +16,7 @@ function design(): Design {
           items: [
             {
               id: 'dr1',
-              template: { id: 'test.drawer', version: 1 },
+              template: { id: 'test.drawer' },
               y: 0,
               params: { height: 200, style: 'external' },
             },
@@ -25,24 +25,24 @@ function design(): Design {
         {
           id: 'c2',
           width: 'auto',
-          items: [{ id: 's1', template: { id: 'test.shelf', version: 1 }, y: 800, params: {} }],
+          items: [{ id: 's1', template: { id: 'test.shelf' }, y: 800, params: {} }],
         },
       ],
       fronts: [
         {
           id: 'f1',
-          template: { id: 'test.door', version: 1 },
+          template: { id: 'test.door' },
           columns: [1, 1],
           y: [0, 2200],
           params: { hinge: 'right' },
         },
         {
           id: 'f2',
-          template: { id: 'test.door', version: 1 },
+          template: { id: 'test.drawer-front' },
           columns: [0, 0],
           y: [0, 250],
-          params: { hinge: 'left' },
-          drawer: 'dr1',
+          params: {},
+          item: 'dr1',
         },
       ],
     }),
@@ -101,7 +101,7 @@ describe('buildScene', () => {
       design(),
       unit('bad', {
         position: { x: 3000, y: 0, z: 300 },
-        template: { id: 'test.unit', version: 1 },
+        template: { id: 'test.unit' },
         columns: [
           { id: 'cx', width: 5000, items: [] },
           { id: 'cy', width: 'auto', items: [] },
