@@ -10,7 +10,19 @@ const hostname = process.env.HOST ?? (production ? '127.0.0.1' : '127.0.0.1');
 
 // In development Vite serves the app on 5173 and proxies /api here; LAN URLs point at Vite's port.
 const publicPort = production ? port : Number(process.env.WEB_PORT ?? 5173);
-const app = createApp({ port: publicPort, interfaces: networkInterfaces() });
+const app = createApp({
+  port: publicPort,
+  interfaces: networkInterfaces(),
+  ai: {
+    env: {
+      ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+      LLM_API_KEY: process.env.LLM_API_KEY,
+      LLM_BASE_URL: process.env.LLM_BASE_URL,
+      LLM_MODEL: process.env.LLM_MODEL,
+      AI_ACCESS_TOKEN: process.env.AI_ACCESS_TOKEN,
+    },
+  },
+});
 
 if (production) {
   app.use('/*', serveStatic({ root: './dist' }));

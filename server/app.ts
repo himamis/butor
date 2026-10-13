@@ -1,10 +1,13 @@
 import { Hono } from 'hono';
+import { aiRoutes, type AdapterFactory } from './ai/routes';
+import type { AiEnv } from './ai/security';
 
 type Interfaces = Record<string, { address: string; family: string | number; internal: boolean }[] | undefined>;
 
 export interface AppOptions {
   port: number; // the port clients reach the app on (used for LAN URLs)
   interfaces: Interfaces; // os.networkInterfaces(), injectable for tests
+  ai?: { env: AiEnv; adapter?: AdapterFactory }; // assistant configuration (environment), injectable for tests
 }
 
 /** The HTTP API. Static hosting is added by main.ts in production. */
@@ -21,6 +24,8 @@ export function createApp(o: AppOptions): Hono {
       .map((i) => `http://${i.address}:${o.port}`);
     return c.json({ urls });
   });
+
+  aiRoutes(app, o.ai?.env ?? {}, o.ai?.adapter);
 
   app.all('/api/*', (c) => c.json({ error: 'Not found' }, 404));
   return app;

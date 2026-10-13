@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import {
   applyTransaction,
+  rebase,
   buildScene,
   createDesign,
   emptyHistory,
@@ -73,6 +74,11 @@ interface AppState {
   redo(): void;
   load(design: Design): void;
   setReadOnly(readOnly: boolean): void;
+  /** Commits a transaction prepared elsewhere (the assistant) against `baseRevision`, replaying its recorded ids. */
+  applyRemote(
+    tx: { label: string; ops: Op[]; ids: string[] },
+    baseRevision: number,
+  ): { ok: boolean; conflict: boolean; revision: number; message?: string };
   setView(patch: Partial<ViewSettings>): void;
   toggleOpen(entityId: string): void;
   setOpenAll(open: boolean): void;
@@ -264,6 +270,22 @@ export const useApp = create<AppState>()((set, get) => {
       const r = redoHistory(get().history, get().design, opContext());
       if (r)
         set({ design: r.doc, history: r.history, ...derive(r.doc), selection: cleanSelection(r.doc, get().selection) });
+    },
+
+    applyRemote(tx, baseRevision) {
+      if (get().readOnly)
+        return { ok: false, conflict: false, revision: get().design.revision, message: 'This design is read-only' };
+      const queue = [...tx.ids];
+      const r = rebase(get().design, { label: tx.label, ops: tx.ops }, baseRevision, {
+        ...opContext(),
+        newId: () => queue.shift() ?? newId(),
+      });
+      if (!r.ok) {
+        const message = r.results.find((x) => !x.ok)?.message;
+        return { ok: false, conflict: r.conflict, revision: get().design.revision, ...(message ? { message } : {}) };
+      }
+      commit(r, tx.label);
+      return { ok: true, conflict: false, revision: get().design.revision };
     },
 
     setReadOnly(readOnly) {

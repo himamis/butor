@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { ChecksPanel } from './ChecksPanel';
 import { ErrorBoundary } from './ErrorBoundary';
 import { MaterialsPanel } from './MaterialsPanel';
@@ -6,7 +6,9 @@ import { OutputsPanel } from './OutputsPanel';
 import { PropertiesPanel } from './PropertiesPanel';
 import { useApp } from './store';
 
-type Tab = 'properties' | 'materials' | 'checks' | 'outputs';
+type Tab = 'properties' | 'materials' | 'checks' | 'outputs' | 'ai';
+
+const ChatPanel = lazy(() => import('../ai/ChatPanel').then((m) => ({ default: m.ChatPanel })));
 
 /** The right-hand panel: properties, materials and checks, each in its own error boundary. */
 export function SidePanel() {
@@ -18,6 +20,7 @@ export function SidePanel() {
     ['materials', 'Materials'],
     ['checks', 'Checks'],
     ['outputs', 'Lists'],
+    ['ai', 'AI'],
   ];
   return (
     <aside className="side-panel" aria-label="Side panel">
@@ -42,6 +45,11 @@ export function SidePanel() {
           {tab === 'materials' && <MaterialsPanel />}
           {tab === 'checks' && <ChecksPanel />}
           {tab === 'outputs' && <OutputsPanel />}
+          {tab === 'ai' && (
+            <Suspense fallback={<p className="muted panel-body">Loading…</p>}>
+              <ChatPanel />
+            </Suspense>
+          )}
         </ErrorBoundary>
       </div>
     </aside>
